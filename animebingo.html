@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Bingo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4338ca; }
+        .hidden { display: none !important; }
+        .modal-overlay {
+            position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.8); 
+            backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center;
+            padding: 1rem; z-index: 110; overflow-y: auto;
+        }
+        .modal-content {
+            background-color: #1e293b; padding: 1.5rem 2rem; border-radius: 0.75rem; 
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); 
+            text-align: center; max-width: 28rem; width: 100%; margin: auto;
+        }
+        .search-results-modal-content { 
+             background-color: #1e293b; padding: 1.5rem; border-radius: 0.75rem; 
+             box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); 
+             width: 90%; max-width: 48rem; max-height: 80vh; overflow-y: auto;
+        }
+        .search-result-item {
+            display: flex; gap: 0.75rem; padding: 0.75rem;
+            background-color: #334155; border-radius: 0.5rem; margin-bottom: 0.5rem;
+            transition: background-color 0.2s;
+        }
+        .search-result-item:hover { background-color: #475569; }
+        .search-result-item img { width: 50px; height: 75px; object-fit: cover; border-radius: 0.25rem; flex-shrink: 0; }
+        .search-result-info { text-align: left; flex-grow: 1; }
+        .search-result-actions { display: flex; align-items: center; }
+
+        .indication-card {
+            display: flex; align-items: center; gap: 0.75rem; 
+            padding: 0.75rem; background-color: #334155; 
+            border-radius: 0.5rem; border: 1px solid #475569; 
+        }
+        .indication-card img { width: 60px; height: 90px; object-fit: cover; border-radius: 0.25rem; }
+        .indication-card-info { text-align: left; flex-grow: 1; }
+        /* .mal-url-input { width: calc(100% - 110px); } */
+        .tab-button-active { border-color: #6366f1 !important; color: #6366f1 !important; } 
+        .game-list-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.75rem 1rem; background-color: #334155; border-radius: 0.5rem;
+            margin-bottom: 0.5rem; cursor: pointer; transition: background-color 0.2s;
+        }
+        .game-list-item:hover { background-color: #475569; }
+        .game-list-item span { flex-grow: 1; }
+        .score-badge {
+            background-color: #facc15; /* yellow-400 */ color: #1e293b; /* slate-800 */
+            padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.9em;
+        }
+        .genre-legend-item { 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; 
+            aspect-ratio: 1 / 1; 
+            padding: 0.5rem; 
+            box-sizing: border-box;
+            overflow: hidden;
+            position: relative; 
+        }
+        .genre-legend-item .genre-image-wrapper { 
+            width: 100%;
+            flex-grow: 1; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; 
+            margin-bottom: 0.375rem; 
+        }
+        .genre-legend-item img { 
+            max-width: 85%; 
+            max-height: 85%; 
+            object-fit: contain; 
+            border-radius: 0.375rem; 
+        }
+        .genre-legend-item p { 
+            font-size: 1.1rem; 
+            line-height: 1.2; 
+            font-weight: 600; 
+            color: #c7d2fe; 
+            text-align: center; 
+            width: 100%; 
+            margin-top: 0.25rem; 
+            padding-bottom: 0.5rem; 
+            flex-shrink: 0; 
+        }
+        .genre-participant-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.65); 
+            color: white;
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0.25rem;
+            border-radius: 0.375rem; 
+            opacity: 0; 
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none; 
+        }
+        .genre-legend-item.assigned .genre-participant-overlay { 
+            opacity: 1;
+        }
+        .genre-participant-overlay .name {
+            font-weight: bold;
+            font-size: 1.25rem; 
+            word-break: break-word; 
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        }
+         .genre-participant-overlay .tag {
+            font-size: 0.9rem; 
+            background-color: #ef4444; 
+            color: white;
+            padding: 0.2rem 0.5rem; 
+            border-radius: 0.25rem;
+            margin-top: 0.3rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        #exportImageContainer { 
+            font-family: 'Inter', sans-serif;
+            color: #e2e8f0; 
+            padding: 24px; 
+            background-color: #0f172a; 
+            border: 2px solid #0ea5e9; 
+            border-radius: 0.5rem; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
+        }
+        #exportImageContainer h3 {
+            font-size: 1.875rem; 
+            font-weight: 700; 
+            color: #38bdf8; 
+            margin-bottom: 1.5rem; 
+            padding-bottom: 0.75rem; 
+            text-align: center;
+            /* border-bottom: 2px solid #0ea5e9;  Removida */
+        }
+        #exportImageContainer .participant-section {
+            padding-top: 16px; 
+            padding-bottom: 16px;
+            border-bottom: 1px solid #334155; 
+            margin-bottom: 16px;
+        }
+        #exportImageContainer .participant-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        #exportImageContainer .participant-name {
+            font-size: 1.5rem; 
+            font-weight: 600; 
+            color: #a5b4fc; 
+            margin-bottom: 12px; /* Aumentado */
+        }
+        #exportImageContainer .genre-info {
+            font-size: 0.875rem; 
+            color: #94a3b8; 
+            margin-bottom: 16px; /* Aumentado */
+        }
+        #exportImageContainer .anime-item {
+            display: flex;
+            align-items: flex-start; 
+            gap: 20px; 
+            margin-left: 8px;
+            padding-top: 8px; /* Adicionado para espaçar do nome/gênero */
+        }
+        #exportImageContainer .anime-item img {
+            width: 75px; 
+            height: 112px; 
+            object-fit: cover;
+            border-radius: 4px;
+            flex-shrink: 0;
+            border: 1px solid #475569; 
+        }
+        #exportImageContainer .anime-details {
+            padding-top: 4px; 
+        }
+        #exportImageContainer .anime-details p {
+            margin: 0; 
+        }
+        #exportImageContainer .anime-title {
+            font-size: 1.25rem; 
+            color: #f1f5f9; 
+            font-weight: 500; 
+            margin-bottom: 6px; 
+        }
+        #exportImageContainer .anime-indicator {
+            font-size: 1rem; 
+            color: #cbd5e1; 
+        }
+
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white min-h-screen flex flex-col items-center p-4 sm:p-6 md:p-8">
+
+    <div id="customAlert" class="fixed top-5 right-5 text-white p-3 sm:p-4 rounded-lg shadow-lg items-start z-[120] max-w-xs sm:max-w-sm hidden">
+        <div class="flex items-start">
+            <span id="alertIcon" class="mr-2 h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0 mt-0.5 text-xl"></span>
+            <span id="alertMessageContent" class="text-sm sm:text-base flex-grow"></span>
+        </div>
+        <button id="alertCloseButton" class="absolute top-1 right-2 text-2xl font-bold leading-none flex-shrink-0">&times;</button>
+        <div id="alertConfirmButtons" class="mt-3 flex justify-end space-x-2 hidden">
+             <button id="alertCancelBtn" class="px-3 py-1 bg-slate-600 hover:bg-slate-500 rounded text-sm">Cancelar</button>
+             <button id="alertConfirmBtn" class="px-3 py-1 bg-red-600 hover:bg-red-500 rounded text-sm">Confirmar</button>
+        </div>
+    </div>
+
+    <div id="genreRevealModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 id="genreRevealParticipantNameModalTitle" class="text-2xl font-semibold text-indigo-400 mb-4"></h3>
+            <div class="relative w-48 h-48 sm:w-56 sm:h-56 mx-auto mb-4 bg-slate-700/50 rounded-lg flex items-center justify-center overflow-hidden shadow-xl">
+                <img id="genreRevealIconImg" src="" alt="Ícone do Gênero" class="max-w-full max-h-full object-contain p-2">
+            </div>
+            <p id="genreRevealNameText" class="text-3xl sm:text-4xl font-bold text-green-400 mb-2"></p>
+            <p class="text-slate-300 mb-1">Número Sorteado:</p>
+            <p id="genreRevealNumberText" class="text-5xl sm:text-6xl font-extrabold text-yellow-400 mb-6"></p>
+            <button id="closeGenreRevealModalButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg">OK</button>
+        </div>
+    </div>
+    
+    <div id="animeRevealModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 id="animeRevealParticipantName" class="text-2xl font-semibold text-indigo-400 mb-4"></h3>
+            <img id="animeRevealCover" src="https://placehold.co/150x225/1e293b/4f46e5?text=Anime" alt="Capa do Anime Sorteado" class="w-36 h-auto mx-auto mb-4 rounded-md shadow-lg">
+            <a id="animeRevealTitleLink" href="#" target="_blank" class="text-2xl sm:text-3xl font-bold text-green-400 mb-1 hover:underline"></a>
+            <div id="animeRevealScore" class="text-xl sm:text-2xl font-bold my-2"></div>
+            <p class="text-slate-300 mb-1">Indicado por:</p>
+            <p id="animeRevealIndicator" class="text-lg sm:text-xl font-medium text-yellow-400 mb-6"></p>
+            <button id="closeAnimeRevealModalButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg">OK</button>
+        </div>
+    </div>
+
+    <div id="searchResultsModal" class="modal-overlay hidden">
+        <div class="search-results-modal-content">
+            <h3 class="text-xl font-semibold text-sky-400 mb-4">Resultados da Busca - Selecione um Anime</h3>
+            <div id="searchResultsList" class="space-y-2 mb-4">
+                </div>
+            <button id="closeSearchResultsModalButton" class="bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded-lg">Cancelar</button>
+        </div>
+    </div>
+
+
+    <header class="w-full max-w-4xl mb-6 sm:mb-8 text-center">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 pb-1 sm:pb-2">
+            Anime Bingo
+        </h1>
+        <p id="currentGameNameDisplay" class="text-lg sm:text-xl text-indigo-300 mt-4"></p> 
+        <p id="userIdDisplay" class="text-xs mt-1 text-slate-400"></p>
+    </header>
+
+    <main class="w-full max-w-4xl bg-slate-800 bg-opacity-70 backdrop-blur-md p-4 sm:p-6 md:p-8 rounded-xl shadow-2xl">
+        <section id="gameManagementSection" class="hidden">
+            <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-sky-400 flex items-center">
+                <span role="img" aria-label="controle de video game" class="mr-3 text-2xl">🎮</span> Gerenciar Bingos
+            </h2>
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-indigo-300 mb-2">Criar Novo Bingo</h3>
+                <div class="flex flex-col sm:flex-row gap-3 mb-3">
+                    <input type="text" id="newGameNameInput" placeholder="Nome do Novo Bingo" class="flex-grow p-3 rounded-lg bg-slate-700 border border-slate-600 focus:ring-2 focus:ring-sky-500 outline-none placeholder-slate-400">
+                </div>
+                 <div class="flex flex-col sm:flex-row gap-3">
+                    <select id="newGameModeSelect" class="flex-grow p-3 rounded-lg bg-slate-700 border border-slate-600 focus:ring-2 focus:ring-sky-500 outline-none text-slate-300">
+                        <option value="infinito" selected>Anime Bingo Infinito (Novo Gênero a cada Anime)</option>
+                        <option value="tradicional">Anime Bingo Tradicional (Um Gênero por Participante)</option>
+                    </select>
+                    <button id="createNewGameButton" class="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-5 rounded-lg flex items-center justify-center">
+                        <span role="img" aria-label="mais" class="mr-2 text-lg">➕</span> Criar Bingo
+                    </button>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium text-indigo-300 mb-2">Bingos Salvos</h3>
+                <div id="savedGamesList" class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                    <p class="text-slate-400">Nenhum bingo salvo ainda.</p>
+                </div>
+            </div>
+        </section>
+
+        <div id="actualGameContent" class="hidden">
+            <section id="registrationPhaseSection">
+                <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-indigo-400 flex items-center"><span role="img" aria-label="ícone de usuários" class="mr-3 text-2xl">👥</span> Cadastro de Participantes</h2>
+                <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                    <input type="text" id="participantNameInput" placeholder="Nome do Participante" class="flex-grow p-3 rounded-lg bg-slate-700 border border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder-slate-400"/>
+                    <button id="addParticipantButton" class="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-600 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center"><span role="img" aria-label="adicionar" class="mr-2 text-lg">+</span> Adicionar</button>
+                </div>
+                <p id="maxParticipantsWarning" class="text-sm text-yellow-400 mb-4 p-3 bg-yellow-900 bg-opacity-50 rounded-md border border-yellow-700 hidden"><span role="img" aria-label="informação" class="inline mr-2">ℹ️</span> Máximo de participantes atingido.</p>
+                <div id="participantsList" class="space-y-3 mb-8 max-h-60 overflow-y-auto pr-2"></div>
+                <button id="goToIndividualDrawButton" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-6 rounded-lg text-lg flex items-center justify-center hidden"><span role="img" aria-label="dado" class="mr-2 text-xl">🎲</span> Iniciar Sorteios de Gênero</button>
+            </section>
+
+            <section id="individualDrawPhaseSection" class="hidden">
+                <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-cyan-400 flex items-center"><span role="img" aria-label="dado" class="mr-3 text-2xl">🎲</span> Sorteio Individual de Gêneros</h2>
+                <div class="mb-6"><h3 class="text-lg font-medium text-indigo-300 mb-2">Participantes Aguardando Sorteio:</h3><div id="participantsToDrawList" class="space-y-3 max-h-48 overflow-y-auto pr-2 border border-slate-700 rounded-lg p-3"></div></div>
+                <div class="mb-6"><h3 class="text-lg font-medium text-slate-400 mb-2">Gêneros Já Sorteados:</h3><div id="drawnParticipantsList" class="space-y-2 text-sm text-slate-500"></div></div>
+                <button id="goToIndicationPhaseButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-lg flex items-center justify-center hidden"><span role="img" aria-label="caneta" class="mr-2 text-xl">✏️</span> Prosseguir para Indicações de Anime</button>
+            </section>
+
+            <section id="indicationPhaseSection" class="hidden">
+                <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-yellow-400 flex items-center"><span role="img" aria-label="caneta" class="mr-3 text-2xl">✏️</span> Fase de Indicações de Anime</h2>
+                <div id="indicationTabs" class="flex border-b border-slate-700 mb-4 overflow-x-auto"></div>
+                <div id="indicationContent" class="space-y-4"></div>
+                <button id="goToAnimeDrawPhaseButton" class="w-full mt-6 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg text-lg flex items-center justify-center hidden"><span role="img" aria-label="televisão" class="mr-2 text-xl">📺</span> Iniciar Sorteio Inicial de Animes</button>
+            </section>
+            
+            <section id="animeDrawPhaseSection" class="hidden">
+                 <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-purple-400 flex items-center"><span role="img" aria-label="televisão" class="mr-3 text-2xl">📺</span> Sorteio Inicial de Anime para Assistir</h2>
+                 <div id="participantsToDrawAnimeList" class="space-y-3"></div>
+                 <button id="goToWatchLoopButton" class="w-full mt-6 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg flex items-center justify-center hidden"><span role="img" aria-label="olhos" class="mr-2 text-xl">👀</span> Iniciar Acompanhamento</button>
+            </section>
+
+            <section id="watchLoopPhaseSection" class="hidden"> 
+                <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-teal-400 flex items-center"><span role="img" aria-label="olhos" class="mr-3 text-2xl">👀</span> Acompanhamento de Animes</h2>
+                <div id="watchLoopContent" class="space-y-6"></div> 
+                <button id="exportWatchListButton" class="mt-6 bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">Exportar Lista de Animes para Assistir</button>
+                 <p id="allAnimesWatchedMessage" class="text-center text-2xl font-bold text-green-400 mt-8 hidden">🎉 Todos os participantes assistiram todas as suas indicações! 🎉</p>
+            </section>
+            <hr class="my-8 border-slate-700">
+            <button id="switchGameButton" class="w-full sm:w-auto bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center text-sm mb-4"><span role="img" aria-label="trocar" class="mr-2">🔄</span> Trocar/Gerenciar Bingos</button>
+            <button id="resetGameButton" class="w-full sm:w-auto bg-red-700 hover:bg-red-800 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center"><span role="img" aria-label="reiniciar" class="mr-2 text-xl">🔄</span> Reiniciar Bingo Atual</button>
+        </div>
+    </main>
+
+    <footer class="mt-12 text-center w-full md:max-w-[70rem] px-4"> 
+        <div class="mb-4">
+            <button id="toggleGenreLegendButton" class="text-indigo-400 hover:text-indigo-300 underline text-sm">Mostrar/Ocultar Legenda de Gêneros</button>
+        </div>
+        <div id="genreLegendContainer" class="hidden"> 
+            <h3 class="text-xl font-semibold mb-4 text-indigo-400">Gêneros Disponíveis para Sorteio</h3>
+            <div id="genreGridFooter" class="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3 mx-auto"></div> 
+        </div>
+        <p class="text-xs text-slate-500 mt-8">Desenvolvido com <span role="img" aria-label="coração">❤️</span> para os fãs de anime.<span id="footerUserId" class="block mt-1"></span></p>
+    </footer>
+
+    <script>
+        let initialGenres = [
+            { name: "Ação/Aventura", imageUrl: "https://i.imgur.com/sSJPZaz.png" },
+            { name: "Cute Girls", imageUrl: "https://i.imgur.com/RCNcu3S.png" }, 
+            { name: "Comédia", imageUrl: "https://i.imgur.com/bjxvrQH.png" },
+            { name: "Drama", imageUrl: "https://i.imgur.com/U9fAQKP.png" },
+            { name: "Escola Mágica", imageUrl: "https://i.imgur.com/o5l5gFL.png" },
+            { name: "Escolar", imageUrl: "https://i.imgur.com/c37ZtI0.png" }, 
+            { name: "Esporte", imageUrl: "https://i.imgur.com/y94tRIg.png" },
+            { name: "Fantasia", imageUrl: "https://i.imgur.com/6cZet0Z.png" },
+            { name: "Ficção Científica", imageUrl: "https://i.imgur.com/ytg2dyZ.png" }, 
+            { name: "Garota Mágica", imageUrl: "https://i.imgur.com/uCJOJGB.png" }, 
+            { name: "Harém", imageUrl: "https://i.imgur.com/UYnL9Qw.png" }, 
+            { name: "Histórico", imageUrl: "https://i.imgur.com/wrkbzRM.png" },
+            { name: "Isekai de Ação", imageUrl: "https://i.imgur.com/GxB1onj.png" }, 
+            { name: "Isekai de Comédia/Slow Life", imageUrl: "https://i.imgur.com/VWdOZBi.png" }, 
+            { name: "Isekai de Vilã/Santa", imageUrl: "https://i.imgur.com/UWfoqIj.png" }, 
+            { name: "Mecha/Espacial", imageUrl: "https://i.imgur.com/6YtHVV5.png" }, 
+            { name: "Militar", imageUrl: "https://i.imgur.com/Nl15kmT.png" }, 
+            { name: "Mistério/Policial", imageUrl: "https://i.imgur.com/K3cybGa.png" }, 
+            { name: "Música/Idol", imageUrl: "https://i.imgur.com/aYi70mf.png" }, 
+            { name: "Profissional", imageUrl: "https://i.imgur.com/uC60dSg.png" }, 
+            { name: "Pós-Apocalíptico", imageUrl: "https://i.imgur.com/aiM4CD7.png" },
+            { name: "Psicológico", imageUrl: "https://i.imgur.com/E0qWbA6.png" }, 
+            { name: "Romance", imageUrl: "https://i.imgur.com/aNcFPTf.png" },
+            { name: "Slice of Life", imageUrl: "https://i.imgur.com/4KZVcQC.png" },
+            { name: "Sobrenatural/Terror", imageUrl: "https://i.imgur.com/hTPPZDk.png" } 
+        ];
+
+        initialGenres.sort((a, b) => a.name.localeCompare(b.name));
+        initialGenres.forEach((genre, index) => {
+            const startNum = index * 4 + 1;
+            genre.numbers = [startNum, startNum + 1, startNum + 2, startNum + 3];
+        });
+
+
+        const PHASES = {
+            GAME_MANAGEMENT: "GAME_MANAGEMENT", 
+            REGISTRATION: "REGISTRATION",
+            INDIVIDUAL_DRAW_SELECTION: "INDIVIDUAL_DRAW_SELECTION", 
+            INDICATION: "INDICATION", 
+            ANIME_DRAW_SELECTION: "ANIME_DRAW_SELECTION", 
+            WATCH_LOOP: "WATCH_LOOP", 
+        };
+
+        const ALL_GAMES_STORAGE_KEY = 'animeBingoAllGamesData_v1';
+        
+        const BASE_GAME_INSTANCE_STATE = { 
+            id: null, 
+            name: "Anime Bingo",
+            createdAt: null,
+            gameMode: 'infinito', 
+            currentPhase: PHASES.REGISTRATION, 
+            participants: [],
+            assignedGenreNames: [], 
+            currentIndicatorTabId: null
+        };
+        
+        let allGamesData = { 
+            activeGameId: null,
+            games: {} 
+        };
+        let gameState = {}; 
+
+        let participantNameInput, addParticipantButton, participantsListDiv, goToIndividualDrawButton, maxParticipantsWarning,
+            registrationPhaseSection, individualDrawPhaseSection, participantsToDrawListDiv, drawnParticipantsListDiv,
+            goToIndicationPhaseButton, indicationPhaseSection, indicationTabsDiv, indicationContentDiv, goToAnimeDrawPhaseButton,
+            animeDrawPhaseSection, participantsToDrawAnimeListDiv, goToWatchLoopButton, 
+            watchLoopPhaseSection, watchLoopContentDiv, allAnimesWatchedMessage, 
+            resetGameButton, genreGridFooterDiv, userIdDisplay, footerUserId,
+            customAlertDiv, alertIconSpan, alertMessageContentSpan, alertCloseButton, alertConfirmButtonsDiv, alertCancelBtn, alertConfirmBtn,
+            genreRevealModal, genreRevealParticipantNameModalTitle, genreRevealIconContainer, genreRevealIconImg, /* genreRevealOverlayNameText, */ genreRevealNameText, genreRevealNumberText, closeGenreRevealModalButton, 
+            animeRevealModal, animeRevealParticipantName, animeRevealCover, animeRevealTitleLink, animeRevealIndicator, closeAnimeRevealModalButton, 
+            gameManagementSection, newGameNameInput, newGameModeSelect, createNewGameButton, savedGamesListDiv, actualGameContentDiv, currentGameNameDisplay, switchGameButton,
+            searchResultsModal, searchResultsListDiv, closeSearchResultsModalButton, animeRevealScore, 
+            toggleGenreLegendButton, genreLegendContainer, exportWatchListButton; 
+        let currentAlertResolve = null;
+        let currentSearchContext = null; 
+
+        const PLACEHOLDER_IMG_60x90 = 'https://placehold.co/60x90/1e293b/4f46e5?text=Capa';
+        const PLACEHOLDER_IMG_150x225 = 'https://placehold.co/150x225/1e293b/4f46e5?text=Anime';
+        const PLACEHOLDER_IMG_ERROR_60x90 = 'https://placehold.co/60x90/1e293b/ff0000?text=Erro';
+        const PLACEHOLDER_IMG_SEARCH_RESULT = 'https://placehold.co/40x60/1e293b/4f46e5?text=Capa';
+        const PLACEHOLDER_IMG_GENRE_ICON = 'https://placehold.co/64x64/1e293b/4f46e5?text=Icon';
+
+
+        // FUNÇÕES PRIMÁRIAS
+        function generateUUID() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); }); }
+        
+        function saveAllGamesData() {
+            localStorage.setItem(ALL_GAMES_STORAGE_KEY, JSON.stringify(allGamesData));
+        }
+
+        function saveCurrentGameToAllGames() {
+            if (allGamesData.activeGameId && gameState && Object.keys(gameState).length > 0) { 
+                allGamesData.games[allGamesData.activeGameId] = { ...gameState }; 
+                saveAllGamesData();
+            }
+        }
+        
+        function loadAllGamesData() {
+            const savedData = localStorage.getItem(ALL_GAMES_STORAGE_KEY);
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                allGamesData = {
+                    ...{ activeGameId: null, games: {} }, 
+                    ...parsedData
+                };
+                if (!allGamesData.games) allGamesData.games = {};
+            } else {
+                allGamesData = { activeGameId: null, games: {} };
+            }
+
+            if (allGamesData.activeGameId && allGamesData.games[allGamesData.activeGameId]) {
+                gameState = { 
+                    ...BASE_GAME_INSTANCE_STATE, 
+                    ...allGamesData.games[allGamesData.activeGameId] 
+                };
+                gameState.participants = (gameState.participants || []).map(p => ({
+                    ...p,
+                    receivedIndications: p.receivedIndications || [],
+                    animeToWatch: p.animeToWatch || null,
+                    genreHistory: p.genreHistory || [], 
+                    currentAssignedGenre: p.currentAssignedGenre || p.assignedGenre,
+                    watchedAnimesHistory: p.watchedAnimesHistory || [] 
+                }));
+                gameState.assignedGenreNames = gameState.assignedGenreNames || [];
+            } else {
+                allGamesData.activeGameId = null; 
+                gameState = { ...BASE_GAME_INSTANCE_STATE, userId: generateUUID() }; 
+            }
+        }
+
+
+        function showAlert(message, type = 'info', duration = 3000) {
+            alertMessageContentSpan.innerHTML = message;
+            customAlertDiv.classList.remove('hidden', 'bg-blue-500', 'bg-green-500', 'bg-red-500', 'bg-yellow-600');
+            alertConfirmButtonsDiv.classList.add('hidden');
+            let iconText = 'ℹ️';
+            if (type === 'success') { customAlertDiv.classList.add('bg-green-500'); iconText = '✅'; }
+            else if (type === 'error') { customAlertDiv.classList.add('bg-red-500'); iconText = '❌'; }
+            else if (type === 'custom_confirm') { customAlertDiv.classList.add('bg-yellow-600'); iconText = '❓'; alertConfirmButtonsDiv.classList.remove('hidden'); }
+            else { customAlertDiv.classList.add('bg-blue-500'); }
+            alertIconSpan.textContent = iconText;
+            if (type !== 'custom_confirm' && duration !== Infinity) setTimeout(() => customAlertDiv.classList.add('hidden'), duration);
+        }
+        async function showConfirmAlert(message) { showAlert(message, 'custom_confirm', Infinity); return new Promise(resolve => currentAlertResolve = resolve); }
+
+        function renderParticipantsList() {
+            participantsListDiv.innerHTML = gameState.participants.length === 0 ? '<p class="text-slate-400 text-sm">Nenhum participante.</p>' : '';
+            gameState.participants.forEach((p, index) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between bg-slate-700 p-3 rounded-lg shadow';
+                div.innerHTML = `<span class="text-indigo-300">${index + 1}. ${p.name}</span>
+                                 <button data-id="${p.id}" class="removeParticipantButton text-red-400 hover:text-red-300"><span role="img" aria-label="remover">🗑️</span></button>`;
+                participantsListDiv.appendChild(div);
+            });
+            document.querySelectorAll('.removeParticipantButton').forEach(btn => btn.onclick = e => handleRemoveParticipant(e.currentTarget.dataset.id));
+            addParticipantButton.disabled = gameState.participants.length >= initialGenres.length;
+            maxParticipantsWarning.classList.toggle('hidden', gameState.participants.length < initialGenres.length);
+            goToIndividualDrawButton.classList.toggle('hidden', gameState.participants.length === 0);
+        }
+
+        function renderIndividualDrawSelection() {
+            participantsToDrawListDiv.innerHTML = '';
+            drawnParticipantsListDiv.innerHTML = '';
+            let participantsYetToDraw = 0;
+            gameState.participants.forEach(p => {
+                if (!p.assignedGenre) { // Verifica se o gênero INICIAL já foi sorteado
+                    participantsYetToDraw++;
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between bg-slate-700 p-3 rounded-lg shadow';
+                    div.innerHTML = `<span class="text-indigo-300">${p.name}</span>
+                                     <button data-id="${p.id}" class="draw-genre-for-participant-button bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">Sortear para ${p.name.split(' ')[0]}</button>`;
+                    participantsToDrawListDiv.appendChild(div);
+                } else {
+                    const li = document.createElement('li');
+                    const genreDetails = initialGenres.find(g => g.name === p.assignedGenre);
+                    li.innerHTML = `${p.name} - <img src="${genreDetails?.imageUrl || PLACEHOLDER_IMG_SEARCH_RESULT}" alt="${genreDetails?.name || ''}" class="inline-block w-5 h-5 object-contain mx-1 rounded-sm"> ${p.assignedGenre} (Nº ${p.genreDrawNumber})`;
+                    drawnParticipantsListDiv.appendChild(li);
+                }
+            });
+            if (participantsYetToDraw === 0 && gameState.participants.length > 0) {
+                 participantsToDrawListDiv.innerHTML = '<p class="text-green-400">Todos os participantes tiveram seus gêneros iniciais sorteados!</p>';
+            } else if (gameState.participants.length === 0) {
+                 participantsToDrawListDiv.innerHTML = '<p class="text-slate-400">Nenhum participante para sortear.</p>';
+            }
+            document.querySelectorAll('.draw-genre-for-participant-button').forEach(btn => btn.onclick = e => handleIndividualGenreDraw(e.currentTarget.dataset.id));
+            goToIndicationPhaseButton.classList.toggle('hidden', participantsYetToDraw > 0 || gameState.participants.length === 0);
+        }
+        
+        function showGenreRevealModal(participantName, genre) {
+            genreRevealParticipantNameModalTitle.textContent = `Sorteio para ${participantName}!`; 
+            genreRevealIconImg.src = genre.imageUrl || PLACEHOLDER_IMG_150x225; 
+            genreRevealIconImg.alt = genre.name;
+            // genreRevealOverlayNameText.textContent = ""; // Garantido que está vazio
+            genreRevealNameText.textContent = genre.name;
+            genreRevealNumberText.textContent = genre.drawnNumber;
+            genreRevealModal.classList.remove('hidden');
+        }
+        
+        function renderIndicationPhase() {
+            indicationTabsDiv.innerHTML = '';
+            indicationContentDiv.innerHTML = '';
+            if (!gameState.currentIndicatorTabId && gameState.participants.length > 0) {
+                gameState.currentIndicatorTabId = gameState.participants[0].id;
+            }
+
+            gameState.participants.forEach(indicator => {
+                const tabButton = document.createElement('button');
+                tabButton.textContent = indicator.name.split(' ')[0];
+                tabButton.dataset.indicatorId = indicator.id;
+                tabButton.className = `py-2 px-4 font-medium border-b-2 transition-colors hover:border-indigo-400 hover:text-indigo-400 whitespace-nowrap ${gameState.currentIndicatorTabId === indicator.id ? 'tab-button-active' : 'border-transparent text-slate-400'}`;
+                tabButton.onclick = () => { gameState.currentIndicatorTabId = indicator.id; renderApp(); };
+                indicationTabsDiv.appendChild(tabButton);
+            });
+
+            const currentIndicator = gameState.participants.find(p => p.id === gameState.currentIndicatorTabId);
+            if (!currentIndicator) return;
+
+            const indicatorSection = document.createElement('div');
+            indicatorSection.innerHTML = `<h3 class="text-xl font-semibold text-yellow-400 mb-3 mt-2">Indicações de ${currentIndicator.name}:</h3>`;
+            
+            gameState.participants.forEach(receiver => {
+                if (receiver.id === currentIndicator.id) return; 
+                if (!receiver.currentAssignedGenre) return; 
+
+                const existingIndication = receiver.receivedIndications?.find(ind => ind.indicatorId === currentIndicator.id && ind.genreContext === receiver.currentAssignedGenre); 
+                const receiverGenreDetails = initialGenres.find(g => g.name === receiver.currentAssignedGenre); 
+                
+                const receiverDiv = document.createElement('div');
+                receiverDiv.className = 'mb-4 p-3 bg-slate-700/50 rounded-lg';
+                let receiverInfoHTML = `<p class="mb-2 text-indigo-300">Para: <span class="font-semibold">${receiver.name}</span>`;
+                if (receiverGenreDetails) {
+                    receiverInfoHTML += ` - Gênero Atual: <img src="${receiverGenreDetails.imageUrl || PLACEHOLDER_IMG_SEARCH_RESULT}" alt="${receiverGenreDetails.name}" class="inline-block w-5 h-5 object-contain mx-1 rounded-sm"> ${receiverGenreDetails.name}`;
+                }
+                receiverInfoHTML += `</p>`;
+                receiverDiv.innerHTML = receiverInfoHTML;
+
+                if (existingIndication) {
+                    receiverDiv.innerHTML += `
+                        <div class="indication-card">
+                            <img src="${existingIndication.animeImageUrl || PLACEHOLDER_IMG_60x90}" alt="Capa de ${existingIndication.animeTitle}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG_ERROR_60x90}';" >
+                            <div class="indication-card-info">
+                                <a href="${existingIndication.malUrl}" target="_blank" class="font-semibold text-green-400 hover:underline">${existingIndication.animeTitle}</a>
+                                ${existingIndication.score ? `<span class="score-badge ml-2">${existingIndication.score.toFixed(2)}</span>` : ''}
+                            </div>
+                            <button data-indicator-id="${currentIndicator.id}" data-receiver-id="${receiver.id}" class="remove-indication-button text-red-400 hover:text-red-300 ml-auto p-1"><span role="img" aria-label="remover indicação">🗑️</span></button>
+                        </div>`;
+                } else {
+                    receiverDiv.innerHTML += `
+                        <div class="flex flex-col sm:flex-row gap-2 items-center">
+                            <input type="text" data-indicator-id="${currentIndicator.id}" data-receiver-id="${receiver.id}" placeholder="Nome do Anime ou URL MAL" class="indication-input w-full sm:flex-grow p-2 rounded bg-slate-600 border border-slate-500 placeholder-slate-400 text-sm">
+                            <button data-indicator-id="${currentIndicator.id}" data-receiver-id="${receiver.id}" class="indicate-anime-button bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg text-sm w-full sm:w-auto">Indicar</button>
+                        </div>`;
+                }
+                indicatorSection.appendChild(receiverDiv);
+            });
+            indicationContentDiv.appendChild(indicatorSection);
+
+            document.querySelectorAll('.indicate-anime-button').forEach(btn => btn.onclick = handleIndicationSubmit);
+            document.querySelectorAll('.indication-input').forEach(input => {
+                input.addEventListener('keypress', (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        const correspondingButton = input.nextElementSibling; 
+                        if (correspondingButton && correspondingButton.classList.contains('indicate-anime-button')) {
+                            correspondingButton.click();
+                        }
+                    }
+                });
+            });
+            document.querySelectorAll('.remove-indication-button').forEach(btn => btn.onclick = handleRemoveIndication);
+
+            let allDone = true;
+            if (gameState.participants.length < 2 && gameState.participants.length > 0) { 
+                allDone = true; 
+            } else if (gameState.participants.length >=2) {
+                 for (const p1 of gameState.participants) { 
+                    for (const p2 of gameState.participants) { 
+                        if (p1.id === p2.id) continue;
+                        if (!p2.currentAssignedGenre) {allDone = false; break;} 
+                        if (!p2.receivedIndications?.find(ind => ind.indicatorId === p1.id && ind.genreContext === p2.currentAssignedGenre)) {
+                            allDone = false; break;
+                        }
+                    }
+                    if (!allDone) break;
+                }
+            } else { 
+                allDone = false;
+            }
+
+            goToAnimeDrawPhaseButton.classList.toggle('hidden', !allDone || gameState.participants.length === 0);
+        }
+
+        async function handleIndicationSubmit(event) {
+            const button = event.currentTarget;
+            const indicatorId = button.dataset.indicatorId;
+            const receiverId = button.dataset.receiverId;
+            const inputElement = document.querySelector(`input[data-indicator-id="${indicatorId}"][data-receiver-id="${receiverId}"]`);
+            const inputValue = inputElement.value.trim();
+
+            if (!inputValue) {
+                showAlert("Por favor, digite o nome do anime ou uma URL do MAL.", "error");
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = '...';
+
+            const malUrlMatch = inputValue.match(/myanimelist\.net\/anime\/(\d+)/);
+            if (malUrlMatch && malUrlMatch[1]) {
+                const malId = malUrlMatch[1];
+                await fetchAnimeDetailsById(malId, indicatorId, receiverId, inputValue);
+            } else {
+                await searchAnimeByNameOnJikan(inputValue, indicatorId, receiverId);
+            }
+            button.disabled = false;
+            button.textContent = 'Indicar'; 
+        }
+        
+        async function searchAnimeByNameOnJikan(query, indicatorId, receiverId) {
+            try {
+                const response = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=10`);
+                if (!response.ok) { const err = await response.json(); throw new Error(`Jikan Search API: ${response.status} - ${err.message || 'Erro'}`); }
+                const data = await response.json();
+                
+                if (!data.data || data.data.length === 0) {
+                    showAlert(`Nenhum resultado encontrado para "${query}". Tente uma URL direta do MAL.`, "info");
+                    return;
+                }
+                currentSearchContext = { indicatorId, receiverId }; 
+                renderSearchResults(data.data);
+            } catch (error) {
+                console.error("Erro ao buscar animes por nome:", error);
+                showAlert(`Erro na busca: ${error.message}. Tente uma URL direta.`, "error");
+            }
+        }
+
+        function renderSearchResults(results) {
+            searchResultsListDiv.innerHTML = '';
+            if (results.length === 0) {
+                searchResultsListDiv.innerHTML = '<p class="text-slate-400">Nenhum resultado encontrado.</p>';
+                return;
+            }
+            results.forEach(anime => {
+                const title = anime.title || anime.title_english || anime.title_japanese || "Título Desconhecido"; // Prioriza title (Romaji/Principal)
+                const imageUrl = anime.images?.jpg?.small_image_url || PLACEHOLDER_IMG_SEARCH_RESULT;
+                const score = anime.score ? `<span class="score-badge">${anime.score.toFixed(2)}</span>` : '<span class="text-xs text-slate-400">N/A</span>';
+                const typeYear = `${anime.type || ''}${anime.year ? ' (' + anime.year + ')' : ''}`;
+                const episodes = anime.episodes ? `${anime.episodes} ep` : 'Ep. N/A';
+                const genres = anime.genres?.slice(0, 2).map(g => g.name).join(', ') || 'Gêneros N/A';
+                const themes = anime.themes?.slice(0, 1).map(t => t.name).join(', ') || '';
+                const demographics = anime.demographics?.map(d => d.name).join(', ') || '';
+
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'search-result-item';
+                itemDiv.innerHTML = `
+                    <img src="${imageUrl}" alt="Capa de ${title}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG_ERROR_60x90}';">
+                    <div class="search-result-info">
+                        <p class="font-semibold text-sky-300">${title}</p>
+                        <p class="text-xs text-slate-300">${typeYear} - ${episodes}</p>
+                        <p class="text-xs text-slate-400">${[genres, themes, demographics].filter(Boolean).join(' | ')}</p>
+                    </div>
+                    <div class="search-result-actions flex flex-col items-end gap-1 ml-auto">
+                        ${score}
+                        <button data-mal-id="${anime.mal_id}" data-mal-url="${anime.url}" class="select-search-result-button bg-green-600 hover:bg-green-700 text-white text-xs font-semibold py-1 px-2 rounded">Selecionar</button>
+                    </div>
+                `;
+                searchResultsListDiv.appendChild(itemDiv);
+            });
+            document.querySelectorAll('.select-search-result-button').forEach(btn => btn.onclick = handleSearchResultSelection);
+            searchResultsModal.classList.remove('hidden');
+        }
+
+        async function handleSearchResultSelection(event) {
+            const button = event.currentTarget;
+            const malId = button.dataset.malId;
+            const malUrl = button.dataset.malUrl; 
+            if (currentSearchContext && malId) {
+                await fetchAnimeDetailsById(malId, currentSearchContext.indicatorId, currentSearchContext.receiverId, malUrl);
+            }
+            searchResultsModal.classList.add('hidden');
+            currentSearchContext = null; 
+        }
+
+        async function fetchAnimeDetailsById(malId, indicatorId, receiverId, originalMalUrl) {
+            try {
+                const response = await fetch(`https://api.jikan.moe/v4/anime/${malId}`);
+                if (!response.ok) { const err = await response.json(); throw new Error(`Jikan Detail API: ${response.status} - ${err.message || 'Erro'}`);}
+                const data = await response.json(); const animeData = data.data;
+                const animeTitle = animeData.title || animeData.title_english || animeData.title_japanese || 'Título Desconhecido'; // Prioriza title (Romaji/Principal)
+                const animeImageUrl = animeData.images?.jpg?.large_image_url || animeData.images?.jpg?.image_url || PLACEHOLDER_IMG_60x90;
+                const score = animeData.score || null; 
+
+                const indicator = gameState.participants.find(p => p.id === indicatorId);
+                const receiver = gameState.participants.find(p => p.id === receiverId);
+
+                if (!receiver.receivedIndications) receiver.receivedIndications = [];
+                receiver.receivedIndications = receiver.receivedIndications.filter(ind => !(ind.indicatorId === indicatorId && ind.genreContext === receiver.currentAssignedGenre) ); 
+                
+                receiver.receivedIndications.push({ 
+                    indicatorId, 
+                    indicatorName: indicator.name, 
+                    malId, 
+                    animeTitle, 
+                    animeImageUrl, 
+                    malUrl: originalMalUrl || animeData.url, 
+                    score, 
+                    status: 'pending',
+                    genreContext: receiver.currentAssignedGenre 
+                });
+                showAlert(`"${animeTitle}" indicado para ${receiver.name} (Gênero: ${receiver.currentAssignedGenre})!`, "success");
+                renderApp();
+            } catch (error) {
+                console.error("Erro ao buscar detalhes do anime por ID:", error);
+                showAlert(`Erro ao buscar detalhes: ${error.message}.`, "error");
+            }
+        }
+
+        function handleRemoveIndication(event) {
+            const button = event.currentTarget;
+            const indicatorId = button.dataset.indicatorId;
+            const receiverId = button.dataset.receiverId;
+            const receiver = gameState.participants.find(p => p.id === receiverId);
+            
+            if (receiver && receiver.receivedIndications) {
+                const indicationToRemove = receiver.receivedIndications.find(ind => ind.indicatorId === indicatorId && ind.genreContext === receiver.currentAssignedGenre);
+                if (indicationToRemove) {
+                    receiver.receivedIndications = receiver.receivedIndications.filter(ind => !(ind.indicatorId === indicatorId && ind.genreContext === receiver.currentAssignedGenre));
+                    showAlert(`Indicação removida para ${receiver.name}.`, "success");
+                    renderApp();
+                }
+            }
+        }
+
+        function renderAnimeDrawPhase() { 
+            participantsToDrawAnimeListDiv.innerHTML = '';
+            let participantsYetToDrawAnime = 0;
+            gameState.participants.forEach(p => {
+                if (!p.animeToWatch && p.currentAssignedGenre) { 
+                    const indicationsForCurrentGenre = p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.currentAssignedGenre).length || 0;
+                    if (indicationsForCurrentGenre > 0) { 
+                        participantsYetToDrawAnime++;
+                        const div = document.createElement('div');
+                        div.className = 'flex items-center justify-between bg-slate-700 p-3 rounded-lg shadow';
+                        div.innerHTML = `<span class="text-indigo-300">${p.name} (Gênero: ${p.currentAssignedGenre})</span>
+                                        <button data-id="${p.id}" class="draw-anime-button bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">Sortear Anime para ${p.name.split(' ')[0]}</button>`;
+                        participantsToDrawAnimeListDiv.appendChild(div);
+                    } else if (p.currentAssignedGenre) { 
+                         const pEl = document.createElement('p');
+                         pEl.className = 'text-slate-400';
+                         pEl.innerHTML = `${p.name} - Aguardando indicações para o gênero ${p.currentAssignedGenre}.`;
+                         participantsToDrawAnimeListDiv.appendChild(pEl);
+                    }
+                } else if (p.animeToWatch) {
+                    const pEl = document.createElement('p');
+                    pEl.className = 'text-slate-400';
+                    pEl.innerHTML = `${p.name} - Anime já sorteado ou aguardando.`;
+                    participantsToDrawAnimeListDiv.appendChild(pEl);
+                }
+            });
+
+            const allParticipantsHaveAnimeOrNoGenreOrNoIndications = gameState.participants.every(p => 
+                p.animeToWatch || 
+                !p.currentAssignedGenre || 
+                (p.currentAssignedGenre && (p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.currentAssignedGenre).length === 0))
+            );
+
+            if (participantsYetToDrawAnime === 0 && gameState.participants.length > 0 && allParticipantsHaveAnimeOrNoGenreOrNoIndications) {
+                participantsToDrawAnimeListDiv.innerHTML = '<p class="text-green-400">Todos os animes possíveis foram sorteados ou aguardam indicações!</p>';
+            } else if (gameState.participants.length === 0) {
+                participantsToDrawAnimeListDiv.innerHTML = '<p class="text-slate-400">Nenhum participante.</p>';
+            }
+            document.querySelectorAll('.draw-anime-button').forEach(btn => btn.onclick = e => handleDrawAnimeForParticipant(e.currentTarget.dataset.id)); 
+            goToWatchLoopButton.classList.toggle('hidden', participantsYetToDrawAnime > 0 || gameState.participants.length === 0);
+        }
+        
+        function handleDrawAnimeForParticipant(viewerId) { 
+            const viewer = gameState.participants.find(p => p.id === viewerId);
+            if (!viewer || viewer.animeToWatch) return; 
+            if (!viewer.currentAssignedGenre) {
+                showAlert(`Nenhum gênero atual definido para ${viewer.name}. Volte para o sorteio de gênero.`, "error");
+                return;
+            }
+
+            const pendingIndications = viewer.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === viewer.currentAssignedGenre);
+            if (!pendingIndications || pendingIndications.length === 0) {
+                showAlert(`Nenhum anime foi indicado para ${viewer.name} no gênero ${viewer.currentAssignedGenre}. Redirecionando para indicações.`, "error");
+                gameState.currentPhase = PHASES.INDICATION; 
+                gameState.currentIndicatorTabId = gameState.participants.find(p => p.id !== viewerId)?.id || gameState.participants[0]?.id; 
+                renderApp(); 
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * pendingIndications.length);
+            const chosenIndication = pendingIndications[randomIndex];
+            
+            viewer.animeToWatch = { ...chosenIndication, statusInternal: 'watching' }; 
+            showAnimeRevealModal(viewer.name, viewer.animeToWatch); 
+            renderApp();
+        }
+        
+        function showAnimeRevealModal(participantName, anime) { 
+            animeRevealParticipantName.textContent = `Anime para ${participantName} assistir!`;
+            animeRevealCover.src = anime.animeImageUrl || PLACEHOLDER_IMG_150x225;
+            animeRevealCover.alt = `Capa de ${anime.animeTitle}`;
+            animeRevealTitleLink.href = anime.malUrl || '#';
+            animeRevealTitleLink.textContent = anime.animeTitle;
+            animeRevealIndicator.textContent = anime.indicatorName;
+            animeRevealScore.innerHTML = anime.score ? `<span class="score-badge">${anime.score.toFixed(2)}</span>` : '';
+            animeRevealModal.classList.remove('hidden');
+        }
+
+        function renderWatchLoopPhase() {
+            watchLoopContentDiv.innerHTML = '';
+            let allParticipantsFinishedAllCycles = true; 
+
+            gameState.participants.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'p-4 bg-slate-700/70 rounded-lg shadow-md mb-4';
+                const genreDetails = initialGenres.find(g => g.name === p.currentAssignedGenre); 
+                let contentHTML = `<h3 class="text-xl font-semibold text-indigo-300 mb-2">${p.name}</h3>`;
+                if (genreDetails) { 
+                    contentHTML += `<p class="text-sm text-slate-400 mb-2">Gênero Atual: <img src="${genreDetails.imageUrl || PLACEHOLDER_IMG_SEARCH_RESULT}" alt="${genreDetails.name}" class="inline-block w-5 h-5 object-contain mx-1 rounded-sm"> ${genreDetails.name}</p>`;
+                } else if (p.assignedGenre && !p.currentAssignedGenre && (p.genreHistory?.length || 0) >= initialGenres.length && gameState.gameMode === 'infinito') {
+                     contentHTML += `<p class="text-green-400 font-semibold">🎉 ${p.name} finalizou todos os ciclos de gênero!</p>`;
+                } else if (!p.currentAssignedGenre && p.assignedGenre && gameState.gameMode === 'tradicional'){ 
+                    const initialGenreDetails = initialGenres.find(g => g.name === p.assignedGenre);
+                    if(initialGenreDetails) contentHTML += `<p class="text-sm text-slate-400 mb-2">Gênero Sorteado: <img src="${initialGenreDetails.imageUrl || PLACEHOLDER_IMG_SEARCH_RESULT}" alt="${initialGenreDetails.name}" class="inline-block w-5 h-5 object-contain mx-1 rounded-sm"> ${initialGenreDetails.name}</p>`;
+                }
+                
+                const pendingIndicationsForCurrentGenre = p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.currentAssignedGenre) || [];
+
+                if (p.animeToWatch && p.animeToWatch.statusInternal === 'watching') {
+                    allParticipantsFinishedAllCycles = false;
+                    const scoreHTML = p.animeToWatch.score ? `<span class="score-badge ml-2">${p.animeToWatch.score.toFixed(2)}</span>` : '';
+                    contentHTML += `
+                        <p class="text-sm text-slate-300 mb-1">Assistindo agora:</p>
+                        <div class="flex items-center gap-3 mb-3 p-2 bg-slate-600 rounded">
+                            <img src="${p.animeToWatch.animeImageUrl || PLACEHOLDER_IMG_60x90}" alt="${p.animeToWatch.animeTitle}" class="w-[50px] h-[75px] object-cover rounded" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG_ERROR_60x90}';">
+                            <div>
+                                <a href="${p.animeToWatch.malUrl}" target="_blank" class="font-bold text-green-400 hover:underline">${p.animeToWatch.animeTitle}</a>
+                                ${scoreHTML}
+                                <p class="text-xs text-slate-400">Indicado por: ${p.animeToWatch.indicatorName}</p>
+                            </div>
+                        </div>
+                        <button data-id="${p.id}" class="mark-as-watched-button bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full">Marcar como Visto</button>
+                    `;
+                } else if (p.currentAssignedGenre && pendingIndicationsForCurrentGenre.length > 0) { 
+                    allParticipantsFinishedAllCycles = false;
+                    contentHTML += `<button data-id="${p.id}" class="draw-next-anime-button bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full">Sortear Próximo Anime (Gênero: ${p.currentAssignedGenre})</button>`;
+                } else if (p.currentAssignedGenre && pendingIndicationsForCurrentGenre.length === 0) { 
+                    allParticipantsFinishedAllCycles = false; 
+                     contentHTML += `<p class="text-yellow-400 mb-2">Aguardando indicações para o gênero: ${p.currentAssignedGenre}.</p>`;
+                     contentHTML += `<button data-id="${p.id}" class="go-to-indicate-for-participant-button bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full">Ir para Indicações</button>`;
+                     if (gameState.gameMode === 'infinito') {
+                        const lastGenre = p.genreHistory && p.genreHistory.length > 0 ? p.genreHistory[p.genreHistory.length - 1] : null;
+                        let availableNewGenres = initialGenres.filter(g => g.name !== lastGenre);
+                        if (p.genreHistory && p.genreHistory.length >= initialGenres.length) availableNewGenres = [];
+                        if (availableNewGenres.length > 0) {
+                            contentHTML += `<button data-id="${p.id}" class="draw-new-genre-button bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full mt-2">Sortear Novo Gênero</button>`;
+                        } else if (p.receivedIndications?.filter(ind => ind.status === 'watched').length === p.receivedIndications?.length && p.receivedIndications?.length > 0){
+                           contentHTML = `<p class="text-green-400 font-semibold">🎉 ${p.name} finalizou todos os ciclos de gênero!</p>`;
+                        }
+                     } else { 
+                         contentHTML = `<p class="text-green-400 font-semibold">🎉 ${p.name} concluiu as indicações para o gênero ${p.currentAssignedGenre}!</p>`;
+                     }
+                } else if (!p.currentAssignedGenre && p.assignedGenre && gameState.gameMode === 'infinito') { 
+                    allParticipantsFinishedAllCycles = false;
+                    contentHTML += `<button data-id="${p.id}" class="draw-new-genre-button bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full mt-2">Sortear Novo Gênero</button>`;
+                } else if (!p.currentAssignedGenre && !p.assignedGenre) { 
+                     allParticipantsFinishedAllCycles = false;
+                     contentHTML += `<p class="text-slate-400">Aguardando sorteio inicial de gênero.</p>`;
+                } else { 
+                    if(gameState.gameMode === 'tradicional' || (p.genreHistory && p.genreHistory.length >= initialGenres.length)) {
+                        contentHTML += `<p class="text-green-400 font-semibold">🎉 ${p.name} finalizou sua participação!</p>`;
+                    } else {
+                        allParticipantsFinishedAllCycles = false; 
+                        contentHTML += `<p class="text-slate-400">Aguardando próximo passo.</p>`;
+                    }
+                }
+
+
+                const watchedAnimesInHistory = p.watchedAnimesHistory || [];
+                if (watchedAnimesInHistory.length > 0) {
+                    contentHTML += `<h4 class="text-sm font-medium text-slate-400 mt-4 mb-1">Animes já vistos:</h4><ul class="list-disc list-inside text-xs text-slate-500">`;
+                    watchedAnimesInHistory.forEach(ind => {
+                        const scoreText = ind.score ? ` (Nota: ${ind.score.toFixed(2)})` : '';
+                        const genreContextText = ind.genreContext ? ` <span class="text-slate-400 italic">(Gênero: ${ind.genreContext})</span>` : ''; 
+                        contentHTML += `<li><a href="${ind.malUrl}" target="_blank" class="hover:underline">${ind.animeTitle}</a>${scoreText} (por ${ind.indicatorName})${genreContextText}</li>`;
+                    });
+                    contentHTML += `</ul>`;
+                }
+                card.innerHTML = contentHTML;
+                watchLoopContentDiv.appendChild(card);
+            });
+            
+            const everyoneTrulyFinished = gameState.participants.every(p => {
+                if (gameState.gameMode === 'tradicional') {
+                    const pendingForCurrentGenre = p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.assignedGenre).length || 0;
+                    return !p.animeToWatch && pendingForCurrentGenre === 0;
+                } else { // Modo Infinito
+                    const lastGenre = p.genreHistory && p.genreHistory.length > 0 ? p.genreHistory[p.genreHistory.length - 1] : null;
+                    let availableNewGenres = initialGenres.filter(g => g.name !== lastGenre);
+                    if (p.genreHistory && p.genreHistory.length >= initialGenres.length) availableNewGenres = [];
+                    return !p.animeToWatch && (p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.currentAssignedGenre).length === 0) && availableNewGenres.length === 0;
+                }
+            });
+
+            allAnimesWatchedMessage.classList.toggle('hidden', !everyoneTrulyFinished || gameState.participants.length === 0);
+
+            document.querySelectorAll('.mark-as-watched-button').forEach(btn => btn.onclick = e => handleMarkAsWatched(e.currentTarget.dataset.id));
+            document.querySelectorAll('.draw-next-anime-button').forEach(btn => btn.onclick = e => handleDrawNextAnimeToWatch(e.currentTarget.dataset.id));
+            document.querySelectorAll('.draw-new-genre-button').forEach(btn => btn.onclick = e => drawNewGenreForParticipant(e.currentTarget.dataset.id));
+            document.querySelectorAll('.go-to-indicate-for-participant-button').forEach(btn => {
+                btn.onclick = (e) => {
+                    const participantId = e.currentTarget.dataset.id;
+                    gameState.currentIndicatorTabId = gameState.participants.find(p => p.id !== participantId)?.id || gameState.participants[0]?.id; 
+                    gameState.currentPhase = PHASES.INDICATION;
+                    renderApp();
+                };
+            });
+        }
+        
+        function handleMarkAsWatched(participantId) {
+            const participant = gameState.participants.find(p => p.id === participantId);
+            if (participant && participant.animeToWatch) {
+                if (!participant.watchedAnimesHistory) participant.watchedAnimesHistory = [];
+                participant.watchedAnimesHistory.push({
+                    ...participant.animeToWatch,
+                    genreContext: participant.currentAssignedGenre 
+                });
+
+                const indicationInList = participant.receivedIndications.find(ind => 
+                    ind.malId === participant.animeToWatch.malId && 
+                    ind.indicatorId === participant.animeToWatch.indicatorId &&
+                    ind.genreContext === participant.currentAssignedGenre 
+                );
+                if (indicationInList) {
+                    indicationInList.status = 'watched';
+                }
+                
+                participant.animeToWatch = null; 
+                showAlert("Anime marcado como visto!", "success");
+
+                if(gameState.gameMode === 'infinito') {
+                    drawNewGenreForParticipant(participantId); 
+                } else { 
+                    renderApp(); 
+                }
+            }
+        }
+
+        function drawNewGenreForParticipant(participantId) {
+            const participant = gameState.participants.find(p => p.id === participantId);
+            if (!participant) return;
+
+            const lastGenre = participant.genreHistory && participant.genreHistory.length > 0 ? participant.genreHistory[participant.genreHistory.length - 1] : null;
+            
+            let availableGenresForNewDraw = initialGenres.filter(g => g.name !== lastGenre);
+            if (availableGenresForNewDraw.length === 0 && initialGenres.length > 0) { 
+                 availableGenresForNewDraw = initialGenres; 
+            }
+            if (availableGenresForNewDraw.length === 0) { 
+                showAlert(`Todos os gêneros já foram sorteados para ${participant.name}! Ele finalizou o Anime Bingo!`, "success", 5000);
+                participant.currentAssignedGenre = null; 
+                renderApp(); 
+                return;
+            }
+
+            const chosenNewGenre = availableGenresForNewDraw[Math.floor(Math.random() * availableGenresForNewDraw.length)];
+            const newDrawnNumber = chosenNewGenre.numbers[Math.floor(Math.random() * chosenNewGenre.numbers.length)];
+
+            participant.currentAssignedGenre = chosenNewGenre.name;
+            if(!participant.genreHistory) participant.genreHistory = [];
+            participant.genreHistory.push(chosenNewGenre.name); 
+            
+            participant.receivedIndications = participant.receivedIndications.filter(ind => ind.status === 'watched');
+            
+            showAlert(`Novo gênero sorteado para ${participant.name}: ${chosenNewGenre.name}! Indiquem animes!`, "success", 5000);
+            showGenreRevealModal(participant.name, { ...chosenNewGenre, drawnNumber: newDrawnNumber, imageUrl: chosenNewGenre.imageUrl });
+            
+            gameState.currentPhase = PHASES.INDICATION;
+            gameState.currentIndicatorTabId = gameState.participants.find(p => p.id !== participantId)?.id || gameState.participants[0]?.id; 
+            renderApp(); 
+        }
+
+
+        function handleDrawNextAnimeToWatch(participantId) {
+            const participant = gameState.participants.find(p => p.id === participantId);
+            if (!participant || participant.animeToWatch) return; 
+
+            const pendingIndications = participant.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === participant.currentAssignedGenre);
+            
+            if (!pendingIndications || pendingIndications.length === 0) {
+                showAlert(`Nenhum anime pendente indicado para ${participant.name} no gênero ${participant.currentAssignedGenre}. Peça indicações!`, "info", 4000);
+                if (gameState.gameMode === 'infinito') { 
+                    gameState.currentPhase = PHASES.INDICATION;
+                    gameState.currentIndicatorTabId = gameState.participants.find(p => p.id !== participantId)?.id || gameState.participants[0]?.id; 
+                }
+                renderApp(); 
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * pendingIndications.length);
+            const chosenIndication = pendingIndications[randomIndex];
+            
+            participant.animeToWatch = { ...chosenIndication, statusInternal: 'watching' };
+            showAnimeRevealModal(participant.name, participant.animeToWatch); 
+            renderApp();
+        }
+        
+        function renderGenreGridFooter() {
+            if (!genreGridFooterDiv) { return; } 
+            genreGridFooterDiv.innerHTML = '';
+            initialGenres.forEach(genre => { 
+                const div = document.createElement('div');
+                div.className = 'genre-legend-item bg-slate-700 rounded-lg shadow text-center'; 
+                
+                const participantsWithThisGenre = gameState.participants?.filter(p => p.currentAssignedGenre === genre.name) || [];
+
+                let overlayHTML = '';
+                if (participantsWithThisGenre.length > 0) {
+                    div.classList.add('assigned'); 
+                    const names = participantsWithThisGenre.map(p => p.name.split(' ')[0]).join(', '); 
+                    overlayHTML = `
+                        <div class="genre-participant-overlay">
+                            <span class="name">${names}</span>
+                            <span class="tag">SORTEADO</span> 
+                        </div>`;
+                }
+                
+                div.innerHTML = `
+                    <div class="genre-image-wrapper">
+                        <img src="${genre.imageUrl || PLACEHOLDER_IMG_GENRE_ICON}" alt="${genre.name}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG_ERROR_60x90}';">
+                    </div>
+                    <p class="text-indigo-300 leading-tight">${genre.name}</p>
+                    ${overlayHTML}`; 
+                genreGridFooterDiv.appendChild(div);
+            });
+        }
+
+        function renderApp() {
+            if (!allGamesData.activeGameId) {
+                gameManagementSection.classList.remove('hidden');
+                actualGameContentDiv.classList.add('hidden');
+                renderGameManagementScreen();
+                return;
+            }
+            
+            gameManagementSection.classList.add('hidden');
+            actualGameContentDiv.classList.remove('hidden');
+            currentGameNameDisplay.textContent = gameState.name ? `Bingo Atual: ${gameState.name} (${gameState.gameMode === 'tradicional' ? 'Tradicional' : 'Infinito'})` : 'Organize sorteios de gêneros e animes com seus amigos!';
+
+
+            registrationPhaseSection.classList.toggle('hidden', gameState.currentPhase !== PHASES.REGISTRATION);
+            individualDrawPhaseSection.classList.toggle('hidden', gameState.currentPhase !== PHASES.INDIVIDUAL_DRAW_SELECTION);
+            indicationPhaseSection.classList.toggle('hidden', gameState.currentPhase !== PHASES.INDICATION);
+            animeDrawPhaseSection.classList.toggle('hidden', gameState.currentPhase !== PHASES.ANIME_DRAW_SELECTION);
+            watchLoopPhaseSection.classList.toggle('hidden', gameState.currentPhase !== PHASES.WATCH_LOOP); 
+            
+            resetGameButton.classList.toggle('hidden', !allGamesData.activeGameId || (gameState.currentPhase === PHASES.REGISTRATION && gameState.participants.length === 0) );
+
+
+            if (gameState.currentPhase === PHASES.REGISTRATION) renderParticipantsList();
+            else if (gameState.currentPhase === PHASES.INDIVIDUAL_DRAW_SELECTION) renderIndividualDrawSelection();
+            else if (gameState.currentPhase === PHASES.INDICATION) renderIndicationPhase();
+            else if (gameState.currentPhase === PHASES.ANIME_DRAW_SELECTION) renderAnimeDrawPhase();
+            else if (gameState.currentPhase === PHASES.WATCH_LOOP) renderWatchLoopPhase();
+            
+            if (allGamesData.activeGameId) { userIdDisplay.textContent = `ID do Bingo: ${allGamesData.activeGameId}`; footerUserId.textContent = `ID do Bingo: ${allGamesData.activeGameId}`; }
+            else { userIdDisplay.textContent = ''; footerUserId.textContent = ''; }
+            
+            if (genreLegendContainer && !genreLegendContainer.classList.contains('hidden')) {
+                 renderGenreGridFooter();
+            }
+            saveCurrentGameToAllGames(); 
+        }
+
+        function handleAddParticipant() {
+            const name = participantNameInput.value.trim();
+            if (!name) { showAlert("O nome do participante não pode estar vazio.", "error"); return; }
+            if (gameState.participants.length >= initialGenres.length) { showAlert(`Máximo de ${initialGenres.length} participantes.`, "error"); return; }
+            if (gameState.participants.find(p => p.name.toLowerCase() === name.toLowerCase())) { showAlert("Este nome já existe.", "error"); return; }
+            gameState.participants.push({ 
+                id: generateUUID(), name, assignedGenre: null, genreDrawNumber: null, 
+                currentAssignedGenre: null, genreHistory: [], 
+                animeToWatch: null, receivedIndications: [], watchedAnimesHistory: []
+            });
+            participantNameInput.value = ""; showAlert(`${name} adicionado!`, "success"); renderApp();
+        };
+
+         function handleRemoveParticipant(participantId) {
+            const pName = gameState.participants.find(p=>p.id === participantId)?.name;
+            gameState.participants = gameState.participants.filter(p => p.id !== participantId);
+            gameState.participants.forEach(p => {
+                p.receivedIndications = p.receivedIndications.filter(ind => ind.indicatorId !== participantId);
+            });
+            if (gameState.currentIndicatorTabId === participantId) {
+                gameState.currentIndicatorTabId = gameState.participants[0]?.id || null;
+            }
+            gameState.assignedGenreNames = gameState.assignedGenreNames.filter(ag => ag.participantId !== participantId);
+            showAlert(`${pName} removido.`, "success"); renderApp();
+        }
+        
+        function handleIndividualGenreDraw(participantId) { 
+            const participant = gameState.participants.find(p => p.id === participantId);
+            if (!participant || participant.assignedGenre) return; 
+            
+            const availableGenres = initialGenres.filter(g => !gameState.assignedGenreNames.some(ag => ag.genreName === g.name));
+            if (availableGenres.length === 0) { showAlert("Não há mais gêneros únicos para distribuir inicialmente!", "error"); return; }
+            
+            const chosenGenre = availableGenres[Math.floor(Math.random() * availableGenres.length)];
+            const drawnNumber = chosenGenre.numbers[Math.floor(Math.random() * chosenGenre.numbers.length)];
+            
+            participant.assignedGenre = chosenGenre.name; 
+            participant.genreDrawNumber = drawnNumber;
+            participant.currentAssignedGenre = chosenGenre.name; 
+            if(!participant.genreHistory) participant.genreHistory = [];
+            participant.genreHistory.push(chosenGenre.name); 
+
+            gameState.assignedGenreNames.push({participantId: participant.id, genreName: chosenGenre.name}); 
+            showGenreRevealModal(participant.name, { ...chosenGenre, drawnNumber, imageUrl: chosenGenre.imageUrl }); 
+            renderApp(); 
+        }
+        
+        async function handleResetGame() {
+            if (await showConfirmAlert('<p class="font-semibold mb-2">Confirmar Reinício do Bingo Atual</p><p>Isso irá manter os participantes, mas limpará todos os gêneros sorteados, animes indicados e progresso de visualização. Deseja prosseguir?</p>')) {
+                const currentGameId = allGamesData.activeGameId;
+                if (currentGameId && allGamesData.games[currentGameId]) {
+                    const currentParticipantsData = allGamesData.games[currentGameId].participants.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        assignedGenre: null,
+                        genreDrawNumber: null,
+                        currentAssignedGenre: null,
+                        genreHistory: [],
+                        receivedIndications: [],
+                        watchedAnimesHistory: [],
+                        animeToWatch: null
+                    }));
+
+                    allGamesData.games[currentGameId] = {
+                        ...BASE_GAME_INSTANCE_STATE, 
+                        id: currentGameId,
+                        name: allGamesData.games[currentGameId].name, 
+                        gameMode: allGamesData.games[currentGameId].gameMode || 'infinito', 
+                        createdAt: allGamesData.games[currentGameId].createdAt, 
+                        userId: allGamesData.games[currentGameId].userId,
+                        participants: currentParticipantsData, 
+                        currentPhase: PHASES.REGISTRATION 
+                    };
+                    allGamesData.games[currentGameId].assignedGenreNames = [];
+
+
+                    gameState = { ...allGamesData.games[currentGameId] };
+                    showAlert("Bingo reiniciado! Os participantes foram mantidos. Prossiga para o sorteio de gêneros.", "success", 4000);
+                    renderApp();
+                } else {
+                    showAlert("Nenhum bingo ativo para reiniciar.", "error");
+                }
+            }
+        };
+
+        function createNewGame() {
+            const gameName = newGameNameInput.value.trim();
+            const gameMode = newGameModeSelect.value;
+            if (!gameName) { showAlert("Por favor, dê um nome ao novo bingo.", "error"); return; }
+            const newGameId = generateUUID();
+            const newGame = {
+                ...BASE_GAME_INSTANCE_STATE,
+                id: newGameId,
+                name: gameName,
+                gameMode: gameMode,
+                createdAt: new Date().toISOString(),
+                userId: generateUUID() 
+            };
+            allGamesData.games[newGameId] = newGame;
+            allGamesData.activeGameId = newGameId;
+            gameState = { ...newGame }; 
+            newGameNameInput.value = '';
+            showAlert(`Bingo "${gameName}" (${gameMode}) criado e carregado!`, "success");
+            saveAllGamesData(); 
+            renderApp(); 
+        }
+
+        function loadSelectedGame(gameId) {
+            if (allGamesData.games[gameId]) {
+                allGamesData.activeGameId = gameId;
+                gameState = { ...allGamesData.games[gameId] };
+                gameState.participants = (gameState.participants || []).map(p => ({
+                    ...p,
+                    receivedIndications: p.receivedIndications || [],
+                    animeToWatch: p.animeToWatch || null,
+                    genreHistory: p.genreHistory || [], 
+                    currentAssignedGenre: p.currentAssignedGenre || p.assignedGenre,
+                    watchedAnimesHistory: p.watchedAnimesHistory || []
+                }));
+                gameState.assignedGenreNames = gameState.assignedGenreNames || [];
+                gameState.gameMode = gameState.gameMode || 'infinito'; 
+                showAlert(`Bingo "${gameState.name}" carregado!`, "success");
+                saveAllGamesData(); 
+                renderApp();
+            } else {
+                showAlert("Erro ao carregar o bingo.", "error");
+            }
+        }
+
+        function deleteGame(gameId) {
+            const gameToDelete = allGamesData.games[gameId];
+            if (!gameToDelete) return;
+            showConfirmAlert(`<p class="font-semibold mb-2">Confirmar Exclusão</p><p>Tem certeza que deseja excluir o bingo "${gameToDelete.name}"? Esta ação não pode ser desfeita.</p>`)
+            .then(confirmed => {
+                if (confirmed) {
+                    delete allGamesData.games[gameId];
+                    if (allGamesData.activeGameId === gameId) {
+                        allGamesData.activeGameId = null;
+                        gameState = {}; 
+                    }
+                    showAlert(`Bingo "${gameToDelete.name}" excluído.`, "success");
+                    saveAllGamesData();
+                    renderApp(); 
+                }
+            });
+        }
+
+        function renderGameManagementScreen() {
+            actualGameContentDiv.classList.add('hidden');
+            gameManagementSection.classList.remove('hidden');
+            currentGameNameDisplay.textContent = 'Gerenciador de Bingos';
+            savedGamesListDiv.innerHTML = '';
+            const gameIds = Object.keys(allGamesData.games);
+            if (gameIds.length === 0) {
+                savedGamesListDiv.innerHTML = '<p class="text-slate-400">Nenhum bingo salvo ainda.</p>';
+            } else {
+                gameIds.forEach(id => {
+                    const game = allGamesData.games[id];
+                    const gameItem = document.createElement('div');
+                    gameItem.className = 'game-list-item';
+                    gameItem.innerHTML = `
+                        <span>${game.name} <em class="text-xs text-slate-400 ml-2">(Modo: ${game.gameMode === 'tradicional' ? 'Tradicional' : 'Infinito'})</em></span>
+                        <div>
+                            <button data-game-id="${id}" class="load-game-button bg-green-600 hover:bg-green-700 text-white text-xs font-semibold py-1 px-2 rounded mr-2">Carregar</button>
+                            <button data-game-id="${id}" class="delete-game-button text-red-400 hover:text-red-300 p-1"><span role="img" aria-label="excluir bingo">🗑️</span></button>
+                        </div>
+                    `;
+                    savedGamesListDiv.appendChild(gameItem);
+                });
+                document.querySelectorAll('.load-game-button').forEach(btn => btn.onclick = (e) => loadSelectedGame(e.currentTarget.dataset.gameId));
+                document.querySelectorAll('.delete-game-button').forEach(btn => btn.onclick = (e) => deleteGame(e.currentTarget.dataset.gameId));
+            }
+        }
+        
+        function exportAnimeWatchList() {
+            const exportContentDiv = document.createElement('div');
+            exportContentDiv.id = 'exportImageContainer'; 
+            exportContentDiv.style.width = '800px'; 
+            exportContentDiv.style.padding = '24px';
+            exportContentDiv.style.backgroundColor = '#0f172a'; 
+            exportContentDiv.style.color = '#e2e8f0'; 
+            exportContentDiv.style.borderRadius = '0.5rem';
+            exportContentDiv.style.border = '2px solid #0ea5e9'; 
+            exportContentDiv.style.fontFamily = "'Inter', sans-serif";
+            exportContentDiv.style.position = 'absolute';
+            exportContentDiv.style.left = '-9999px'; 
+            document.body.appendChild(exportContentDiv);
+
+            let listContentHTML = `<h3 style="font-size: 1.875rem; font-weight: 700; color: #38bdf8; margin-bottom: 1.5rem; padding-bottom: 0.75rem; text-align: center;">Lista de Animes para Assistir</h3>`;
+            let hasAnimesToWatch = false;
+
+            gameState.participants.forEach(participant => {
+                if (participant.animeToWatch && participant.animeToWatch.animeTitle) {
+                    hasAnimesToWatch = true;
+                    const genreDetails = initialGenres.find(g => g.name === participant.currentAssignedGenre);
+                    const genreDisplay = genreDetails ? `<span style="font-size: 0.95rem; color: #cbd5e1; margin-left: 8px;">(Gênero Atual: ${genreDetails.name})</span>` : '';
+                    
+                    listContentHTML += `
+                        <div style="padding: 16px 0; border-bottom: 1px solid #334155; margin-bottom: 16px;">
+                            <h4 style="font-size: 1.5rem; font-weight: 600; color: #a5b4fc; margin-bottom: 12px;">${participant.name} ${genreDisplay}</h4>
+                            <div style="display: flex; align-items: flex-start; gap: 20px; margin-left: 12px; padding-top: 8px;">
+                                <img src="${participant.animeToWatch.animeImageUrl || PLACEHOLDER_IMG_60x90}" alt="Capa" style="width: 75px; height: 112px; object-fit: cover; border-radius: 4px; flex-shrink: 0; border: 1px solid #475569;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_60x90}'">
+                                <div style="text-align: left; padding-top: 4px;">
+                                    <p style="font-size: 1.25rem; color: #f1f5f9; font-weight: 500; margin-bottom: 6px;">${participant.animeToWatch.animeTitle}</p>
+                                    <p style="font-size: 1rem; color: #cbd5e1;">Indicado por: ${participant.animeToWatch.indicatorName}</p>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+            });
+             if (!hasAnimesToWatch) {
+                listContentHTML += '<p style="font-size: 1.125rem; text-align: center; color: #94a3b8; margin-top: 1rem;">Nenhum anime sorteado para assistir no momento.</p>';
+            }
+
+
+            exportContentDiv.innerHTML = listContentHTML;
+            
+            html2canvas(exportContentDiv, { 
+                backgroundColor: '#0f172a', 
+                useCORS: true, 
+                scale: 2 
+            }).then(canvas => {
+                const imageURL = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = imageURL;
+                link.download = `lista_animes_assistir_${gameState.name.replace(/\s+/g, '_') || 'bingo'}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showAlert("Lista de animes exportada como imagem!", "success");
+            }).catch(error => {
+                console.error("Erro ao exportar imagem:", error);
+                showAlert("Erro ao exportar imagem. Verifique o console.", "error");
+            }).finally(() => {
+                if (document.getElementById('exportImageContainer')) { 
+                    document.body.removeChild(exportContentDiv);
+                }
+            });
+        }
+
+
+        // DOM READY E INICIALIZAÇÃO
+        document.addEventListener('DOMContentLoaded', () => {
+            participantNameInput = document.getElementById('participantNameInput');
+            addParticipantButton = document.getElementById('addParticipantButton');
+            participantsListDiv = document.getElementById('participantsList');
+            goToIndividualDrawButton = document.getElementById('goToIndividualDrawButton');
+            maxParticipantsWarning = document.getElementById('maxParticipantsWarning');
+            registrationPhaseSection = document.getElementById('registrationPhaseSection');
+            individualDrawPhaseSection = document.getElementById('individualDrawPhaseSection');
+            participantsToDrawListDiv = document.getElementById('participantsToDrawList');
+            drawnParticipantsListDiv = document.getElementById('drawnParticipantsList');
+            goToIndicationPhaseButton = document.getElementById('goToIndicationPhaseButton');
+            indicationPhaseSection = document.getElementById('indicationPhaseSection');
+            indicationTabsDiv = document.getElementById('indicationTabs');
+            indicationContentDiv = document.getElementById('indicationContent');
+            goToAnimeDrawPhaseButton = document.getElementById('goToAnimeDrawPhaseButton');
+            animeDrawPhaseSection = document.getElementById('animeDrawPhaseSection');
+            participantsToDrawAnimeListDiv = document.getElementById('participantsToDrawAnimeList');
+            goToWatchLoopButton = document.getElementById('goToWatchLoopButton'); 
+            watchLoopPhaseSection = document.getElementById('watchLoopPhaseSection');
+            watchLoopContentDiv = document.getElementById('watchLoopContent');
+            exportWatchListButton = document.getElementById('exportWatchListButton');
+            allAnimesWatchedMessage = document.getElementById('allAnimesWatchedMessage');
+            resetGameButton = document.getElementById('resetGameButton');
+            genreGridFooterDiv = document.getElementById('genreGridFooter'); 
+            userIdDisplay = document.getElementById('userIdDisplay');
+            footerUserId = document.getElementById('footerUserId');
+            customAlertDiv = document.getElementById('customAlert');
+            alertIconSpan = document.getElementById('alertIcon');
+            alertMessageContentSpan = document.getElementById('alertMessageContent');
+            alertCloseButton = document.getElementById('alertCloseButton');
+            alertConfirmButtonsDiv = document.getElementById('alertConfirmButtons');
+            alertCancelBtn = document.getElementById('alertCancelBtn');
+            alertConfirmBtn = document.getElementById('alertConfirmBtn');
+            genreRevealModal = document.getElementById('genreRevealModal');
+            genreRevealParticipantNameModalTitle = document.getElementById('genreRevealParticipantNameModalTitle'); 
+            genreRevealIconContainer = document.getElementById('genreRevealIconContainer'); 
+            genreRevealIconImg = document.getElementById('genreRevealIconImg'); 
+            // genreRevealOverlayNameText foi removido do HTML do modal
+            genreRevealNameText = document.getElementById('genreRevealNameText'); 
+            genreRevealNumberText = document.getElementById('genreRevealNumberText'); 
+            closeGenreRevealModalButton = document.getElementById('closeGenreRevealModalButton');
+            animeRevealModal = document.getElementById('animeRevealModal');
+            animeRevealParticipantName = document.getElementById('animeRevealParticipantName');
+            animeRevealCover = document.getElementById('animeRevealCover');
+            animeRevealTitleLink = document.getElementById('animeRevealTitleLink'); 
+            animeRevealIndicator = document.getElementById('animeRevealIndicator');
+            animeRevealScore = document.getElementById('animeRevealScore'); 
+            closeAnimeRevealModalButton = document.getElementById('closeAnimeRevealModalButton');
+            gameManagementSection = document.getElementById('gameManagementSection');
+            newGameNameInput = document.getElementById('newGameNameInput');
+            newGameModeSelect = document.getElementById('newGameModeSelect');
+            createNewGameButton = document.getElementById('createNewGameButton');
+            savedGamesListDiv = document.getElementById('savedGamesList');
+            actualGameContentDiv = document.getElementById('actualGameContent');
+            currentGameNameDisplay = document.getElementById('currentGameNameDisplay');
+            switchGameButton = document.getElementById('switchGameButton');
+            searchResultsModal = document.getElementById('searchResultsModal');
+            searchResultsListDiv = document.getElementById('searchResultsList');
+            closeSearchResultsModalButton = document.getElementById('closeSearchResultsModalButton');
+            toggleGenreLegendButton = document.getElementById('toggleGenreLegendButton'); 
+            genreLegendContainer = document.getElementById('genreLegendContainer'); 
+
+            if (alertCloseButton) alertCloseButton.onclick = () => { customAlertDiv.classList.add('hidden'); if (currentAlertResolve) { currentAlertResolve(false); currentAlertResolve = null; } };
+            if (alertCancelBtn) alertCancelBtn.onclick = () => { customAlertDiv.classList.add('hidden'); if (currentAlertResolve) { currentAlertResolve(false); currentAlertResolve = null; } };
+            if (alertConfirmBtn) alertConfirmBtn.onclick = () => { customAlertDiv.classList.add('hidden'); if (currentAlertResolve) { currentAlertResolve(true); currentAlertResolve = null; } };
+            if (closeGenreRevealModalButton) closeGenreRevealModalButton.onclick = () => genreRevealModal.classList.add('hidden');
+            if (closeAnimeRevealModalButton) closeAnimeRevealModalButton.onclick = () => animeRevealModal.classList.add('hidden');
+            if (closeSearchResultsModalButton) closeSearchResultsModalButton.onclick = () => {searchResultsModal.classList.add('hidden'); currentSearchContext = null;};
+            
+            if (participantNameInput) {
+                participantNameInput.addEventListener('keypress', (event) => { 
+                    if (event.key === 'Enter') { event.preventDefault(); if(addParticipantButton) addParticipantButton.click(); }
+                });
+            }
+            if(newGameNameInput) { 
+                newGameNameInput.addEventListener('keypress', (event) => {
+                    if (event.key === 'Enter') { event.preventDefault(); if(createNewGameButton) createNewGameButton.click(); }
+                });
+            }
+            if (toggleGenreLegendButton) { 
+                toggleGenreLegendButton.onclick = () => {
+                    genreLegendContainer.classList.toggle('hidden');
+                    if (!genreLegendContainer.classList.contains('hidden')) { 
+                        renderGenreGridFooter();
+                    }
+                };
+            }
+            if(exportWatchListButton) exportWatchListButton.onclick = exportAnimeWatchList;
+
+
+            if (addParticipantButton) addParticipantButton.onclick = handleAddParticipant;
+            if(goToIndividualDrawButton) goToIndividualDrawButton.onclick = () => { gameState.currentPhase = PHASES.INDIVIDUAL_DRAW_SELECTION; renderApp(); };
+            if(goToIndicationPhaseButton) goToIndicationPhaseButton.onclick = () => { 
+                gameState.participants.forEach(p => { 
+                    if(!p.receivedIndications) p.receivedIndications = []; 
+                }); 
+                gameState.currentPhase = PHASES.INDICATION; 
+                gameState.currentIndicatorTabId = gameState.participants[0]?.id || null; 
+                renderApp(); 
+            };
+            if(goToAnimeDrawPhaseButton) goToAnimeDrawPhaseButton.onclick = () => {
+                gameState.currentPhase = PHASES.ANIME_DRAW_SELECTION; 
+                renderApp(); 
+            };
+            if(goToWatchLoopButton) goToWatchLoopButton.onclick = () => { gameState.currentPhase = PHASES.WATCH_LOOP; renderApp(); };
+            if(resetGameButton) resetGameButton.onclick = handleResetGame;
+            if(createNewGameButton) createNewGameButton.onclick = createNewGame;
+            if(switchGameButton) switchGameButton.onclick = () => {
+                allGamesData.activeGameId = null; 
+                gameState = {}; 
+                saveAllGamesData(); 
+                renderApp(); 
+            };
+
+            loadAllGamesData(); 
+            renderApp(); 
+            renderGenreGridFooter(); 
+        });
+    </script>
+</body>
+</html>
