@@ -111,7 +111,7 @@
         }
         #exportImageContainer .anime-item img {
             width: 80px; height: 120px; object-fit: cover; border-radius: 4px; flex-shrink: 0; border: 1px solid #475569; 
-            overflow: hidden; /* Added to address html2canvas warning */
+            overflow: hidden; 
         }
         #exportImageContainer .anime-details { text-align: left; }
         #exportImageContainer .anime-details p { margin: 0; }
@@ -147,7 +147,7 @@
         }
          #exportAllIndicationsContainer .indicated-anime-item img {
             width: 30px; height: 45px; object-fit: cover; border-radius: 0.125rem;
-            overflow: hidden; /* Added to address html2canvas warning */
+            overflow: hidden; 
         }
         #exportAllIndicationsContainer .status-tag {
             display: inline-block; font-size: 2.2rem; margin-left: 0.75rem; 
@@ -402,7 +402,7 @@
             searchResultsModal, searchResultsListDiv, closeSearchResultsModalButton, animeRevealScore, 
             toggleGenreLegendButton, genreLegendContainer, exportWatchListButton, exportFullIndicationHistoryButton,
             importFileInput, importGamesButton, exportAllGamesButton;
-            // saveProgressWatchLoopButton removed
+            
         let currentAlertResolve = null;
         let currentSearchContext = null; 
 
@@ -411,6 +411,9 @@
         const PLACEHOLDER_IMG_ERROR_60x90 = 'https://placehold.co/60x90/1e293b/ff0000?text=Erro';
         const PLACEHOLDER_IMG_SEARCH_RESULT = 'https://placehold.co/40x60/1e293b/4f46e5?text=Capa';
         const PLACEHOLDER_IMG_GENRE_ICON = 'https://placehold.co/64x64/1e293b/4f46e5?text=Icon';
+        const PLACEHOLDER_IMG_ERROR_80x120 = 'https://placehold.co/80x120/1e293b/ff0000?text=Erro';
+        const PLACEHOLDER_IMG_ERROR_40x60 = 'https://placehold.co/40x60/1e293b/ff0000?text=Erro';
+        const PLACEHOLDER_IMG_ERROR_20x20 = 'https://placehold.co/20x20/1e293b/ff0000?text=X';
 
 
         // FUNÇÕES PRIMÁRIAS
@@ -476,6 +479,25 @@
             if (type !== 'custom_confirm' && duration !== Infinity) setTimeout(() => customAlertDiv.classList.add('hidden'), duration);
         }
         async function showConfirmAlert(message) { showAlert(message, 'custom_confirm', Infinity); return new Promise(resolve => currentAlertResolve = resolve); }
+
+        // Função para pré-carregar imagens e garantir acessibilidade para html2canvas
+        function ensureImageIsAccessible(src, placeholderOnError) {
+            return new Promise((resolve) => {
+                if (!src || src.startsWith('https://placehold.co') || src.startsWith('data:image/png;base64')) {
+                    resolve(src || placeholderOnError);
+                    return;
+                }
+                const img = new Image();
+                img.crossOrigin = 'anonymous'; // Essencial para html2canvas com useCORS:true
+                img.onload = () => resolve(src); // Sucesso, imagem está no cache e acessível
+                img.onerror = (err) => {
+                    console.warn(`Falha ao carregar/verificar CORS para imagem: ${src}. Erro:`, err, `Usando placeholder: ${placeholderOnError}`);
+                    resolve(placeholderOnError); // Falha, usar placeholder
+                };
+                img.src = src;
+            });
+        }
+
 
         function renderParticipantsList() {
             participantsListDiv.innerHTML = gameState.participants.length === 0 ? '<p class="text-slate-400 text-sm">Nenhum participante.</p>' : '';
@@ -1154,7 +1176,7 @@
             participant.genreHistory.push(chosenGenre.name); 
 
             gameState.assignedGenreNames.push({participantId: participant.id, genreName: chosenGenre.name}); 
-            showGenreRevealModal(participant.name, { ...chosenGenre, drawnNumber: drawnNumber, imageUrl: chosenGenre.imageUrl }); // Corrected variable name
+            showGenreRevealModal(participant.name, { ...chosenGenre, drawnNumber: drawnNumber, imageUrl: chosenGenre.imageUrl });
             renderApp(); 
         }
         
@@ -1222,14 +1244,12 @@
                 allGamesData.activeGameId = gameId;
                 loadAllGamesData(); 
                 showAlert(`Bingo "${gameState.name || 'Desconhecido'}" carregado!`, "success");
-                // Ensure data consistency after potential re-initialization in loadAllGamesData
                 const tempActiveGameId = allGamesData.activeGameId; 
                 loadAllGamesData(); 
                 if (allGamesData.activeGameId !== tempActiveGameId || !allGamesData.games[gameId]) {
-                    // This case implies activeGameId was reset, so we need to ensure it's saved if it was meant to be this gameId
-                    saveAllGamesData(); // Save the potentially reset activeGameId
+                    saveAllGamesData(); 
                 } else {
-                     allGamesData.activeGameId = gameId; // Re-affirm if it's still valid
+                     allGamesData.activeGameId = gameId; 
                      saveAllGamesData();
                 }
                 renderApp();
@@ -1286,54 +1306,70 @@
             }
         }
         
-        function exportAnimeWatchList() {
-            const exportContentDiv = document.createElement('div');
-            exportContentDiv.id = 'exportImageContainer'; 
-            exportContentDiv.style.width = '800px'; 
-            exportContentDiv.style.padding = '24px';
-            exportContentDiv.style.backgroundColor = '#0f172a'; 
-            exportContentDiv.style.color = '#e2e8f0'; 
-            exportContentDiv.style.borderRadius = '0.5rem';
-            exportContentDiv.style.border = '2px solid #0ea5e9'; 
-            exportContentDiv.style.fontFamily = "'Inter', sans-serif";
-            exportContentDiv.style.position = 'absolute';
-            exportContentDiv.style.left = '-9999px'; 
-            document.body.appendChild(exportContentDiv);
+        async function exportAnimeWatchList() {
+            if(exportWatchListButton) exportWatchListButton.disabled = true;
+            showAlert("Preparando exportação da lista para assistir...", "info", Infinity);
 
-            let listContentHTML = `<h3 style="font-size: 1.875rem; font-weight: 700; color: #38bdf8; margin-bottom: 1.5rem; padding-bottom: 0.75rem; text-align: center;">Lista de Animes para Assistir</h3>`;
-            let hasAnimesToWatch = false;
+            try {
+                await document.fonts.ready;
 
-            gameState.participants.forEach(participant => {
-                if (participant.animeToWatch && participant.animeToWatch.animeTitle) {
-                    hasAnimesToWatch = true;
-                    const genreDetails = initialGenres.find(g => g.name === participant.currentAssignedGenre);
-                    const genreDisplay = genreDetails ? `<span style="font-size: 0.95rem; color: #cbd5e1; margin-left: 8px;">(Gênero Atual: ${genreDetails.name})</span>` : '';
-                    
-                    listContentHTML += `
-                        <div style="padding: 16px 0; border-bottom: 1px solid #334155; margin-bottom: 16px;">
-                            <h4 style="font-size: 1.5rem; font-weight: 600; color: #a5b4fc; margin-bottom: 16px;">${participant.name} ${genreDisplay}</h4>
-                            <div style="display: flex; align-items: center; gap: 20px; margin-left: 12px; padding-top: 8px;">
-                                <img src="${participant.animeToWatch.animeImageUrl || PLACEHOLDER_IMG_60x90}" alt="Capa" style="width: 80px; height: 120px; object-fit: cover; border-radius: 4px; flex-shrink: 0; border: 1px solid #475569; overflow: hidden;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_60x90}'">
-                                <div style="text-align: left; padding-top: 4px;">
-                                    <p style="font-size: 1.3rem; color: #f1f5f9; font-weight: 500; margin-bottom: 8px;">${participant.animeToWatch.animeTitle}</p>
-                                    <p style="font-size: 1.1rem; color: #cbd5e1;">Indicado por: ${participant.animeToWatch.indicatorName}</p>
-                                </div>
-                            </div>
-                        </div>`;
+                const exportContentDiv = document.createElement('div');
+                exportContentDiv.id = 'exportImageContainer'; 
+                // Apply styles directly for html2canvas consistency
+                Object.assign(exportContentDiv.style, {
+                    width: '800px', padding: '24px', backgroundColor: '#0f172a', color: '#e2e8f0',
+                    borderRadius: '0.5rem', border: '2px solid #0ea5e9', fontFamily: "'Inter', sans-serif",
+                    position: 'absolute', left: '-9999px', // Keep off-screen
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+                });
+                document.body.appendChild(exportContentDiv);
+
+                let listContentHTML = `<h3 style="font-size: 1.875rem; font-weight: 700; color: #38bdf8; margin-bottom: 1.5rem; padding-bottom: 0.75rem; text-align: center;">Lista de Animes para Assistir</h3>`;
+                let hasAnimesToWatch = false;
+
+                const participantsData = [];
+                for (const participant of gameState.participants) {
+                    if (participant.animeToWatch && participant.animeToWatch.animeTitle) {
+                        hasAnimesToWatch = true;
+                        const genreDetails = initialGenres.find(g => g.name === participant.currentAssignedGenre);
+                        const animeImageUrl = participant.animeToWatch.animeImageUrl || PLACEHOLDER_IMG_60x90; // Default placeholder if no image
+                        
+                        const finalAnimeImageUrl = await ensureImageIsAccessible(animeImageUrl, PLACEHOLDER_IMG_ERROR_80x120);
+
+                        participantsData.push({
+                            name: participant.name,
+                            genreDisplay: genreDetails ? `<span style="font-size: 0.95rem; color: #cbd5e1; margin-left: 8px;">(Gênero Atual: ${genreDetails.name})</span>` : '',
+                            animeTitle: participant.animeToWatch.animeTitle,
+                            finalAnimeImageUrl: finalAnimeImageUrl,
+                            indicatorName: participant.animeToWatch.indicatorName
+                        });
+                    }
                 }
-            });
-             if (!hasAnimesToWatch) {
-                listContentHTML += '<p style="font-size: 1.125rem; text-align: center; color: #94a3b8; margin-top: 1rem;">Nenhum anime sorteado para assistir no momento.</p>';
-            }
 
-
-            exportContentDiv.innerHTML = listContentHTML;
-            
-            html2canvas(exportContentDiv, { 
-                backgroundColor: '#0f172a', 
-                useCORS: true, 
-                scale: 2 
-            }).then(canvas => {
+                if (!hasAnimesToWatch) {
+                    listContentHTML += '<p style="font-size: 1.125rem; text-align: center; color: #94a3b8; margin-top: 1rem;">Nenhum anime sorteado para assistir no momento.</p>';
+                } else {
+                    participantsData.forEach(pData => {
+                        listContentHTML += `
+                            <div style="padding: 16px 0; border-bottom: 1px solid #334155; margin-bottom: 16px;">
+                                <h4 style="font-size: 1.5rem; font-weight: 600; color: #a5b4fc; margin-bottom: 16px;">${pData.name} ${pData.genreDisplay}</h4>
+                                <div style="display: flex; align-items: center; gap: 20px; margin-left: 12px; padding-top: 8px;">
+                                    <img src="${pData.finalAnimeImageUrl}" alt="Capa" style="width: 80px; height: 120px; object-fit: cover; border-radius: 4px; flex-shrink: 0; border: 1px solid #475569; overflow: hidden;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_80x120}'">
+                                    <div style="text-align: left; padding-top: 4px;">
+                                        <p style="font-size: 1.3rem; color: #f1f5f9; font-weight: 500; margin-bottom: 8px;">${pData.animeTitle}</p>
+                                        <p style="font-size: 1.1rem; color: #cbd5e1;">Indicado por: ${pData.indicatorName}</p>
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                }
+                exportContentDiv.innerHTML = listContentHTML;
+                
+                const canvas = await html2canvas(exportContentDiv, { 
+                    backgroundColor: '#0f172a', 
+                    useCORS: true, 
+                    scale: 2 
+                });
                 const imageURL = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
                 link.href = imageURL;
@@ -1342,124 +1378,119 @@
                 link.click();
                 document.body.removeChild(link);
                 showAlert("Lista de animes exportada como imagem!", "success");
-            }).catch(error => {
-                console.error("Erro ao exportar imagem:", error);
+
+            } catch (error) {
+                console.error("Erro ao exportar imagem da lista para assistir:", error);
                 showAlert("Erro ao exportar imagem. Verifique o console.", "error");
-            }).finally(() => {
+            } finally {
                 if (document.getElementById('exportImageContainer')) { 
-                    document.body.removeChild(exportContentDiv);
+                    document.body.removeChild(document.getElementById('exportImageContainer'));
                 }
-            });
+                if(exportWatchListButton) exportWatchListButton.disabled = false;
+                customAlertDiv.classList.add('hidden'); // Hide the "preparing" alert
+            }
         }
 
-        function exportIndicationsList(exportType) {
-            const containerId = 'exportAllIndicationsContainer';
-            let existingContainer = document.getElementById(containerId);
-            if (existingContainer) {
-                existingContainer.remove();
-            }
+        async function exportIndicationsList(exportType) {
+            const exportButton = exportType === 'current' ? exportIndicationsButton : exportFullIndicationHistoryButton;
+            if(exportButton) exportButton.disabled = true;
+            showAlert(`Preparando exportação do ${exportType === 'current' ? 'histórico atual' : 'histórico completo'}...`, "info", Infinity);
+            
+            try {
+                await document.fonts.ready;
 
-            const exportContentDiv = document.createElement('div');
-            exportContentDiv.id = containerId;
-            exportContentDiv.style.width = '800px'; 
-            exportContentDiv.style.padding = '20px';
-            exportContentDiv.style.backgroundColor = '#0f172a';
-            exportContentDiv.style.color = '#e2e8f0';
-            exportContentDiv.style.borderRadius = '8px';
-            exportContentDiv.style.border = '1px solid #38bdf8';
-            exportContentDiv.style.fontFamily = "'Inter', sans-serif";
-            exportContentDiv.style.position = 'absolute';
-            exportContentDiv.style.left = '-9999px';
-            document.body.appendChild(exportContentDiv);
+                const containerId = 'exportAllIndicationsContainer';
+                if (document.getElementById(containerId)) document.getElementById(containerId).remove();
 
-            const titleText = exportType === 'current' ? "Indicações Atuais para os Gêneros Ativos" : "Histórico Completo de Todas as Indicações";
-            let listContentHTML = `<h3 style="font-size: 1.75rem; font-weight: 700; color: #38bdf8; text-align: center; margin-bottom: 1rem; padding-bottom: 0.5rem;">${titleText}</h3>`;
-            let hasAnyIndications = false;
-
-            gameState.participants.forEach(receiver => {
-                let receiverIndicationsHTML = '';
-                let hasIndicationsForThisReceiver = false;
-
-                const indicationsByGenre = {};
-                (receiver.receivedIndications || []).forEach(ind => { 
-                    if (exportType === 'current' && ind.status !== 'pending') return; 
-                    if (exportType === 'current' && ind.genreContext !== receiver.currentAssignedGenre) return; 
-
-                    if (!indicationsByGenre[ind.genreContext]) {
-                        indicationsByGenre[ind.genreContext] = [];
-                    }
-                    indicationsByGenre[ind.genreContext].push(ind);
+                const exportContentDiv = document.createElement('div');
+                exportContentDiv.id = containerId;
+                Object.assign(exportContentDiv.style, {
+                    width: '800px', padding: '20px', backgroundColor: '#0f172a', color: '#e2e8f0',
+                    borderRadius: '8px', border: '1px solid #38bdf8', fontFamily: "'Inter', sans-serif",
+                    position: 'absolute', left: '-9999px'
                 });
+                document.body.appendChild(exportContentDiv);
 
-                Object.keys(indicationsByGenre).forEach(genreCtx => {
-                    if (indicationsByGenre[genreCtx].length > 0) {
-                        hasIndicationsForThisReceiver = true;
-                        hasAnyIndications = true;
-                        const genreDetails = initialGenres.find(g => g.name === genreCtx);
-                        const genreImgHTML = genreDetails ? `<img src="${genreDetails.imageUrl}" alt="${genreDetails.name}" style="width: 20px; height: 20px; object-fit: contain; margin-right: 8px; display: inline-block; vertical-align: middle; overflow: hidden;">` : ''; // Added overflow:hidden
-                        
-                        receiverIndicationsHTML += `<div class="genre-title-export" style="font-size: 1.1rem; font-weight: 600; color: #818cf8; margin-top: 0.75rem; margin-bottom: 0.5rem;">${genreImgHTML}${genreCtx || 'Gênero Desconhecido'}</div>`;
-                        
-                        const indicationsByIndicator = {};
-                        indicationsByGenre[genreCtx].forEach(ind => {
-                            if (!indicationsByIndicator[ind.indicatorName]) {
-                                indicationsByIndicator[ind.indicatorName] = [];
-                            }
-                            indicationsByIndicator[ind.indicatorName].push(ind);
-                        });
+                const titleText = exportType === 'current' ? "Indicações Atuais para os Gêneros Ativos" : "Histórico Completo de Todas as Indicações";
+                let listContentHTML = `<h3 style="font-size: 1.75rem; font-weight: 700; color: #38bdf8; text-align: center; margin-bottom: 1rem; padding-bottom: 0.5rem;">${titleText}</h3>`;
+                let hasAnyIndications = false;
 
-                        Object.keys(indicationsByIndicator).forEach(indicatorName => {
-                            receiverIndicationsHTML += `<div class="indicator-block" style="margin-left: 1rem; margin-bottom: 0.5rem;">
-                                                            <p class="indicator-name" style="font-size: 1rem; color: #9ca3af; margin-bottom: 0.25rem;">Indicado por: ${indicatorName}</p>
-                                                            <ul style="list-style: none; padding-left: 0;">`;
-                            indicationsByIndicator[indicatorName].forEach(ind => {
-                                let statusTagHTML = '';
-                                const isCurrentAnimeToWatch = receiver.animeToWatch && receiver.animeToWatch.malId === ind.malId && receiver.animeToWatch.indicatorId === ind.indicatorId && receiver.animeToWatch.genreContext === ind.genreContext;
+                for (const receiver of gameState.participants) {
+                    let receiverBlockHTML = '';
+                    let hasIndicationsForThisReceiverInBlock = false;
 
-                                if (exportType === 'history') {
-                                    if (isCurrentAnimeToWatch) {
-                                         statusTagHTML = `<span class="status-tag status-sorted">🎲</span>`;
-                                    } else if (ind.status === 'watched') {
-                                         statusTagHTML = `<span class="status-tag status-watched">✅</span>`;
-                                    } else if (gameState.gameMode === 'tradicional' && ind.status === 'pending') { 
-                                         statusTagHTML = `<span class="status-tag status-pending">⏳</span>`;
-                                    }
-                                } else if (exportType === 'current' && gameState.gameMode === 'tradicional' && ind.status === 'pending') {
-                                     statusTagHTML = `<span class="status-tag status-pending">⏳</span>`;
-                                }
-                                
+                    const indicationsByGenreContext = {};
+                    (receiver.receivedIndications || []).forEach(ind => {
+                        if (exportType === 'current' && ind.status !== 'pending') return;
+                        if (exportType === 'current' && ind.genreContext !== receiver.currentAssignedGenre) return;
+                        if (!indicationsByGenreContext[ind.genreContext]) indicationsByGenreContext[ind.genreContext] = [];
+                        indicationsByGenreContext[ind.genreContext].push(ind);
+                    });
 
-                                receiverIndicationsHTML += `
-                                    <li class="indicated-anime-item" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; font-size: 1rem; color: #e2e8f0;">
-                                        <img src="${ind.animeImageUrl || PLACEHOLDER_IMG_SEARCH_RESULT}" alt="Capa" style="width: 40px; height: 60px; object-fit: cover; border-radius: 0.125rem; flex-shrink: 0; overflow: hidden;">
-                                        <span>${ind.animeTitle} ${statusTagHTML}</span>
-                                    </li>`;
+                    for (const genreCtx of Object.keys(indicationsByGenreContext)) {
+                        if (indicationsByGenreContext[genreCtx].length > 0) {
+                            hasIndicationsForThisReceiverInBlock = true;
+                            hasAnyIndications = true;
+                            
+                            const genreDetails = initialGenres.find(g => g.name === genreCtx);
+                            const genreIconUrl = genreDetails ? genreDetails.imageUrl : PLACEHOLDER_IMG_GENRE_ICON;
+                            const finalGenreIconUrl = await ensureImageIsAccessible(genreIconUrl, PLACEHOLDER_IMG_ERROR_20x20);
+                            const genreImgHTML = `<img src="${finalGenreIconUrl}" alt="${genreCtx}" style="width: 20px; height: 20px; object-fit: contain; margin-right: 8px; display: inline-block; vertical-align: middle; overflow: hidden;">`;
+                            
+                            receiverBlockHTML += `<div class="genre-title-export" style="font-size: 1.1rem; font-weight: 600; color: #818cf8; margin-top: 0.75rem; margin-bottom: 0.5rem;">${genreImgHTML}${genreCtx || 'Gênero Desconhecido'}</div>`;
+                            
+                            const indicationsByIndName = {};
+                            indicationsByGenreContext[genreCtx].forEach(ind => {
+                                if(!indicationsByIndName[ind.indicatorName]) indicationsByIndName[ind.indicatorName] = [];
+                                indicationsByIndName[ind.indicatorName].push(ind);
                             });
-                            receiverIndicationsHTML += `</ul></div>`;
-                        });
+
+                            for(const indicatorName of Object.keys(indicationsByIndName)){
+                                receiverBlockHTML += `<div class="indicator-block" style="margin-left: 1rem; margin-bottom: 0.5rem;">
+                                                        <p class="indicator-name" style="font-size: 1rem; color: #9ca3af; margin-bottom: 0.25rem;">Indicado por: ${indicatorName}</p>
+                                                        <ul style="list-style: none; padding-left: 0;">`;
+                                for(const ind of indicationsByIndName[indicatorName]){
+                                    let statusTagHTML = '';
+                                    const isCurrentAnimeToWatch = receiver.animeToWatch && receiver.animeToWatch.malId === ind.malId && receiver.animeToWatch.indicatorId === ind.indicatorId && receiver.animeToWatch.genreContext === ind.genreContext;
+                                    if (exportType === 'history') {
+                                        if (isCurrentAnimeToWatch) statusTagHTML = `<span class="status-tag status-sorted">🎲</span>`;
+                                        else if (ind.status === 'watched') statusTagHTML = `<span class="status-tag status-watched">✅</span>`;
+                                        else if (gameState.gameMode === 'tradicional' && ind.status === 'pending') statusTagHTML = `<span class="status-tag status-pending">⏳</span>`;
+                                    } else if (exportType === 'current' && gameState.gameMode === 'tradicional' && ind.status === 'pending') {
+                                        statusTagHTML = `<span class="status-tag status-pending">⏳</span>`;
+                                    }
+                                    
+                                    const animeIndicationImageUrl = ind.animeImageUrl || PLACEHOLDER_IMG_SEARCH_RESULT;
+                                    const finalAnimeIndicationImageUrl = await ensureImageIsAccessible(animeIndicationImageUrl, PLACEHOLDER_IMG_ERROR_40x60);
+
+                                    receiverBlockHTML += `
+                                        <li class="indicated-anime-item" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; font-size: 1rem; color: #e2e8f0;">
+                                            <img src="${finalAnimeIndicationImageUrl}" alt="Capa" style="width: 40px; height: 60px; object-fit: cover; border-radius: 0.125rem; flex-shrink: 0; overflow: hidden;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_40x60}'">
+                                            <span>${ind.animeTitle} ${statusTagHTML}</span>
+                                        </li>`;
+                                }
+                                receiverBlockHTML += `</ul></div>`;
+                            }
+                        }
                     }
-                });
-                
-                if (hasIndicationsForThisReceiver) {
-                    listContentHTML += `<div class="receiver-block" style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px dashed #475569;">
-                                            <h4 class="receiver-name" style="font-size: 1.35rem; font-weight: 600; color: #a5b4fc; margin-bottom: 0.75rem;">${receiver.name}</h4>
-                                            ${receiverIndicationsHTML}
-                                        </div>`;
+                    if (hasIndicationsForThisReceiverInBlock) {
+                        listContentHTML += `<div class="receiver-block" style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px dashed #475569;">
+                                                <h4 class="receiver-name" style="font-size: 1.35rem; font-weight: 600; color: #a5b4fc; margin-bottom: 0.75rem;">${receiver.name}</h4>
+                                                ${receiverBlockHTML}
+                                            </div>`;
+                    }
                 }
-            });
 
+                if (!hasAnyIndications) {
+                    listContentHTML += `<p style="font-size: 1.125rem; text-align: center; color: #94a3b8; margin-top: 1rem;">Nenhuma indicação encontrada para os critérios atuais.</p>`;
+                }
+                exportContentDiv.innerHTML = listContentHTML;
 
-            if (!hasAnyIndications) {
-                listContentHTML += `<p style="font-size: 1.125rem; text-align: center; color: #94a3b8; margin-top: 1rem;">Nenhuma indicação encontrada para os critérios atuais.</p>`;
-            }
-
-            exportContentDiv.innerHTML = listContentHTML;
-
-            html2canvas(exportContentDiv, { 
-                backgroundColor: '#0f172a', 
-                useCORS: true, 
-                scale: 1.5 
-            }).then(canvas => {
+                const canvas = await html2canvas(exportContentDiv, { 
+                    backgroundColor: '#0f172a', 
+                    useCORS: true, 
+                    scale: 1.5 
+                });
                 const imageURL = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
                 link.href = imageURL;
@@ -1469,14 +1500,17 @@
                 link.click();
                 document.body.removeChild(link);
                 showAlert("Lista de indicações exportada como imagem!", "success");
-            }).catch(error => {
-                console.error("Erro ao exportar imagem de indicações:", error);
+
+            } catch (error) {
+                console.error(`Erro ao exportar imagem de indicações (${exportType}):`, error);
                 showAlert("Erro ao exportar imagem de indicações. Verifique o console.", "error");
-            }).finally(() => {
-                 if (document.getElementById(containerId)) {
-                    document.body.removeChild(exportContentDiv);
+            } finally {
+                if (document.getElementById(containerId)) {
+                    document.body.removeChild(document.getElementById(containerId));
                 }
-            });
+                if(exportButton) exportButton.disabled = false;
+                customAlertDiv.classList.add('hidden'); // Hide the "preparing" alert
+            }
         }
 
         // Backup and Restore Functions
@@ -1648,8 +1682,7 @@
             genreLegendContainer = document.getElementById('genreLegendContainer'); 
             exportIndicationsButton = document.getElementById('exportIndicationsButton'); 
             exportFullIndicationHistoryButton = document.getElementById('exportFullIndicationHistoryButton'); 
-            // saveProgressWatchLoopButton removed from here
-
+            
             importFileInput = document.getElementById('importFileInput');
             importGamesButton = document.getElementById('importGamesButton');
             exportAllGamesButton = document.getElementById('exportAllGamesButton');
@@ -1683,7 +1716,6 @@
             if(exportWatchListButton) exportWatchListButton.onclick = exportAnimeWatchList;
             if(exportIndicationsButton) exportIndicationsButton.onclick = () => exportIndicationsList('current');
             if(exportFullIndicationHistoryButton) exportFullIndicationHistoryButton.onclick = () => exportIndicationsList('history');
-            // Event listener for saveProgressWatchLoopButton removed
 
 
             if (addParticipantButton) addParticipantButton.onclick = handleAddParticipant;
