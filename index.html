@@ -95,17 +95,17 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
         }
         #exportImageContainer h3 {
-            font-size: 1.875rem; font-weight: 700; color: #38bdf8; margin-bottom: 1.5rem; 
-            padding-bottom: 0.75rem; text-align: center;
+            font-size: 30px; /* Alterado para px */ font-weight: 700; color: #38bdf8; margin-bottom: 24px; /* Alterado para px */
+            padding-bottom: 12px; /* Alterado para px */ text-align: center;
         }
         #exportImageContainer .participant-section {
             padding: 16px 0; border-bottom: 1px solid #334155; margin-bottom: 16px;
         }
         #exportImageContainer .participant-section:last-child { border-bottom: none; margin-bottom: 0; }
         #exportImageContainer .participant-name-header {
-            font-size: 1.5rem; font-weight: 600; color: #a5b4fc; margin-bottom: 16px; 
+            font-size: 24px; /* Alterado para px */ font-weight: 600; color: #a5b4fc; margin-bottom: 16px; 
         }
-        #exportImageContainer .genre-context-text { font-size: 0.95rem; color: #cbd5e1; margin-left: 8px; }
+        #exportImageContainer .genre-context-text { font-size: 15px; /* Alterado para px */ color: #cbd5e1; margin-left: 8px; }
         #exportImageContainer .anime-item {
             display: flex; align-items: center; gap: 20px; margin-left: 12px; padding-top: 8px; margin-bottom: 12px; 
         }
@@ -116,41 +116,41 @@
         #exportImageContainer .anime-details { text-align: left; }
         #exportImageContainer .anime-details p { margin: 0; }
         #exportImageContainer .anime-title {
-            font-size: 1.35rem; color: #f1f5f9; font-weight: 500; margin-bottom: 8px; 
+            font-size: 20px; /* Alterado para px */ color: #f1f5f9; font-weight: 500; margin-bottom: 8px; 
         }
-        #exportImageContainer .anime-indicator { font-size: 1rem; color: #cbd5e1; }
+        #exportImageContainer .anime-indicator { font-size: 16px; /* Alterado para px */ color: #cbd5e1; }
         #exportAllIndicationsContainer { 
             font-family: 'Inter', sans-serif; color: #e2e8f0; padding: 20px; background-color: #0f172a; 
             border: 1px solid #38bdf8; border-radius: 8px;
         }
         #exportAllIndicationsContainer h3 {
-            font-size: 1.75rem; font-weight: 700; color: #38bdf8; text-align: center;
-            margin-bottom: 1rem; padding-bottom: 0.5rem;
+            font-size: 28px; /* Alterado para px */ font-weight: 700; color: #38bdf8; text-align: center;
+            margin-bottom: 16px; /* Alterado para px */ padding-bottom: 8px; /* Alterado para px */
         }
         #exportAllIndicationsContainer .receiver-block {
-            margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px dashed #475569; 
+            margin-bottom: 24px; /* Alterado para px */ padding-bottom: 16px; /* Alterado para px */ border-bottom: 1px dashed #475569; 
         }
         #exportAllIndicationsContainer .receiver-block:last-child { border-bottom: none; margin-bottom: 0; }
         #exportAllIndicationsContainer .receiver-name {
-            font-size: 1.25rem; font-weight: 600; color: #a5b4fc; margin-bottom: 0.5rem;
+            font-size: 20px; /* Alterado para px */ font-weight: 600; color: #a5b4fc; margin-bottom: 8px; /* Alterado para px */
         }
          #exportAllIndicationsContainer .genre-title-export {
-            font-size: 1rem; font-weight: 500; color: #60a5fa; margin-bottom: 0.5rem; margin-top: 0.5rem;
+            font-size: 16px; /* Alterado para px */ font-weight: 500; color: #60a5fa; margin-bottom: 8px; /* Alterado para px */ margin-top: 8px; /* Alterado para px */
         }
-        #exportAllIndicationsContainer .indicator-block { margin-left: 1rem; margin-bottom: 0.75rem; }
+        #exportAllIndicationsContainer .indicator-block { margin-left: 16px; /* Alterado para px */ margin-bottom: 12px; /* Alterado para px */ }
         #exportAllIndicationsContainer .indicator-name {
-            font-size: 0.875rem; font-weight: 500; color: #94a3b8; 
+            font-size: 14px; /* Alterado para px */ font-weight: 500; color: #94a3b8; 
         }
         #exportAllIndicationsContainer .indicated-anime-item {
-            display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0;
-            font-size: 1rem; color: #e2e8f0; 
+            display: flex; align-items: center; gap: 8px; /* Alterado para px */ padding: 4px 0; /* Alterado para px */
+            font-size: 16px; /* Alterado para px */ color: #e2e8f0; 
         }
          #exportAllIndicationsContainer .indicated-anime-item img {
-            width: 30px; height: 45px; object-fit: cover; border-radius: 0.125rem;
+            width: 30px; height: 45px; object-fit: cover; border-radius: 2px; /* Alterado para px */
             overflow: hidden; 
         }
         #exportAllIndicationsContainer .status-tag {
-            display: inline-block; font-size: 2.2rem; margin-left: 0.75rem; 
+            display: inline-block; font-size: 2.2rem; /* Mantido rem para ícones grandes, pode ser ajustado se necessário */ margin-left: 12px; /* Alterado para px */
             line-height: 1; vertical-align: 0rem; padding: 0 4px; background-color: transparent !important; 
         }
         #exportAllIndicationsContainer .status-pending { color: #f59e0b; } 
@@ -1176,7 +1176,7 @@
             participant.genreHistory.push(chosenGenre.name); 
 
             gameState.assignedGenreNames.push({participantId: participant.id, genreName: chosenGenre.name}); 
-            showGenreRevealModal(participant.name, { ...chosenGenre, drawnNumber: drawnNumber, imageUrl: chosenGenre.imageUrl });
+            showGenreRevealModal(participant.name, { ...chosenGenre, drawnNumber: drawnNumber, imageUrl: chosenNewGenre.imageUrl });
             renderApp(); 
         }
         
@@ -1311,7 +1311,7 @@
             showAlert("Preparando exportação da lista para assistir...", "info", Infinity);
 
             try {
-                await document.fonts.ready; // Garante que as fontes estão carregadas
+                await document.fonts.ready; 
 
                 const exportContentDiv = document.createElement('div');
                 exportContentDiv.id = 'exportImageContainer'; 
@@ -1323,7 +1323,7 @@
                 });
                 document.body.appendChild(exportContentDiv);
 
-                let listContentHTML = `<h3 style="font-size: 1.875rem; font-weight: 700; color: #38bdf8; margin-bottom: 1.5rem; padding-bottom: 0.75rem; text-align: center;">Lista de Animes para Assistir</h3>`;
+                let listContentHTML = `<h3 style="font-size: 30px; font-weight: 700; color: #38bdf8; margin-bottom: 24px; padding-bottom: 12px; text-align: center;">Lista de Animes para Assistir</h3>`;
                 let hasAnimesToWatch = false;
 
                 const imageLoadPromises = [];
@@ -1334,14 +1334,13 @@
                         hasAnimesToWatch = true;
                         const animeImageUrl = participant.animeToWatch.animeImageUrl || PLACEHOLDER_IMG_60x90;
                         
-                        // Adiciona a promessa de carregamento da imagem ao array
                         imageLoadPromises.push(
                             ensureImageIsAccessible(animeImageUrl, PLACEHOLDER_IMG_ERROR_80x120)
                                 .then(finalUrl => {
                                     const genreDetails = initialGenres.find(g => g.name === participant.currentAssignedGenre);
                                     participantsRenderData.push({
                                         name: participant.name,
-                                        genreDisplay: genreDetails ? `<span style="font-size: 0.95rem; color: #cbd5e1; margin-left: 8px;">(Gênero Atual: ${genreDetails.name})</span>` : '',
+                                        genreDisplay: genreDetails ? `<span style="font-size: 15px; color: #cbd5e1; margin-left: 8px;">(Gênero Atual: ${genreDetails.name})</span>` : '',
                                         animeTitle: participant.animeToWatch.animeTitle,
                                         finalAnimeImageUrl: finalUrl,
                                         indicatorName: participant.animeToWatch.indicatorName
@@ -1351,13 +1350,11 @@
                     }
                 }
 
-                await Promise.all(imageLoadPromises); // Espera todas as imagens carregarem (ou falharem para placeholder)
+                await Promise.all(imageLoadPromises); 
 
                 if (!hasAnimesToWatch) {
-                    listContentHTML += '<p style="font-size: 1.125rem; text-align: center; color: #94a3b8; margin-top: 1rem;">Nenhum anime sorteado para assistir no momento.</p>';
+                    listContentHTML += '<p style="font-size: 18px; text-align: center; color: #94a3b8; margin-top: 16px;">Nenhum anime sorteado para assistir no momento.</p>';
                 } else {
-                    // Ordena os dados dos participantes pela ordem original, se necessário (ou pela ordem que foram adicionados)
-                    // Se a ordem original dos participantes em gameState.participants for importante:
                     const orderedRenderData = [];
                     gameState.participants.forEach(p => {
                         const found = participantsRenderData.find(r => r.name === p.name && r.animeTitle === p.animeToWatch?.animeTitle);
@@ -1367,12 +1364,12 @@
                     orderedRenderData.forEach(pData => {
                         listContentHTML += `
                             <div style="padding: 16px 0; border-bottom: 1px solid #334155; margin-bottom: 16px;">
-                                <h4 style="font-size: 1.5rem; font-weight: 600; color: #a5b4fc; margin-bottom: 16px;">${pData.name} ${pData.genreDisplay}</h4>
+                                <h4 style="font-size: 24px; font-weight: 600; color: #a5b4fc; margin-bottom: 16px;">${pData.name} ${pData.genreDisplay}</h4>
                                 <div style="display: flex; align-items: center; gap: 20px; margin-left: 12px; padding-top: 8px;">
                                     <img src="${pData.finalAnimeImageUrl}" alt="Capa" style="width: 80px; height: 120px; object-fit: cover; border-radius: 4px; flex-shrink: 0; border: 1px solid #475569; overflow: hidden;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_80x120}'">
                                     <div style="text-align: left; padding-top: 4px;">
-                                        <p style="font-size: 1.3rem; color: #f1f5f9; font-weight: 500; margin-bottom: 8px;">${pData.animeTitle}</p>
-                                        <p style="font-size: 1.1rem; color: #cbd5e1;">Indicado por: ${pData.indicatorName}</p>
+                                        <p style="font-size: 20px; color: #f1f5f9; font-weight: 500; margin-bottom: 8px;">${pData.animeTitle}</p>
+                                        <p style="font-size: 16px; color: #cbd5e1;">Indicado por: ${pData.indicatorName}</p>
                                     </div>
                                 </div>
                             </div>`;
@@ -1380,15 +1377,17 @@
                 }
                 exportContentDiv.innerHTML = listContentHTML;
                 
-                // Força o navegador a renderizar o conteúdo antes de chamar html2canvas
-                await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 300)));
+                void exportContentDiv.offsetHeight; 
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Aumentado para 1 segundo
 
 
                 const canvas = await html2canvas(exportContentDiv, { 
                     backgroundColor: '#0f172a', 
                     useCORS: true, 
                     scale: 2,
-                    logging: true // Habilitar logs do html2canvas para depuração, se necessário
+                    logging: true,
+                    windowWidth: exportContentDiv.scrollWidth, // Adicionado
+                    windowHeight: exportContentDiv.scrollHeight // Adicionado
                 });
                 const imageURL = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
@@ -1432,11 +1431,10 @@
                 document.body.appendChild(exportContentDiv);
 
                 const titleText = exportType === 'current' ? "Indicações Atuais para os Gêneros Ativos" : "Histórico Completo de Todas as Indicações";
-                let listContentHTML = `<h3 style="font-size: 1.75rem; font-weight: 700; color: #38bdf8; text-align: center; margin-bottom: 1rem; padding-bottom: 0.5rem;">${titleText}</h3>`;
+                let listContentHTML = `<h3 style="font-size: 28px; font-weight: 700; color: #38bdf8; text-align: center; margin-bottom: 16px; padding-bottom: 8px;">${titleText}</h3>`;
                 let hasAnyIndications = false;
 
                 const allImagePromises = [];
-                // Estrutura para armazenar os dados processados antes de gerar o HTML
                 const receiversRenderData = []; 
 
                 for (const receiver of gameState.participants) {
@@ -1459,7 +1457,6 @@
                             const genreDetails = initialGenres.find(g => g.name === genreCtx);
                             const genreIconUrl = genreDetails ? genreDetails.imageUrl : PLACEHOLDER_IMG_GENRE_ICON;
                             
-                            // Promessa para o ícone do gênero
                             const genreIconPromise = ensureImageIsAccessible(genreIconUrl, PLACEHOLDER_IMG_ERROR_20x20)
                                 .then(finalUrl => ({ genreCtx, finalUrl }));
                             allImagePromises.push(genreIconPromise);
@@ -1476,7 +1473,6 @@
                                 receiverData.indicationsByGenre[genreCtx].indicators[indicatorName] = [];
                                 indicationsByIndName[indicatorName].forEach(ind => {
                                     const animeIndicationImageUrl = ind.animeImageUrl || PLACEHOLDER_IMG_SEARCH_RESULT;
-                                    // Promessa para a capa do anime
                                     const animeImagePromise = ensureImageIsAccessible(animeIndicationImageUrl, PLACEHOLDER_IMG_ERROR_40x60)
                                         .then(finalUrl => ({ ...ind, finalAnimeImageUrl: finalUrl }));
                                     allImagePromises.push(animeImagePromise);
@@ -1490,9 +1486,8 @@
                     }
                 }
 
-                await Promise.all(allImagePromises.map(p => p.catch(e => e))); // Espera todas as imagens (ou seus fallbacks)
+                await Promise.all(allImagePromises.map(p => p.catch(e => e))); 
 
-                // Agora, construa o HTML com as URLs finais das imagens
                 for (const receiverData of receiversRenderData) {
                     let receiverBlockHTML = '';
                     let hasIndicationsForThisReceiverInBlock = false;
@@ -1500,16 +1495,16 @@
                     for (const genreCtx of Object.keys(receiverData.indicationsByGenre)) {
                          hasIndicationsForThisReceiverInBlock = true;
                         const genreIconData = await receiverData.indicationsByGenre[genreCtx].genreIconPromise;
-                        const finalGenreIconUrl = genreIconData.finalUrl; // URL já resolvida
+                        const finalGenreIconUrl = genreIconData.finalUrl; 
                         const genreImgHTML = `<img src="${finalGenreIconUrl}" alt="${genreCtx}" style="width: 20px; height: 20px; object-fit: contain; margin-right: 8px; display: inline-block; vertical-align: middle; overflow: hidden;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_20x20}'">`;
-                        receiverBlockHTML += `<div class="genre-title-export" style="font-size: 1.1rem; font-weight: 600; color: #818cf8; margin-top: 0.75rem; margin-bottom: 0.5rem;">${genreImgHTML}${genreCtx || 'Gênero Desconhecido'}</div>`;
+                        receiverBlockHTML += `<div class="genre-title-export" style="font-size: 18px; font-weight: 600; color: #818cf8; margin-top: 12px; margin-bottom: 8px;">${genreImgHTML}${genreCtx || 'Gênero Desconhecido'}</div>`;
 
                         for (const indicatorName of Object.keys(receiverData.indicationsByGenre[genreCtx].indicators)) {
-                            receiverBlockHTML += `<div class="indicator-block" style="margin-left: 1rem; margin-bottom: 0.5rem;">
-                                                    <p class="indicator-name" style="font-size: 1rem; color: #9ca3af; margin-bottom: 0.25rem;">Indicado por: ${indicatorName}</p>
+                            receiverBlockHTML += `<div class="indicator-block" style="margin-left: 16px; margin-bottom: 8px;">
+                                                    <p class="indicator-name" style="font-size: 15px; color: #9ca3af; margin-bottom: 4px;">Indicado por: ${indicatorName}</p>
                                                     <ul style="list-style: none; padding-left: 0;">`;
                             for (const indData of receiverData.indicationsByGenre[genreCtx].indicators[indicatorName]) {
-                                const ind = await indData.animeImagePromise; // Objeto 'ind' original com 'finalAnimeImageUrl'
+                                const ind = await indData.animeImagePromise; 
                                 let statusTagHTML = '';
                                 const isCurrentAnimeToWatch = gameState.participants.find(p=>p.name === receiverData.name)?.animeToWatch && 
                                                             gameState.participants.find(p=>p.name === receiverData.name)?.animeToWatch.malId === ind.malId && 
@@ -1524,8 +1519,8 @@
                                     statusTagHTML = `<span class="status-tag status-pending">⏳</span>`;
                                 }
                                 receiverBlockHTML += `
-                                    <li class="indicated-anime-item" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; font-size: 1rem; color: #e2e8f0;">
-                                        <img src="${ind.finalAnimeImageUrl}" alt="Capa" style="width: 40px; height: 60px; object-fit: cover; border-radius: 0.125rem; flex-shrink: 0; overflow: hidden;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_40x60}'">
+                                    <li class="indicated-anime-item" style="display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 16px; color: #e2e8f0;">
+                                        <img src="${ind.finalAnimeImageUrl}" alt="Capa" style="width: 40px; height: 60px; object-fit: cover; border-radius: 2px; flex-shrink: 0; overflow: hidden;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_40x60}'">
                                         <span>${ind.animeTitle} ${statusTagHTML}</span>
                                     </li>`;
                             }
@@ -1533,8 +1528,8 @@
                         }
                     }
                      if (hasIndicationsForThisReceiverInBlock) {
-                        listContentHTML += `<div class="receiver-block" style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px dashed #475569;">
-                                                <h4 class="receiver-name" style="font-size: 1.35rem; font-weight: 600; color: #a5b4fc; margin-bottom: 0.75rem;">${receiverData.name}</h4>
+                        listContentHTML += `<div class="receiver-block" style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px dashed #475569;">
+                                                <h4 class="receiver-name" style="font-size: 21px; font-weight: 600; color: #a5b4fc; margin-bottom: 12px;">${receiverData.name}</h4>
                                                 ${receiverBlockHTML}
                                             </div>`;
                     }
@@ -1542,17 +1537,21 @@
 
 
                 if (!hasAnyIndications) {
-                    listContentHTML += `<p style="font-size: 1.125rem; text-align: center; color: #94a3b8; margin-top: 1rem;">Nenhuma indicação encontrada para os critérios atuais.</p>`;
+                    listContentHTML += `<p style="font-size: 18px; text-align: center; color: #94a3b8; margin-top: 16px;">Nenhuma indicação encontrada para os critérios atuais.</p>`;
                 }
                 exportContentDiv.innerHTML = listContentHTML;
 
-                await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 300)));
+                void exportContentDiv.offsetHeight; 
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Aumentado para 1 segundo
+
 
                 const canvas = await html2canvas(exportContentDiv, { 
                     backgroundColor: '#0f172a', 
                     useCORS: true, 
                     scale: 1.5,
-                    logging: true // Habilitar logs do html2canvas
+                    logging: true,
+                    windowWidth: exportContentDiv.scrollWidth, // Adicionado
+                    windowHeight: exportContentDiv.scrollHeight // Adicionado
                 });
                 const imageURL = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
