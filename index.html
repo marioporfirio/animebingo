@@ -1311,15 +1311,14 @@
             showAlert("Preparando exportação da lista para assistir...", "info", Infinity);
 
             try {
-                await document.fonts.ready;
+                await document.fonts.ready; // Garante que as fontes estão carregadas
 
                 const exportContentDiv = document.createElement('div');
                 exportContentDiv.id = 'exportImageContainer'; 
-                // Apply styles directly for html2canvas consistency
                 Object.assign(exportContentDiv.style, {
                     width: '800px', padding: '24px', backgroundColor: '#0f172a', color: '#e2e8f0',
                     borderRadius: '0.5rem', border: '2px solid #0ea5e9', fontFamily: "'Inter', sans-serif",
-                    position: 'absolute', left: '-9999px', // Keep off-screen
+                    position: 'absolute', left: '-9999px', 
                     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
                 });
                 document.body.appendChild(exportContentDiv);
@@ -1327,29 +1326,45 @@
                 let listContentHTML = `<h3 style="font-size: 1.875rem; font-weight: 700; color: #38bdf8; margin-bottom: 1.5rem; padding-bottom: 0.75rem; text-align: center;">Lista de Animes para Assistir</h3>`;
                 let hasAnimesToWatch = false;
 
-                const participantsData = [];
+                const imageLoadPromises = [];
+                const participantsRenderData = [];
+
                 for (const participant of gameState.participants) {
                     if (participant.animeToWatch && participant.animeToWatch.animeTitle) {
                         hasAnimesToWatch = true;
-                        const genreDetails = initialGenres.find(g => g.name === participant.currentAssignedGenre);
-                        const animeImageUrl = participant.animeToWatch.animeImageUrl || PLACEHOLDER_IMG_60x90; // Default placeholder if no image
+                        const animeImageUrl = participant.animeToWatch.animeImageUrl || PLACEHOLDER_IMG_60x90;
                         
-                        const finalAnimeImageUrl = await ensureImageIsAccessible(animeImageUrl, PLACEHOLDER_IMG_ERROR_80x120);
-
-                        participantsData.push({
-                            name: participant.name,
-                            genreDisplay: genreDetails ? `<span style="font-size: 0.95rem; color: #cbd5e1; margin-left: 8px;">(Gênero Atual: ${genreDetails.name})</span>` : '',
-                            animeTitle: participant.animeToWatch.animeTitle,
-                            finalAnimeImageUrl: finalAnimeImageUrl,
-                            indicatorName: participant.animeToWatch.indicatorName
-                        });
+                        // Adiciona a promessa de carregamento da imagem ao array
+                        imageLoadPromises.push(
+                            ensureImageIsAccessible(animeImageUrl, PLACEHOLDER_IMG_ERROR_80x120)
+                                .then(finalUrl => {
+                                    const genreDetails = initialGenres.find(g => g.name === participant.currentAssignedGenre);
+                                    participantsRenderData.push({
+                                        name: participant.name,
+                                        genreDisplay: genreDetails ? `<span style="font-size: 0.95rem; color: #cbd5e1; margin-left: 8px;">(Gênero Atual: ${genreDetails.name})</span>` : '',
+                                        animeTitle: participant.animeToWatch.animeTitle,
+                                        finalAnimeImageUrl: finalUrl,
+                                        indicatorName: participant.animeToWatch.indicatorName
+                                    });
+                                })
+                        );
                     }
                 }
+
+                await Promise.all(imageLoadPromises); // Espera todas as imagens carregarem (ou falharem para placeholder)
 
                 if (!hasAnimesToWatch) {
                     listContentHTML += '<p style="font-size: 1.125rem; text-align: center; color: #94a3b8; margin-top: 1rem;">Nenhum anime sorteado para assistir no momento.</p>';
                 } else {
-                    participantsData.forEach(pData => {
+                    // Ordena os dados dos participantes pela ordem original, se necessário (ou pela ordem que foram adicionados)
+                    // Se a ordem original dos participantes em gameState.participants for importante:
+                    const orderedRenderData = [];
+                    gameState.participants.forEach(p => {
+                        const found = participantsRenderData.find(r => r.name === p.name && r.animeTitle === p.animeToWatch?.animeTitle);
+                        if (found) orderedRenderData.push(found);
+                    });
+
+                    orderedRenderData.forEach(pData => {
                         listContentHTML += `
                             <div style="padding: 16px 0; border-bottom: 1px solid #334155; margin-bottom: 16px;">
                                 <h4 style="font-size: 1.5rem; font-weight: 600; color: #a5b4fc; margin-bottom: 16px;">${pData.name} ${pData.genreDisplay}</h4>
@@ -1365,10 +1380,15 @@
                 }
                 exportContentDiv.innerHTML = listContentHTML;
                 
+                // Força o navegador a renderizar o conteúdo antes de chamar html2canvas
+                await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 300)));
+
+
                 const canvas = await html2canvas(exportContentDiv, { 
                     backgroundColor: '#0f172a', 
                     useCORS: true, 
-                    scale: 2 
+                    scale: 2,
+                    logging: true // Habilitar logs do html2canvas para depuração, se necessário
                 });
                 const imageURL = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
@@ -1387,7 +1407,7 @@
                     document.body.removeChild(document.getElementById('exportImageContainer'));
                 }
                 if(exportWatchListButton) exportWatchListButton.disabled = false;
-                customAlertDiv.classList.add('hidden'); // Hide the "preparing" alert
+                customAlertDiv.classList.add('hidden'); 
             }
         }
 
@@ -1415,9 +1435,13 @@
                 let listContentHTML = `<h3 style="font-size: 1.75rem; font-weight: 700; color: #38bdf8; text-align: center; margin-bottom: 1rem; padding-bottom: 0.5rem;">${titleText}</h3>`;
                 let hasAnyIndications = false;
 
+                const allImagePromises = [];
+                // Estrutura para armazenar os dados processados antes de gerar o HTML
+                const receiversRenderData = []; 
+
                 for (const receiver of gameState.participants) {
-                    let receiverBlockHTML = '';
-                    let hasIndicationsForThisReceiverInBlock = false;
+                    const receiverData = { name: receiver.name, indicationsByGenre: {} };
+                    let hasIndicationsForThisReceiver = false;
 
                     const indicationsByGenreContext = {};
                     (receiver.receivedIndications || []).forEach(ind => {
@@ -1429,16 +1453,19 @@
 
                     for (const genreCtx of Object.keys(indicationsByGenreContext)) {
                         if (indicationsByGenreContext[genreCtx].length > 0) {
-                            hasIndicationsForThisReceiverInBlock = true;
+                            hasIndicationsForThisReceiver = true;
                             hasAnyIndications = true;
                             
                             const genreDetails = initialGenres.find(g => g.name === genreCtx);
                             const genreIconUrl = genreDetails ? genreDetails.imageUrl : PLACEHOLDER_IMG_GENRE_ICON;
-                            const finalGenreIconUrl = await ensureImageIsAccessible(genreIconUrl, PLACEHOLDER_IMG_ERROR_20x20);
-                            const genreImgHTML = `<img src="${finalGenreIconUrl}" alt="${genreCtx}" style="width: 20px; height: 20px; object-fit: contain; margin-right: 8px; display: inline-block; vertical-align: middle; overflow: hidden;">`;
                             
-                            receiverBlockHTML += `<div class="genre-title-export" style="font-size: 1.1rem; font-weight: 600; color: #818cf8; margin-top: 0.75rem; margin-bottom: 0.5rem;">${genreImgHTML}${genreCtx || 'Gênero Desconhecido'}</div>`;
-                            
+                            // Promessa para o ícone do gênero
+                            const genreIconPromise = ensureImageIsAccessible(genreIconUrl, PLACEHOLDER_IMG_ERROR_20x20)
+                                .then(finalUrl => ({ genreCtx, finalUrl }));
+                            allImagePromises.push(genreIconPromise);
+
+                            receiverData.indicationsByGenre[genreCtx] = { genreIconPromise, indicators: {} };
+
                             const indicationsByIndName = {};
                             indicationsByGenreContext[genreCtx].forEach(ind => {
                                 if(!indicationsByIndName[ind.indicatorName]) indicationsByIndName[ind.indicatorName] = [];
@@ -1446,50 +1473,86 @@
                             });
 
                             for(const indicatorName of Object.keys(indicationsByIndName)){
-                                receiverBlockHTML += `<div class="indicator-block" style="margin-left: 1rem; margin-bottom: 0.5rem;">
-                                                        <p class="indicator-name" style="font-size: 1rem; color: #9ca3af; margin-bottom: 0.25rem;">Indicado por: ${indicatorName}</p>
-                                                        <ul style="list-style: none; padding-left: 0;">`;
-                                for(const ind of indicationsByIndName[indicatorName]){
-                                    let statusTagHTML = '';
-                                    const isCurrentAnimeToWatch = receiver.animeToWatch && receiver.animeToWatch.malId === ind.malId && receiver.animeToWatch.indicatorId === ind.indicatorId && receiver.animeToWatch.genreContext === ind.genreContext;
-                                    if (exportType === 'history') {
-                                        if (isCurrentAnimeToWatch) statusTagHTML = `<span class="status-tag status-sorted">🎲</span>`;
-                                        else if (ind.status === 'watched') statusTagHTML = `<span class="status-tag status-watched">✅</span>`;
-                                        else if (gameState.gameMode === 'tradicional' && ind.status === 'pending') statusTagHTML = `<span class="status-tag status-pending">⏳</span>`;
-                                    } else if (exportType === 'current' && gameState.gameMode === 'tradicional' && ind.status === 'pending') {
-                                        statusTagHTML = `<span class="status-tag status-pending">⏳</span>`;
-                                    }
-                                    
+                                receiverData.indicationsByGenre[genreCtx].indicators[indicatorName] = [];
+                                indicationsByIndName[indicatorName].forEach(ind => {
                                     const animeIndicationImageUrl = ind.animeImageUrl || PLACEHOLDER_IMG_SEARCH_RESULT;
-                                    const finalAnimeIndicationImageUrl = await ensureImageIsAccessible(animeIndicationImageUrl, PLACEHOLDER_IMG_ERROR_40x60);
-
-                                    receiverBlockHTML += `
-                                        <li class="indicated-anime-item" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; font-size: 1rem; color: #e2e8f0;">
-                                            <img src="${finalAnimeIndicationImageUrl}" alt="Capa" style="width: 40px; height: 60px; object-fit: cover; border-radius: 0.125rem; flex-shrink: 0; overflow: hidden;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_40x60}'">
-                                            <span>${ind.animeTitle} ${statusTagHTML}</span>
-                                        </li>`;
-                                }
-                                receiverBlockHTML += `</ul></div>`;
+                                    // Promessa para a capa do anime
+                                    const animeImagePromise = ensureImageIsAccessible(animeIndicationImageUrl, PLACEHOLDER_IMG_ERROR_40x60)
+                                        .then(finalUrl => ({ ...ind, finalAnimeImageUrl: finalUrl }));
+                                    allImagePromises.push(animeImagePromise);
+                                    receiverData.indicationsByGenre[genreCtx].indicators[indicatorName].push({ ...ind, animeImagePromise });
+                                });
                             }
                         }
                     }
-                    if (hasIndicationsForThisReceiverInBlock) {
+                    if (hasIndicationsForThisReceiver) {
+                        receiversRenderData.push(receiverData);
+                    }
+                }
+
+                await Promise.all(allImagePromises.map(p => p.catch(e => e))); // Espera todas as imagens (ou seus fallbacks)
+
+                // Agora, construa o HTML com as URLs finais das imagens
+                for (const receiverData of receiversRenderData) {
+                    let receiverBlockHTML = '';
+                    let hasIndicationsForThisReceiverInBlock = false;
+
+                    for (const genreCtx of Object.keys(receiverData.indicationsByGenre)) {
+                         hasIndicationsForThisReceiverInBlock = true;
+                        const genreIconData = await receiverData.indicationsByGenre[genreCtx].genreIconPromise;
+                        const finalGenreIconUrl = genreIconData.finalUrl; // URL já resolvida
+                        const genreImgHTML = `<img src="${finalGenreIconUrl}" alt="${genreCtx}" style="width: 20px; height: 20px; object-fit: contain; margin-right: 8px; display: inline-block; vertical-align: middle; overflow: hidden;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_20x20}'">`;
+                        receiverBlockHTML += `<div class="genre-title-export" style="font-size: 1.1rem; font-weight: 600; color: #818cf8; margin-top: 0.75rem; margin-bottom: 0.5rem;">${genreImgHTML}${genreCtx || 'Gênero Desconhecido'}</div>`;
+
+                        for (const indicatorName of Object.keys(receiverData.indicationsByGenre[genreCtx].indicators)) {
+                            receiverBlockHTML += `<div class="indicator-block" style="margin-left: 1rem; margin-bottom: 0.5rem;">
+                                                    <p class="indicator-name" style="font-size: 1rem; color: #9ca3af; margin-bottom: 0.25rem;">Indicado por: ${indicatorName}</p>
+                                                    <ul style="list-style: none; padding-left: 0;">`;
+                            for (const indData of receiverData.indicationsByGenre[genreCtx].indicators[indicatorName]) {
+                                const ind = await indData.animeImagePromise; // Objeto 'ind' original com 'finalAnimeImageUrl'
+                                let statusTagHTML = '';
+                                const isCurrentAnimeToWatch = gameState.participants.find(p=>p.name === receiverData.name)?.animeToWatch && 
+                                                            gameState.participants.find(p=>p.name === receiverData.name)?.animeToWatch.malId === ind.malId && 
+                                                            gameState.participants.find(p=>p.name === receiverData.name)?.animeToWatch.indicatorId === ind.indicatorId && 
+                                                            gameState.participants.find(p=>p.name === receiverData.name)?.animeToWatch.genreContext === ind.genreContext;
+
+                                if (exportType === 'history') {
+                                    if (isCurrentAnimeToWatch) statusTagHTML = `<span class="status-tag status-sorted">🎲</span>`;
+                                    else if (ind.status === 'watched') statusTagHTML = `<span class="status-tag status-watched">✅</span>`;
+                                    else if (gameState.gameMode === 'tradicional' && ind.status === 'pending') statusTagHTML = `<span class="status-tag status-pending">⏳</span>`;
+                                } else if (exportType === 'current' && gameState.gameMode === 'tradicional' && ind.status === 'pending') {
+                                    statusTagHTML = `<span class="status-tag status-pending">⏳</span>`;
+                                }
+                                receiverBlockHTML += `
+                                    <li class="indicated-anime-item" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; font-size: 1rem; color: #e2e8f0;">
+                                        <img src="${ind.finalAnimeImageUrl}" alt="Capa" style="width: 40px; height: 60px; object-fit: cover; border-radius: 0.125rem; flex-shrink: 0; overflow: hidden;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_40x60}'">
+                                        <span>${ind.animeTitle} ${statusTagHTML}</span>
+                                    </li>`;
+                            }
+                            receiverBlockHTML += `</ul></div>`;
+                        }
+                    }
+                     if (hasIndicationsForThisReceiverInBlock) {
                         listContentHTML += `<div class="receiver-block" style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px dashed #475569;">
-                                                <h4 class="receiver-name" style="font-size: 1.35rem; font-weight: 600; color: #a5b4fc; margin-bottom: 0.75rem;">${receiver.name}</h4>
+                                                <h4 class="receiver-name" style="font-size: 1.35rem; font-weight: 600; color: #a5b4fc; margin-bottom: 0.75rem;">${receiverData.name}</h4>
                                                 ${receiverBlockHTML}
                                             </div>`;
                     }
                 }
+
 
                 if (!hasAnyIndications) {
                     listContentHTML += `<p style="font-size: 1.125rem; text-align: center; color: #94a3b8; margin-top: 1rem;">Nenhuma indicação encontrada para os critérios atuais.</p>`;
                 }
                 exportContentDiv.innerHTML = listContentHTML;
 
+                await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 300)));
+
                 const canvas = await html2canvas(exportContentDiv, { 
                     backgroundColor: '#0f172a', 
                     useCORS: true, 
-                    scale: 1.5 
+                    scale: 1.5,
+                    logging: true // Habilitar logs do html2canvas
                 });
                 const imageURL = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
@@ -1509,7 +1572,7 @@
                     document.body.removeChild(document.getElementById(containerId));
                 }
                 if(exportButton) exportButton.disabled = false;
-                customAlertDiv.classList.add('hidden'); // Hide the "preparing" alert
+                customAlertDiv.classList.add('hidden'); 
             }
         }
 
