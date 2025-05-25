@@ -48,7 +48,6 @@
         }
         .indication-card img { width: 60px; height: 90px; object-fit: cover; border-radius: 0.25rem; }
         .indication-card-info { text-align: left; flex-grow: 1; }
-        /* .mal-url-input { width: calc(100% - 110px); } */
         .tab-button-active { border-color: #6366f1 !important; color: #6366f1 !important; } 
         .game-list-item {
             display: flex; justify-content: space-between; align-items: center;
@@ -58,152 +57,103 @@
         .game-list-item:hover { background-color: #475569; }
         .game-list-item span { flex-grow: 1; }
         .score-badge {
-            background-color: #facc15; /* yellow-400 */ color: #1e293b; /* slate-800 */
+            background-color: #facc15; color: #1e293b; 
             padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.9em;
         }
         .genre-legend-item { 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start; 
-            aspect-ratio: 1 / 1; 
-            padding: 0.5rem; 
-            box-sizing: border-box;
-            overflow: hidden;
-            position: relative; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            aspect-ratio: 1 / 1; padding: 0.5rem; box-sizing: border-box; overflow: hidden; position: relative; 
         }
         .genre-legend-item .genre-image-wrapper { 
-            width: 100%;
-            flex-grow: 1; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden; 
-            margin-bottom: 0.375rem; 
+            width: 100%; flex-grow: 1; display: flex; align-items: center; justify-content: center;
+            overflow: hidden; margin-bottom: 0.375rem; 
         }
         .genre-legend-item img { 
-            max-width: 85%; 
-            max-height: 85%; 
-            object-fit: contain; 
-            border-radius: 0.375rem; 
+            max-width: 85%; max-height: 85%; object-fit: contain; border-radius: 0.375rem; 
         }
         .genre-legend-item p { 
-            font-size: 1.1rem; 
-            line-height: 1.2; 
-            font-weight: 600; 
-            color: #c7d2fe; 
-            text-align: center; 
-            width: 100%; 
-            margin-top: 0.25rem; 
-            padding-bottom: 0.5rem; 
-            flex-shrink: 0; 
+            font-size: 1.1rem; line-height: 1.2; font-weight: 600; color: #c7d2fe; 
+            text-align: center; width: 100%; margin-top: 0.25rem; padding-bottom: 0.5rem; flex-shrink: 0; 
         }
         .genre-participant-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0,0,0,0.65); 
-            color: white;
-            display: flex;
-            flex-direction: column; 
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 0.25rem;
-            border-radius: 0.375rem; 
-            opacity: 0; 
-            transition: opacity 0.3s ease-in-out;
-            pointer-events: none; 
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.65); 
+            color: white; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 0.25rem; border-radius: 0.375rem; opacity: 0; 
+            transition: opacity 0.3s ease-in-out; pointer-events: none; 
         }
-        .genre-legend-item.assigned .genre-participant-overlay { 
-            opacity: 1;
-        }
+        .genre-legend-item.assigned .genre-participant-overlay { opacity: 1; }
         .genre-participant-overlay .name {
-            font-weight: bold;
-            font-size: 1.25rem; 
-            word-break: break-word; 
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            font-weight: bold; font-size: 1.25rem; word-break: break-word; text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
         }
          .genre-participant-overlay .tag {
-            font-size: 0.9rem; 
-            background-color: #ef4444; 
-            color: white;
-            padding: 0.2rem 0.5rem; 
-            border-radius: 0.25rem;
-            margin-top: 0.3rem;
-            text-transform: uppercase;
-            font-weight: bold;
+            font-size: 0.9rem; background-color: #ef4444; color: white; padding: 0.2rem 0.5rem; 
+            border-radius: 0.25rem; margin-top: 0.3rem; text-transform: uppercase; font-weight: bold;
         }
         #exportImageContainer { 
-            font-family: 'Inter', sans-serif;
-            color: #e2e8f0; 
-            padding: 24px; 
-            background-color: #0f172a; 
-            border: 2px solid #0ea5e9; 
-            border-radius: 0.5rem; 
+            font-family: 'Inter', sans-serif; color: #e2e8f0; padding: 24px; background-color: #0f172a; 
+            border: 2px solid #0ea5e9; border-radius: 0.5rem; 
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
         }
         #exportImageContainer h3 {
-            font-size: 1.875rem; 
-            font-weight: 700; 
-            color: #38bdf8; 
-            margin-bottom: 1.5rem; 
-            padding-bottom: 0.75rem; 
-            text-align: center;
-            /* border-bottom: 2px solid #0ea5e9;  Removida */
+            font-size: 1.875rem; font-weight: 700; color: #38bdf8; margin-bottom: 1.5rem; 
+            padding-bottom: 0.75rem; text-align: center;
         }
         #exportImageContainer .participant-section {
-            padding-top: 16px; 
-            padding-bottom: 16px;
-            border-bottom: 1px solid #334155; 
-            margin-bottom: 16px;
+            padding: 16px 0; border-bottom: 1px solid #334155; margin-bottom: 16px;
         }
-        #exportImageContainer .participant-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
+        #exportImageContainer .participant-section:last-child { border-bottom: none; margin-bottom: 0; }
+        #exportImageContainer .participant-name-header {
+            font-size: 1.5rem; font-weight: 600; color: #a5b4fc; margin-bottom: 16px; 
         }
-        #exportImageContainer .participant-name {
-            font-size: 1.5rem; 
-            font-weight: 600; 
-            color: #a5b4fc; 
-            margin-bottom: 12px; /* Aumentado */
-        }
-        #exportImageContainer .genre-info {
-            font-size: 0.875rem; 
-            color: #94a3b8; 
-            margin-bottom: 16px; /* Aumentado */
-        }
+        #exportImageContainer .genre-context-text { font-size: 0.95rem; color: #cbd5e1; margin-left: 8px; }
         #exportImageContainer .anime-item {
-            display: flex;
-            align-items: flex-start; 
-            gap: 20px; 
-            margin-left: 8px;
-            padding-top: 8px; /* Adicionado para espaçar do nome/gênero */
+            display: flex; align-items: center; gap: 20px; margin-left: 12px; padding-top: 8px; margin-bottom: 12px; 
         }
         #exportImageContainer .anime-item img {
-            width: 75px; 
-            height: 112px; 
-            object-fit: cover;
-            border-radius: 4px;
-            flex-shrink: 0;
-            border: 1px solid #475569; 
+            width: 80px; height: 120px; object-fit: cover; border-radius: 4px; flex-shrink: 0; border: 1px solid #475569; 
         }
-        #exportImageContainer .anime-details {
-            padding-top: 4px; 
-        }
-        #exportImageContainer .anime-details p {
-            margin: 0; 
-        }
+        #exportImageContainer .anime-details { text-align: left; }
+        #exportImageContainer .anime-details p { margin: 0; }
         #exportImageContainer .anime-title {
-            font-size: 1.25rem; 
-            color: #f1f5f9; 
-            font-weight: 500; 
-            margin-bottom: 6px; 
+            font-size: 1.35rem; color: #f1f5f9; font-weight: 500; margin-bottom: 8px; 
         }
-        #exportImageContainer .anime-indicator {
-            font-size: 1rem; 
-            color: #cbd5e1; 
+        #exportImageContainer .anime-indicator { font-size: 1rem; color: #cbd5e1; }
+        #exportAllIndicationsContainer { 
+            font-family: 'Inter', sans-serif; color: #e2e8f0; padding: 20px; background-color: #0f172a; 
+            border: 1px solid #38bdf8; border-radius: 8px;
         }
-
+        #exportAllIndicationsContainer h3 {
+            font-size: 1.75rem; font-weight: 700; color: #38bdf8; text-align: center;
+            margin-bottom: 1rem; padding-bottom: 0.5rem;
+        }
+        #exportAllIndicationsContainer .receiver-block {
+            margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px dashed #475569; 
+        }
+        #exportAllIndicationsContainer .receiver-block:last-child { border-bottom: none; margin-bottom: 0; }
+        #exportAllIndicationsContainer .receiver-name {
+            font-size: 1.25rem; font-weight: 600; color: #a5b4fc; margin-bottom: 0.5rem;
+        }
+         #exportAllIndicationsContainer .genre-title-export {
+            font-size: 1rem; font-weight: 500; color: #60a5fa; margin-bottom: 0.5rem; margin-top: 0.5rem;
+        }
+        #exportAllIndicationsContainer .indicator-block { margin-left: 1rem; margin-bottom: 0.75rem; }
+        #exportAllIndicationsContainer .indicator-name {
+            font-size: 0.875rem; font-weight: 500; color: #94a3b8; 
+        }
+        #exportAllIndicationsContainer .indicated-anime-item {
+            display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0;
+            font-size: 1rem; color: #e2e8f0; 
+        }
+         #exportAllIndicationsContainer .indicated-anime-item img {
+            width: 30px; height: 45px; object-fit: cover; border-radius: 0.125rem;
+        }
+        #exportAllIndicationsContainer .status-tag {
+            display: inline-block; font-size: 2.2rem; margin-left: 0.75rem; 
+            line-height: 1; vertical-align: 0rem; padding: 0 4px; background-color: transparent !important; 
+        }
+        #exportAllIndicationsContainer .status-pending { color: #f59e0b; } 
+        #exportAllIndicationsContainer .status-watched { color: #10b981; } 
+        #exportAllIndicationsContainer .status-sorted { color: #3b82f6; }  
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white min-h-screen flex flex-col items-center p-4 sm:p-6 md:p-8">
@@ -223,7 +173,7 @@
     <div id="genreRevealModal" class="modal-overlay hidden">
         <div class="modal-content">
             <h3 id="genreRevealParticipantNameModalTitle" class="text-2xl font-semibold text-indigo-400 mb-4"></h3>
-            <div class="relative w-48 h-48 sm:w-56 sm:h-56 mx-auto mb-4 bg-slate-700/50 rounded-lg flex items-center justify-center overflow-hidden shadow-xl">
+            <div class="relative w-48 h-48 sm:w-56 sm:h-56 mx-auto mb-4 bg-slate-700/50 rounded-lg flex items-center justify-content: center; overflow: hidden; shadow-xl">
                 <img id="genreRevealIconImg" src="" alt="Ícone do Gênero" class="max-w-full max-h-full object-contain p-2">
             </div>
             <p id="genreRevealNameText" class="text-3xl sm:text-4xl font-bold text-green-400 mb-2"></p>
@@ -283,10 +233,31 @@
                     </button>
                 </div>
             </div>
-            <div>
+            <div class="mb-6">
                 <h3 class="text-lg font-medium text-indigo-300 mb-2">Bingos Salvos</h3>
                 <div id="savedGamesList" class="space-y-2 max-h-60 overflow-y-auto pr-2">
                     <p class="text-slate-400">Nenhum bingo salvo ainda.</p>
+                </div>
+            </div>
+
+            <!-- Backup and Restore Section -->
+            <div class="mt-8 pt-6 border-t border-slate-700">
+                <h3 class="text-lg font-medium text-indigo-300 mb-3">Backup e Restauração de Dados</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="importFileInput" class="block text-sm font-medium text-slate-300 mb-1 w-full text-left sm:text-left">Importar Dados de Bingos (arquivo .json):</label>
+                        <div class="flex flex-col items-end sm:flex-row sm:items-center gap-3">
+                            <input type="file" id="importFileInput" accept=".json" class="w-full sm:flex-grow p-0 text-sm text-slate-300 rounded-lg bg-slate-700 border border-slate-600 file:mr-3 file:py-2.5 file:px-4 file:rounded-l-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500">
+                            <button id="importGamesButton" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-5 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <span role="img" aria-label="importar" class="mr-2 text-lg">📥</span> Importar
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <button id="exportAllGamesButton" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-lg flex items-center justify-center">
+                            <span role="img" aria-label="exportar" class="mr-2 text-lg">📤</span> Exportar Todos os Dados
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -314,11 +285,14 @@
                 <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-yellow-400 flex items-center"><span role="img" aria-label="caneta" class="mr-3 text-2xl">✏️</span> Fase de Indicações de Anime</h2>
                 <div id="indicationTabs" class="flex border-b border-slate-700 mb-4 overflow-x-auto"></div>
                 <div id="indicationContent" class="space-y-4"></div>
-                <button id="goToAnimeDrawPhaseButton" class="w-full mt-6 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg text-lg flex items-center justify-center hidden"><span role="img" aria-label="televisão" class="mr-2 text-xl">📺</span> Iniciar Sorteio Inicial de Animes</button>
+                <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                    <button id="exportIndicationsButton" class="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">Exportar Indicações Atuais</button>
+                    <button id="goToAnimeDrawPhaseButton" class="w-full sm:flex-grow bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg text-lg flex items-center justify-center hidden"><span role="img" aria-label="televisão" class="mr-2 text-xl">📺</span> Iniciar Sorteio de Animes</button>
+                </div>
             </section>
             
             <section id="animeDrawPhaseSection" class="hidden">
-                 <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-purple-400 flex items-center"><span role="img" aria-label="televisão" class="mr-3 text-2xl">📺</span> Sorteio Inicial de Anime para Assistir</h2>
+                 <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-purple-400 flex items-center"><span role="img" aria-label="televisão" class="mr-3 text-2xl">📺</span> Sorteio de Anime para Assistir</h2>
                  <div id="participantsToDrawAnimeList" class="space-y-3"></div>
                  <button id="goToWatchLoopButton" class="w-full mt-6 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg flex items-center justify-center hidden"><span role="img" aria-label="olhos" class="mr-2 text-xl">👀</span> Iniciar Acompanhamento</button>
             </section>
@@ -326,7 +300,10 @@
             <section id="watchLoopPhaseSection" class="hidden"> 
                 <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-teal-400 flex items-center"><span role="img" aria-label="olhos" class="mr-3 text-2xl">👀</span> Acompanhamento de Animes</h2>
                 <div id="watchLoopContent" class="space-y-6"></div> 
-                <button id="exportWatchListButton" class="mt-6 bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">Exportar Lista de Animes para Assistir</button>
+                <div class="mt-6 flex flex-col sm:flex-row flex-wrap gap-3">
+                    <button id="exportWatchListButton" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">Exportar Lista para Assistir</button>
+                    <button id="exportFullIndicationHistoryButton" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">Exportar Histórico de Indicações</button>
+                </div>
                  <p id="allAnimesWatchedMessage" class="text-center text-2xl font-bold text-green-400 mt-8 hidden">🎉 Todos os participantes assistiram todas as suas indicações! 🎉</p>
             </section>
             <hr class="my-8 border-slate-700">
@@ -397,6 +374,7 @@
             id: null, 
             name: "Anime Bingo",
             createdAt: null,
+            userId: null, 
             gameMode: 'infinito', 
             currentPhase: PHASES.REGISTRATION, 
             participants: [],
@@ -412,16 +390,18 @@
 
         let participantNameInput, addParticipantButton, participantsListDiv, goToIndividualDrawButton, maxParticipantsWarning,
             registrationPhaseSection, individualDrawPhaseSection, participantsToDrawListDiv, drawnParticipantsListDiv,
-            goToIndicationPhaseButton, indicationPhaseSection, indicationTabsDiv, indicationContentDiv, goToAnimeDrawPhaseButton,
+            goToIndicationPhaseButton, indicationPhaseSection, indicationTabsDiv, indicationContentDiv, goToAnimeDrawPhaseButton, exportIndicationsButton,
             animeDrawPhaseSection, participantsToDrawAnimeListDiv, goToWatchLoopButton, 
             watchLoopPhaseSection, watchLoopContentDiv, allAnimesWatchedMessage, 
             resetGameButton, genreGridFooterDiv, userIdDisplay, footerUserId,
             customAlertDiv, alertIconSpan, alertMessageContentSpan, alertCloseButton, alertConfirmButtonsDiv, alertCancelBtn, alertConfirmBtn,
-            genreRevealModal, genreRevealParticipantNameModalTitle, genreRevealIconContainer, genreRevealIconImg, /* genreRevealOverlayNameText, */ genreRevealNameText, genreRevealNumberText, closeGenreRevealModalButton, 
+            genreRevealModal, genreRevealParticipantNameModalTitle, genreRevealIconContainer, genreRevealIconImg, genreRevealNameText, genreRevealNumberText, closeGenreRevealModalButton, 
             animeRevealModal, animeRevealParticipantName, animeRevealCover, animeRevealTitleLink, animeRevealIndicator, closeAnimeRevealModalButton, 
             gameManagementSection, newGameNameInput, newGameModeSelect, createNewGameButton, savedGamesListDiv, actualGameContentDiv, currentGameNameDisplay, switchGameButton,
             searchResultsModal, searchResultsListDiv, closeSearchResultsModalButton, animeRevealScore, 
-            toggleGenreLegendButton, genreLegendContainer, exportWatchListButton; 
+            toggleGenreLegendButton, genreLegendContainer, exportWatchListButton, exportFullIndicationHistoryButton,
+            importFileInput, importGamesButton, exportAllGamesButton;
+            // saveProgressWatchLoopButton removed
         let currentAlertResolve = null;
         let currentSearchContext = null; 
 
@@ -440,7 +420,7 @@
         }
 
         function saveCurrentGameToAllGames() {
-            if (allGamesData.activeGameId && gameState && Object.keys(gameState).length > 0) { 
+            if (allGamesData.activeGameId && gameState && gameState.id === allGamesData.activeGameId) { 
                 allGamesData.games[allGamesData.activeGameId] = { ...gameState }; 
                 saveAllGamesData();
             }
@@ -469,13 +449,15 @@
                     receivedIndications: p.receivedIndications || [],
                     animeToWatch: p.animeToWatch || null,
                     genreHistory: p.genreHistory || [], 
-                    currentAssignedGenre: p.currentAssignedGenre || p.assignedGenre,
+                    currentAssignedGenre: p.currentAssignedGenre || p.assignedGenre, 
                     watchedAnimesHistory: p.watchedAnimesHistory || [] 
                 }));
                 gameState.assignedGenreNames = gameState.assignedGenreNames || [];
+                gameState.gameMode = gameState.gameMode || 'infinito'; 
+                gameState.userId = gameState.userId || generateUUID(); 
             } else {
                 allGamesData.activeGameId = null; 
-                gameState = { ...BASE_GAME_INSTANCE_STATE, userId: generateUUID() }; 
+                gameState = {}; 
             }
         }
 
@@ -514,7 +496,7 @@
             drawnParticipantsListDiv.innerHTML = '';
             let participantsYetToDraw = 0;
             gameState.participants.forEach(p => {
-                if (!p.assignedGenre) { // Verifica se o gênero INICIAL já foi sorteado
+                if (!p.assignedGenre) { 
                     participantsYetToDraw++;
                     const div = document.createElement('div');
                     div.className = 'flex items-center justify-between bg-slate-700 p-3 rounded-lg shadow';
@@ -541,7 +523,6 @@
             genreRevealParticipantNameModalTitle.textContent = `Sorteio para ${participantName}!`; 
             genreRevealIconImg.src = genre.imageUrl || PLACEHOLDER_IMG_150x225; 
             genreRevealIconImg.alt = genre.name;
-            // genreRevealOverlayNameText.textContent = ""; // Garantido que está vazio
             genreRevealNameText.textContent = genre.name;
             genreRevealNumberText.textContent = genre.drawnNumber;
             genreRevealModal.classList.remove('hidden');
@@ -692,7 +673,7 @@
                 return;
             }
             results.forEach(anime => {
-                const title = anime.title || anime.title_english || anime.title_japanese || "Título Desconhecido"; // Prioriza title (Romaji/Principal)
+                const title = anime.title || anime.title_english || anime.title_japanese || "Título Desconhecido"; 
                 const imageUrl = anime.images?.jpg?.small_image_url || PLACEHOLDER_IMG_SEARCH_RESULT;
                 const score = anime.score ? `<span class="score-badge">${anime.score.toFixed(2)}</span>` : '<span class="text-xs text-slate-400">N/A</span>';
                 const typeYear = `${anime.type || ''}${anime.year ? ' (' + anime.year + ')' : ''}`;
@@ -737,7 +718,7 @@
                 const response = await fetch(`https://api.jikan.moe/v4/anime/${malId}`);
                 if (!response.ok) { const err = await response.json(); throw new Error(`Jikan Detail API: ${response.status} - ${err.message || 'Erro'}`);}
                 const data = await response.json(); const animeData = data.data;
-                const animeTitle = animeData.title || animeData.title_english || animeData.title_japanese || 'Título Desconhecido'; // Prioriza title (Romaji/Principal)
+                const animeTitle = animeData.title || animeData.title_english || animeData.title_japanese || 'Título Desconhecido'; 
                 const animeImageUrl = animeData.images?.jpg?.large_image_url || animeData.images?.jpg?.image_url || PLACEHOLDER_IMG_60x90;
                 const score = animeData.score || null; 
 
@@ -1010,7 +991,7 @@
                  availableGenresForNewDraw = initialGenres; 
             }
             if (availableGenresForNewDraw.length === 0) { 
-                showAlert(`Todos os gêneros já foram sorteados para ${participant.name}! Ele finalizou o Anime Bingo!`, "success", 5000);
+                showAlert(`Todos os gêneros já foram sorteados para ${participant.name}! Ele finalizou o bingo!`, "success", 5000);
                 participant.currentAssignedGenre = null; 
                 renderApp(); 
                 return;
@@ -1073,7 +1054,7 @@
                     overlayHTML = `
                         <div class="genre-participant-overlay">
                             <span class="name">${names}</span>
-                            <span class="tag">SORTEADO</span> 
+                            <span class="tag">ATIVO</span>
                         </div>`;
                 }
                 
@@ -1088,7 +1069,7 @@
         }
 
         function renderApp() {
-            if (!allGamesData.activeGameId) {
+            if (!allGamesData.activeGameId || !gameState || Object.keys(gameState).length === 0) { 
                 gameManagementSection.classList.remove('hidden');
                 actualGameContentDiv.classList.add('hidden');
                 renderGameManagementScreen();
@@ -1115,8 +1096,13 @@
             else if (gameState.currentPhase === PHASES.ANIME_DRAW_SELECTION) renderAnimeDrawPhase();
             else if (gameState.currentPhase === PHASES.WATCH_LOOP) renderWatchLoopPhase();
             
-            if (allGamesData.activeGameId) { userIdDisplay.textContent = `ID do Bingo: ${allGamesData.activeGameId}`; footerUserId.textContent = `ID do Bingo: ${allGamesData.activeGameId}`; }
-            else { userIdDisplay.textContent = ''; footerUserId.textContent = ''; }
+            if (allGamesData.activeGameId && gameState.id) { 
+                userIdDisplay.textContent = `ID do Bingo: ${gameState.id}`; 
+                footerUserId.textContent = `ID do Bingo: ${gameState.id}`; 
+            } else { 
+                userIdDisplay.textContent = ''; 
+                footerUserId.textContent = ''; 
+            }
             
             if (genreLegendContainer && !genreLegendContainer.classList.contains('hidden')) {
                  renderGenreGridFooter();
@@ -1167,7 +1153,7 @@
             participant.genreHistory.push(chosenGenre.name); 
 
             gameState.assignedGenreNames.push({participantId: participant.id, genreName: chosenGenre.name}); 
-            showGenreRevealModal(participant.name, { ...chosenGenre, drawnNumber, imageUrl: chosenGenre.imageUrl }); 
+            showGenreRevealModal(participant.name, { ...chosenGenre, drawnNumber: newDrawnNumber, imageUrl: chosenNewGenre.imageUrl }); 
             renderApp(); 
         }
         
@@ -1193,16 +1179,15 @@
                         name: allGamesData.games[currentGameId].name, 
                         gameMode: allGamesData.games[currentGameId].gameMode || 'infinito', 
                         createdAt: allGamesData.games[currentGameId].createdAt, 
-                        userId: allGamesData.games[currentGameId].userId,
+                        userId: allGamesData.games[currentGameId].userId || generateUUID(), 
                         participants: currentParticipantsData, 
-                        currentPhase: PHASES.REGISTRATION 
+                        currentPhase: PHASES.REGISTRATION,
+                        assignedGenreNames: [] 
                     };
-                    allGamesData.games[currentGameId].assignedGenreNames = [];
-
-
+                    
                     gameState = { ...allGamesData.games[currentGameId] };
-                    showAlert("Bingo reiniciado! Os participantes foram mantidos. Prossiga para o sorteio de gêneros.", "success", 4000);
-                    renderApp();
+                    showAlert("Bingo reiniciado! Os participantes foram mantidos. Prossiga para o sorteio de gêneros.", "success", 4000); 
+                    renderApp(); 
                 } else {
                     showAlert("Nenhum bingo ativo para reiniciar.", "error");
                 }
@@ -1226,7 +1211,7 @@
             allGamesData.activeGameId = newGameId;
             gameState = { ...newGame }; 
             newGameNameInput.value = '';
-            showAlert(`Bingo "${gameName}" (${gameMode}) criado e carregado!`, "success");
+            showAlert(`Bingo "${gameName}" (Modo: ${gameMode}) criado e carregado!`, "success");
             saveAllGamesData(); 
             renderApp(); 
         }
@@ -1234,24 +1219,22 @@
         function loadSelectedGame(gameId) {
             if (allGamesData.games[gameId]) {
                 allGamesData.activeGameId = gameId;
-                gameState = { ...allGamesData.games[gameId] };
-                gameState.participants = (gameState.participants || []).map(p => ({
-                    ...p,
-                    receivedIndications: p.receivedIndications || [],
-                    animeToWatch: p.animeToWatch || null,
-                    genreHistory: p.genreHistory || [], 
-                    currentAssignedGenre: p.currentAssignedGenre || p.assignedGenre,
-                    watchedAnimesHistory: p.watchedAnimesHistory || []
-                }));
-                gameState.assignedGenreNames = gameState.assignedGenreNames || [];
-                gameState.gameMode = gameState.gameMode || 'infinito'; 
-                showAlert(`Bingo "${gameState.name}" carregado!`, "success");
-                saveAllGamesData(); 
+                loadAllGamesData(); 
+                showAlert(`Bingo "${gameState.name || 'Desconhecido'}" carregado!`, "success");
+                const tempActiveGameId = allGamesData.activeGameId; 
+                loadAllGamesData(); 
+                if (allGamesData.activeGameId !== tempActiveGameId || !allGamesData.games[gameId]) {
+                    saveAllGamesData();
+                } else {
+                     allGamesData.activeGameId = gameId; 
+                     saveAllGamesData();
+                }
                 renderApp();
             } else {
-                showAlert("Erro ao carregar o bingo.", "error");
+                showAlert("Erro ao carregar o bingo. ID não encontrado.", "error");
             }
         }
+
 
         function deleteGame(gameId) {
             const gameToDelete = allGamesData.games[gameId];
@@ -1275,6 +1258,8 @@
             actualGameContentDiv.classList.add('hidden');
             gameManagementSection.classList.remove('hidden');
             currentGameNameDisplay.textContent = 'Gerenciador de Bingos';
+            userIdDisplay.textContent = ''; 
+            footerUserId.textContent = '';
             savedGamesListDiv.innerHTML = '';
             const gameIds = Object.keys(allGamesData.games);
             if (gameIds.length === 0) {
@@ -1323,12 +1308,12 @@
                     
                     listContentHTML += `
                         <div style="padding: 16px 0; border-bottom: 1px solid #334155; margin-bottom: 16px;">
-                            <h4 style="font-size: 1.5rem; font-weight: 600; color: #a5b4fc; margin-bottom: 12px;">${participant.name} ${genreDisplay}</h4>
-                            <div style="display: flex; align-items: flex-start; gap: 20px; margin-left: 12px; padding-top: 8px;">
-                                <img src="${participant.animeToWatch.animeImageUrl || PLACEHOLDER_IMG_60x90}" alt="Capa" style="width: 75px; height: 112px; object-fit: cover; border-radius: 4px; flex-shrink: 0; border: 1px solid #475569;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_60x90}'">
+                            <h4 style="font-size: 1.5rem; font-weight: 600; color: #a5b4fc; margin-bottom: 16px;">${participant.name} ${genreDisplay}</h4>
+                            <div style="display: flex; align-items: center; gap: 20px; margin-left: 12px; padding-top: 8px;">
+                                <img src="${participant.animeToWatch.animeImageUrl || PLACEHOLDER_IMG_60x90}" alt="Capa" style="width: 80px; height: 120px; object-fit: cover; border-radius: 4px; flex-shrink: 0; border: 1px solid #475569;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_60x90}'">
                                 <div style="text-align: left; padding-top: 4px;">
-                                    <p style="font-size: 1.25rem; color: #f1f5f9; font-weight: 500; margin-bottom: 6px;">${participant.animeToWatch.animeTitle}</p>
-                                    <p style="font-size: 1rem; color: #cbd5e1;">Indicado por: ${participant.animeToWatch.indicatorName}</p>
+                                    <p style="font-size: 1.3rem; color: #f1f5f9; font-weight: 500; margin-bottom: 8px;">${participant.animeToWatch.animeTitle}</p>
+                                    <p style="font-size: 1.1rem; color: #cbd5e1;">Indicado por: ${participant.animeToWatch.indicatorName}</p>
                                 </div>
                             </div>
                         </div>`;
@@ -1362,6 +1347,238 @@
                     document.body.removeChild(exportContentDiv);
                 }
             });
+        }
+
+        function exportIndicationsList(exportType) {
+            const containerId = 'exportAllIndicationsContainer';
+            let existingContainer = document.getElementById(containerId);
+            if (existingContainer) {
+                existingContainer.remove();
+            }
+
+            const exportContentDiv = document.createElement('div');
+            exportContentDiv.id = containerId;
+            exportContentDiv.style.width = '800px'; 
+            exportContentDiv.style.padding = '20px';
+            exportContentDiv.style.backgroundColor = '#0f172a';
+            exportContentDiv.style.color = '#e2e8f0';
+            exportContentDiv.style.borderRadius = '8px';
+            exportContentDiv.style.border = '1px solid #38bdf8';
+            exportContentDiv.style.fontFamily = "'Inter', sans-serif";
+            exportContentDiv.style.position = 'absolute';
+            exportContentDiv.style.left = '-9999px';
+            document.body.appendChild(exportContentDiv);
+
+            const titleText = exportType === 'current' ? "Indicações Atuais para os Gêneros Ativos" : "Histórico Completo de Todas as Indicações";
+            let listContentHTML = `<h3 style="font-size: 1.75rem; font-weight: 700; color: #38bdf8; text-align: center; margin-bottom: 1rem; padding-bottom: 0.5rem;">${titleText}</h3>`;
+            let hasAnyIndications = false;
+
+            gameState.participants.forEach(receiver => {
+                let receiverIndicationsHTML = '';
+                let hasIndicationsForThisReceiver = false;
+
+                const indicationsByGenre = {};
+                (receiver.receivedIndications || []).forEach(ind => { 
+                    if (exportType === 'current' && ind.status !== 'pending') return; 
+                    if (exportType === 'current' && ind.genreContext !== receiver.currentAssignedGenre) return; 
+
+                    if (!indicationsByGenre[ind.genreContext]) {
+                        indicationsByGenre[ind.genreContext] = [];
+                    }
+                    indicationsByGenre[ind.genreContext].push(ind);
+                });
+
+                Object.keys(indicationsByGenre).forEach(genreCtx => {
+                    if (indicationsByGenre[genreCtx].length > 0) {
+                        hasIndicationsForThisReceiver = true;
+                        hasAnyIndications = true;
+                        const genreDetails = initialGenres.find(g => g.name === genreCtx);
+                        const genreImgHTML = genreDetails ? `<img src="${genreDetails.imageUrl}" alt="${genreDetails.name}" style="width: 20px; height: 20px; object-fit: contain; margin-right: 8px; display: inline-block; vertical-align: middle;">` : '';
+                        
+                        receiverIndicationsHTML += `<div class="genre-title-export" style="font-size: 1.1rem; font-weight: 600; color: #818cf8; margin-top: 0.75rem; margin-bottom: 0.5rem;">${genreImgHTML}${genreCtx || 'Gênero Desconhecido'}</div>`;
+                        
+                        const indicationsByIndicator = {};
+                        indicationsByGenre[genreCtx].forEach(ind => {
+                            if (!indicationsByIndicator[ind.indicatorName]) {
+                                indicationsByIndicator[ind.indicatorName] = [];
+                            }
+                            indicationsByIndicator[ind.indicatorName].push(ind);
+                        });
+
+                        Object.keys(indicationsByIndicator).forEach(indicatorName => {
+                            receiverIndicationsHTML += `<div class="indicator-block" style="margin-left: 1rem; margin-bottom: 0.5rem;">
+                                                            <p class="indicator-name" style="font-size: 1rem; color: #9ca3af; margin-bottom: 0.25rem;">Indicado por: ${indicatorName}</p>
+                                                            <ul style="list-style: none; padding-left: 0;">`;
+                            indicationsByIndicator[indicatorName].forEach(ind => {
+                                let statusTagHTML = '';
+                                const isCurrentAnimeToWatch = receiver.animeToWatch && receiver.animeToWatch.malId === ind.malId && receiver.animeToWatch.indicatorId === ind.indicatorId && receiver.animeToWatch.genreContext === ind.genreContext;
+
+                                if (exportType === 'history') {
+                                    if (isCurrentAnimeToWatch) {
+                                         statusTagHTML = `<span class="status-tag status-sorted">🎲</span>`;
+                                    } else if (ind.status === 'watched') {
+                                        statusTagHTML = `<span class="status-tag status-watched">✅</span>`;
+                                    } else if (gameState.gameMode === 'tradicional' && ind.status === 'pending') { 
+                                        statusTagHTML = `<span class="status-tag status-pending">⏳</span>`;
+                                    }
+                                } else if (exportType === 'current' && gameState.gameMode === 'tradicional' && ind.status === 'pending') {
+                                     statusTagHTML = `<span class="status-tag status-pending">⏳</span>`;
+                                }
+                                
+
+                                receiverIndicationsHTML += `
+                                    <li class="indicated-anime-item" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; font-size: 1rem; color: #e2e8f0;">
+                                        <img src="${ind.animeImageUrl || PLACEHOLDER_IMG_SEARCH_RESULT}" alt="Capa" style="width: 40px; height: 60px; object-fit: cover; border-radius: 0.125rem; flex-shrink: 0;">
+                                        <span>${ind.animeTitle} ${statusTagHTML}</span>
+                                    </li>`;
+                            });
+                            receiverIndicationsHTML += `</ul></div>`;
+                        });
+                    }
+                });
+                
+                if (hasIndicationsForThisReceiver) {
+                    listContentHTML += `<div class="receiver-block" style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px dashed #475569;">
+                                            <h4 class="receiver-name" style="font-size: 1.35rem; font-weight: 600; color: #a5b4fc; margin-bottom: 0.75rem;">${receiver.name}</h4>
+                                            ${receiverIndicationsHTML}
+                                        </div>`;
+                }
+            });
+
+
+            if (!hasAnyIndications) {
+                listContentHTML += `<p style="font-size: 1.125rem; text-align: center; color: #94a3b8; margin-top: 1rem;">Nenhuma indicação encontrada para os critérios atuais.</p>`;
+            }
+
+            exportContentDiv.innerHTML = listContentHTML;
+
+            html2canvas(exportContentDiv, { 
+                backgroundColor: '#0f172a', 
+                useCORS: true, 
+                scale: 1.5 
+            }).then(canvas => {
+                const imageURL = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = imageURL;
+                const filename = exportType === 'current' ? `indicacoes_atuais_${gameState.name.replace(/\s+/g, '_') || 'bingo'}.png` : `historico_indicacoes_${gameState.name.replace(/\s+/g, '_') || 'bingo'}.png`;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showAlert("Lista de indicações exportada como imagem!", "success");
+            }).catch(error => {
+                console.error("Erro ao exportar imagem de indicações:", error);
+                showAlert("Erro ao exportar imagem de indicações. Verifique o console.", "error");
+            }).finally(() => {
+                 if (document.getElementById(containerId)) {
+                    document.body.removeChild(exportContentDiv);
+                }
+            });
+        }
+
+        // Backup and Restore Functions
+        function handleExportAllGamesData() {
+            try {
+                saveCurrentGameToAllGames(); 
+
+                const dataStr = JSON.stringify(allGamesData, null, 2); 
+                const blob = new Blob([dataStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                const date = new Date().toISOString().slice(0, 10); 
+                a.download = `anime_bingo_dados_${date}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showAlert("Todos os dados dos bingos foram exportados!", "success");
+            } catch (error) {
+                console.error("Erro ao exportar dados:", error);
+                showAlert("Erro ao exportar dados. Verifique o console.", "error");
+            }
+        }
+
+        async function handleImportGamesData() {
+            if (!importFileInput || !importFileInput.files || importFileInput.files.length === 0) {
+                showAlert("Nenhum arquivo selecionado para importação.", "info");
+                return;
+            }
+
+            const file = importFileInput.files[0];
+            if (file.type !== "application/json") {
+                showAlert("Por favor, selecione um arquivo .json válido.", "error");
+                importFileInput.value = ''; 
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const importedJson = event.target.result;
+                    const importedData = JSON.parse(importedJson);
+
+                    if (typeof importedData !== 'object' || importedData === null ||
+                        typeof importedData.games !== 'object' || importedData.games === null ||
+                        !importedData.hasOwnProperty('activeGameId')) {
+                        showAlert("Arquivo JSON inválido ou formato de dados incorreto.", "error");
+                        importFileInput.value = '';
+                        return;
+                    }
+
+                    for (const gameId in importedData.games) {
+                        const game = importedData.games[gameId];
+                        if (typeof game !== 'object' || game === null ||
+                            !game.hasOwnProperty('id') || !game.hasOwnProperty('name') ||
+                            !game.hasOwnProperty('currentPhase') || !game.hasOwnProperty('participants')) {
+                            showAlert(`Jogo com ID ${gameId} no arquivo importado tem formato inválido. Importação cancelada.`, "error", 5000);
+                            importFileInput.value = '';
+                            return;
+                        }
+                        game.participants = (game.participants || []).map(p => {
+                             if (typeof p !== 'object' || p === null || !p.hasOwnProperty('id') || !p.hasOwnProperty('name')) {
+                                throw new Error(`Participante inválido no jogo ID ${gameId}`);
+                            }
+                            return {
+                                ...p,
+                                receivedIndications: p.receivedIndications || [],
+                                animeToWatch: p.animeToWatch || null,
+                                genreHistory: p.genreHistory || [],
+                                currentAssignedGenre: p.currentAssignedGenre || p.assignedGenre, 
+                                watchedAnimesHistory: p.watchedAnimesHistory || []
+                            };
+                        });
+                        game.gameMode = game.gameMode || 'infinito';
+                        game.assignedGenreNames = game.assignedGenreNames || [];
+                        game.userId = game.userId || generateUUID(); 
+                        game.createdAt = game.createdAt || new Date().toISOString();
+                    }
+                    
+                    if (importedData.activeGameId && !importedData.games[importedData.activeGameId]) {
+                        importedData.activeGameId = null;
+                    }
+
+                    allGamesData = importedData;
+                    saveAllGamesData(); 
+                    
+                    loadAllGamesData(); 
+
+                    showAlert("Dados importados com sucesso! O aplicativo será atualizado.", "success", 4000);
+                    importFileInput.value = ''; 
+                    renderApp(); 
+
+                } catch (error) {
+                    console.error("Erro ao importar dados:", error);
+                    showAlert(`Erro ao ler ou processar o arquivo: ${error.message}`, "error");
+                    importFileInput.value = '';
+                }
+            };
+
+            reader.onerror = () => {
+                showAlert("Erro ao ler o arquivo selecionado.", "error");
+                importFileInput.value = '';
+            };
+            reader.readAsText(file);
         }
 
 
@@ -1403,7 +1620,6 @@
             genreRevealParticipantNameModalTitle = document.getElementById('genreRevealParticipantNameModalTitle'); 
             genreRevealIconContainer = document.getElementById('genreRevealIconContainer'); 
             genreRevealIconImg = document.getElementById('genreRevealIconImg'); 
-            // genreRevealOverlayNameText foi removido do HTML do modal
             genreRevealNameText = document.getElementById('genreRevealNameText'); 
             genreRevealNumberText = document.getElementById('genreRevealNumberText'); 
             closeGenreRevealModalButton = document.getElementById('closeGenreRevealModalButton');
@@ -1427,6 +1643,14 @@
             closeSearchResultsModalButton = document.getElementById('closeSearchResultsModalButton');
             toggleGenreLegendButton = document.getElementById('toggleGenreLegendButton'); 
             genreLegendContainer = document.getElementById('genreLegendContainer'); 
+            exportIndicationsButton = document.getElementById('exportIndicationsButton'); 
+            exportFullIndicationHistoryButton = document.getElementById('exportFullIndicationHistoryButton'); 
+            // saveProgressWatchLoopButton removed from here
+
+            importFileInput = document.getElementById('importFileInput');
+            importGamesButton = document.getElementById('importGamesButton');
+            exportAllGamesButton = document.getElementById('exportAllGamesButton');
+
 
             if (alertCloseButton) alertCloseButton.onclick = () => { customAlertDiv.classList.add('hidden'); if (currentAlertResolve) { currentAlertResolve(false); currentAlertResolve = null; } };
             if (alertCancelBtn) alertCancelBtn.onclick = () => { customAlertDiv.classList.add('hidden'); if (currentAlertResolve) { currentAlertResolve(false); currentAlertResolve = null; } };
@@ -1454,6 +1678,9 @@
                 };
             }
             if(exportWatchListButton) exportWatchListButton.onclick = exportAnimeWatchList;
+            if(exportIndicationsButton) exportIndicationsButton.onclick = () => exportIndicationsList('current');
+            if(exportFullIndicationHistoryButton) exportFullIndicationHistoryButton.onclick = () => exportIndicationsList('history');
+            // Event listener for saveProgressWatchLoopButton removed
 
 
             if (addParticipantButton) addParticipantButton.onclick = handleAddParticipant;
@@ -1479,6 +1706,9 @@
                 saveAllGamesData(); 
                 renderApp(); 
             };
+
+            if (importGamesButton) importGamesButton.onclick = handleImportGamesData;
+            if (exportAllGamesButton) exportAllGamesButton.onclick = handleExportAllGamesData;
 
             loadAllGamesData(); 
             renderApp(); 
