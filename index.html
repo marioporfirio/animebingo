@@ -380,31 +380,39 @@
             const savedData = localStorage.getItem(ALL_GAMES_STORAGE_KEY);
             if (savedData) {
                 const parsedData = JSON.parse(savedData);
-                allGamesData = {
-                    ...{ activeGameId: null, games: {} }, 
-                    ...parsedData
+                allGamesData = { 
+                    activeGameId: null, 
+                    games: {}, 
+                    ...parsedData 
                 };
-                if (!allGamesData.games) allGamesData.games = {};
+                if (!allGamesData.games) {
+                    allGamesData.games = {};
+                }
             } else {
                 allGamesData = { activeGameId: null, games: {} };
             }
 
             if (allGamesData.activeGameId && allGamesData.games[allGamesData.activeGameId]) {
+                const gameToLoad = allGamesData.games[allGamesData.activeGameId];
                 gameState = { 
                     ...BASE_GAME_INSTANCE_STATE, 
-                    ...allGamesData.games[allGamesData.activeGameId] 
+                    ...gameToLoad
                 };
-                gameState.participants = (gameState.participants || []).map(p => ({
-                    ...p,
-                    receivedIndications: p.receivedIndications || [],
-                    animeToWatch: p.animeToWatch || null,
-                    genreHistory: p.genreHistory || [], 
-                    currentAssignedGenre: p.currentAssignedGenre || p.assignedGenre, 
-                    watchedAnimesHistory: p.watchedAnimesHistory || [] 
+                gameState.participants = (gameToLoad.participants || []).map(p => ({
+                    id: p.id || generateUUID(),
+                    name: p.name || "Participante Desconhecido",
+                    assignedGenre: p.assignedGenre || null,
+                    genreDrawNumber: p.genreDrawNumber || null,
+                    currentAssignedGenre: p.currentAssignedGenre || p.assignedGenre || null, 
+                    genreHistory: Array.isArray(p.genreHistory) ? [...p.genreHistory] : [], 
+                    animeToWatch: p.animeToWatch ? {...p.animeToWatch} : null, 
+                    receivedIndications: Array.isArray(p.receivedIndications) ? p.receivedIndications.map(ind => ({...ind})) : [], 
+                    watchedAnimesHistory: Array.isArray(p.watchedAnimesHistory) ? p.watchedAnimesHistory.map(hist => ({...hist})) : []
                 }));
-                gameState.assignedGenreNames = gameState.assignedGenreNames || [];
-                gameState.gameMode = gameState.gameMode || 'infinito'; 
-                gameState.userId = gameState.userId || generateUUID(); 
+                gameState.assignedGenreNames = Array.isArray(gameToLoad.assignedGenreNames) ? [...gameToLoad.assignedGenreNames] : [];
+                gameState.gameMode = gameToLoad.gameMode || 'infinito'; 
+                gameState.currentPhase = gameToLoad.currentPhase || PHASES.REGISTRATION;
+                gameState.currentIndicatorTabId = gameToLoad.currentIndicatorTabId || (gameState.participants[0]?.id || null);
             } else {
                 allGamesData.activeGameId = null; 
                 gameState = {}; 
@@ -426,7 +434,6 @@
         }
         async function showConfirmAlert(message) { showAlert(message, 'custom_confirm', Infinity); return new Promise(resolve => currentAlertResolve = resolve); }
 
-        // Função para pré-carregar imagens e garantir acessibilidade para html2canvas
         function ensureImageIsAccessible(src, placeholderOnError) {
             return new Promise((resolve) => {
                 if (!src || src.startsWith('https://placehold.co') || src.startsWith('data:image/png;base64')) {
@@ -434,11 +441,11 @@
                     return;
                 }
                 const img = new Image();
-                img.crossOrigin = 'anonymous'; // Essencial para html2canvas com useCORS:true
-                img.onload = () => resolve(src); // Sucesso, imagem está no cache e acessível
+                img.crossOrigin = 'anonymous'; 
+                img.onload = () => resolve(src); 
                 img.onerror = (err) => {
                     console.warn(`Falha ao carregar/verificar CORS para imagem: ${src}. Erro:`, err, `Usando placeholder: ${placeholderOnError}`);
-                    resolve(placeholderOnError); // Falha, usar placeholder
+                    resolve(placeholderOnError); 
                 };
                 img.src = src;
             });
@@ -1186,14 +1193,65 @@
         }
 
         function loadSelectedGame(gameId) {
-            if (allGamesData.games[gameId]) {
-                allGamesData.activeGameId = gameId;
-                loadAllGamesData(); 
-                showAlert(`Bingo "${gameState.name || 'Desconhecido'}" carregado!`, "success");
+            const gameDataFromStorage = allGamesData.games[gameId];
+
+            if (gameDataFromStorage) {
+                allGamesData.activeGameId = gameId; 
+
+                // Use deep copy for the loaded game data
+                const loadedGame = JSON.parse(JSON.stringify(gameDataFromStorage)); 
+                
+                gameState = {
+                    ...BASE_GAME_INSTANCE_STATE, // Start with base defaults
+                    ...loadedGame, // Spread the loaded game data
+                    // Explicitly ensure core properties from loadedGame are used, or fallback to defaults/new if missing
+                    id: loadedGame.id || BASE_GAME_INSTANCE_STATE.id || generateUUID(),
+                    name: loadedGame.name || BASE_GAME_INSTANCE_STATE.name,
+                    createdAt: loadedGame.createdAt || BASE_GAME_INSTANCE_STATE.createdAt || new Date().toISOString(),
+                    userId: loadedGame.userId || BASE_GAME_INSTANCE_STATE.userId || generateUUID(),
+                    gameMode: loadedGame.gameMode || BASE_GAME_INSTANCE_STATE.gameMode,
+                    currentPhase: loadedGame.currentPhase || BASE_GAME_INSTANCE_STATE.currentPhase,
+                };
+                
+                // Ensure nested arrays and objects are properly initialized and copied
+                gameState.participants = (loadedGame.participants || []).map(p_in => {
+                    const participantData = {...p_in}; // Clone participant data
+                    return {
+                        id: participantData.id || generateUUID(),
+                        name: participantData.name || "Participante Desconhecido",
+                        assignedGenre: participantData.assignedGenre || null,
+                        genreDrawNumber: participantData.genreDrawNumber || null,
+                        currentAssignedGenre: participantData.currentAssignedGenre || participantData.assignedGenre || null,
+                        genreHistory: Array.isArray(participantData.genreHistory) ? [...participantData.genreHistory] : [],
+                        animeToWatch: participantData.animeToWatch ? { ...participantData.animeToWatch } : null,
+                        receivedIndications: Array.isArray(participantData.receivedIndications) ? participantData.receivedIndications.map(ind => ({ ...ind })) : [],
+                        watchedAnimesHistory: Array.isArray(participantData.watchedAnimesHistory) ? participantData.watchedAnimesHistory.map(hist => ({ ...hist })) : []
+                    };
+                });
+                
+                gameState.assignedGenreNames = Array.isArray(loadedGame.assignedGenreNames) ? [...loadedGame.assignedGenreNames] : [];
+                
+                // Set currentIndicatorTabId, defaulting if necessary
+                if (gameState.participants.length > 0) {
+                    const isValidTabId = loadedGame.currentIndicatorTabId && gameState.participants.find(p => p.id === loadedGame.currentIndicatorTabId);
+                    gameState.currentIndicatorTabId = isValidTabId ? loadedGame.currentIndicatorTabId : gameState.participants[0].id;
+                } else {
+                    gameState.currentIndicatorTabId = null;
+                }
+
+                // Validate currentPhase
+                if (!Object.values(PHASES).includes(gameState.currentPhase)) {
+                    console.warn(`Fase inválida "${gameState.currentPhase}" carregada para o jogo "${gameState.name}". Redefinindo para REGISTRATION.`);
+                    gameState.currentPhase = PHASES.REGISTRATION;
+                }
+                
+                const displayNameForAlert = gameState.name || "Bingo Carregado";
+                showAlert(`Bingo "${displayNameForAlert}" carregado!`, "success");
+                
                 saveAllGamesData(); 
-                renderApp();
+                renderApp();        
             } else {
-                showAlert("Erro ao carregar o bingo. ID não encontrado.", "error");
+                showAlert("Erro ao carregar o bingo: Jogo não encontrado.", "error");
             }
         }
 
@@ -1232,7 +1290,7 @@
                     const gameItem = document.createElement('div');
                     gameItem.className = 'game-list-item';
                     gameItem.innerHTML = `
-                            <span>${game.name} <em class="text-xs text-slate-400 ml-2">(Modo: ${game.gameMode === 'tradicional' ? 'Tradicional' : 'Infinito'})</em></span>
+                            <span>${game.name || 'Bingo Sem Nome'} <em class="text-xs text-slate-400 ml-2">(Modo: ${game.gameMode === 'tradicional' ? 'Tradicional' : 'Infinito'})</em></span>
                             <div>
                                 <button data-game-id="${id}" class="load-game-button bg-green-600 hover:bg-green-700 text-white text-xs font-semibold py-1 px-2 rounded mr-2">Carregar</button>
                                 <button data-game-id="${id}" class="delete-game-button text-red-400 hover:text-red-300 p-1"><span role="img" aria-label="excluir bingo">🗑️</span></button>
@@ -1254,11 +1312,10 @@
 
                 const exportContentDiv = document.createElement('div');
                 exportContentDiv.id = 'exportImageContainer'; 
-                // Aplicar a classe base para estilos comuns
                 exportContentDiv.className = 'export-base-container';
                 document.body.appendChild(exportContentDiv);
 
-                let listContentHTML = `<h3 style="font-size: 32px; font-weight: 700; color: #38bdf8; margin-bottom: 24px; padding-bottom: 12px; text-align: center; line-height: 1.2;">Lista de Animes para Assistir - ${gameState.name || 'Bingo'}</h3>`;
+                let listContentHTML = `<h3 style="font-family: 'Inter', sans-serif; font-size: 32px; font-weight: 700; color: #38bdf8; margin-bottom: 24px; padding-bottom: 12px; text-align: center; line-height: 1.2; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">Lista de Animes para Assistir - ${gameState.name || 'Bingo'}</h3>`;
                 let hasAnimesToWatch = false;
 
                 const imageLoadPromises = [];
@@ -1275,7 +1332,7 @@
                                     const genreDetails = initialGenres.find(g => g.name === participant.currentAssignedGenre);
                                     participantsRenderData.push({
                                         name: participant.name,
-                                        genreDisplay: genreDetails ? `<span style="font-size: 16px; color: #cbd5e1; margin-left: 8px; line-height: 1.4;">(Gênero Atual: ${genreDetails.name})</span>` : '',
+                                        genreDisplay: genreDetails ? `<span style="font-family: 'Inter', sans-serif; font-size: 16px; color: #cbd5e1; margin-left: 8px; line-height: 1.4; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">(Gênero Atual: ${genreDetails.name})</span>` : '',
                                         animeTitle: participant.animeToWatch.animeTitle,
                                         finalAnimeImageUrl: finalUrl,
                                         indicatorName: participant.animeToWatch.indicatorName
@@ -1285,10 +1342,10 @@
                     }
                 }
 
-                await Promise.all(imageLoadPromises.map(p => p.catch(e => e))); // Esperar por todas as imagens
+                await Promise.all(imageLoadPromises.map(p => p.catch(e => e))); 
 
                 if (!hasAnimesToWatch) {
-                    listContentHTML += '<p style="font-size: 18px; text-align: center; color: #94a3b8; margin-top: 16px; line-height: 1.4;">Nenhum anime sorteado para assistir no momento.</p>';
+                    listContentHTML += '<p style="font-family: \'Inter\', sans-serif; font-size: 18px; text-align: center; color: #94a3b8; margin-top: 16px; line-height: 1.4; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">Nenhum anime sorteado para assistir no momento.</p>';
                 } else {
                     const orderedRenderData = [];
                     gameState.participants.forEach(p => {
@@ -1299,12 +1356,12 @@
                     orderedRenderData.forEach(pData => {
                         listContentHTML += `
                                 <div style="padding: 16px 0; border-bottom: 1px solid #334155; margin-bottom: 16px;">
-                                    <h4 style="font-size: 26px; font-weight: 600; color: #a5b4fc; margin-bottom: 16px; line-height: 1.3;">${pData.name} ${pData.genreDisplay}</h4>
+                                    <h4 style="font-family: 'Inter', sans-serif; font-size: 26px; font-weight: 600; color: #a5b4fc; margin-bottom: 16px; line-height: 1.3; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">${pData.name} ${pData.genreDisplay}</h4>
                                     <div style="display: flex; align-items: center; gap: 20px; margin-left: 12px; padding-top: 8px;">
                                         <img src="${pData.finalAnimeImageUrl}" alt="Capa do anime ${pData.animeTitle}" style="width: 80px; height: 120px; object-fit: cover; border-radius: 4px; flex-shrink: 0; border: 1px solid #475569; overflow: hidden;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_80x120}'">
                                         <div style="text-align: left; padding-top: 4px;">
-                                            <p style="font-size: 22px; color: #f1f5f9; font-weight: 500; margin-bottom: 8px; line-height: 1.3;">${pData.animeTitle}</p>
-                                            <p style="font-size: 18px; color: #cbd5e1; line-height: 1.4;">Indicado por: ${pData.indicatorName}</p>
+                                            <p style="font-family: 'Inter', sans-serif; font-size: 22px; color: #f1f5f9; font-weight: 500; margin-bottom: 8px; line-height: 1.3; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">${pData.animeTitle}</p>
+                                            <p style="font-family: 'Inter', sans-serif; font-size: 18px; color: #cbd5e1; line-height: 1.4; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">Indicado por: ${pData.indicatorName}</p>
                                         </div>
                                     </div>
                                 </div>`;
@@ -1319,7 +1376,7 @@
                 const canvas = await html2canvas(exportContentDiv, { 
                     backgroundColor: '#0f172a', 
                     useCORS: true, 
-                    scale: 2, // Mantido para melhor resolução
+                    scale: 2, 
                     logging: true,
                     windowWidth: exportContentDiv.scrollWidth,
                     windowHeight: exportContentDiv.scrollHeight
@@ -1355,15 +1412,15 @@
 
                 const containerId = 'exportAllIndicationsContainer';
                 let exportContentDiv = document.getElementById(containerId);
-                if (exportContentDiv) exportContentDiv.remove(); // Remove se já existir
+                if (exportContentDiv) exportContentDiv.remove(); 
 
                 exportContentDiv = document.createElement('div');
                 exportContentDiv.id = containerId;
-                exportContentDiv.className = 'export-base-container'; // Aplicar classe base
+                exportContentDiv.className = 'export-base-container'; 
                 document.body.appendChild(exportContentDiv);
 
                 const titleText = exportType === 'current' ? "Indicações Atuais para os Gêneros Ativos" : "Histórico Completo de Todas as Indicações";
-                let listContentHTML = `<h3 style="font-size: 30px; font-weight: 700; color: #38bdf8; text-align: center; margin-bottom: 20px; padding-bottom: 10px; line-height: 1.2;">${titleText} - ${gameState.name || 'Bingo'}</h3>`;
+                let listContentHTML = `<h3 style="font-family: 'Inter', sans-serif; font-size: 30px; font-weight: 700; color: #38bdf8; text-align: center; margin-bottom: 20px; padding-bottom: 10px; line-height: 1.2; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">${titleText} - ${gameState.name || 'Bingo'}</h3>`;
                 let hasAnyIndications = false;
 
                 const allImagePromises = [];
@@ -1429,11 +1486,11 @@
                         const genreIconData = await receiverData.indicationsByGenre[genreCtx].genreIconPromise;
                         const finalGenreIconUrl = genreIconData.finalUrl; 
                         const genreImgHTML = `<img src="${finalGenreIconUrl}" alt="${genreCtx}" style="width: 24px; height: 24px; object-fit: contain; margin-right: 8px; display: inline-block; vertical-align: middle; overflow: hidden; border-radius: 2px;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_20x20}'">`;
-                        receiverBlockHTML += `<div style="font-size: 20px; font-weight: 600; color: #818cf8; margin-top: 12px; margin-bottom: 8px; line-height: 1.3; display: flex; align-items: center;">${genreImgHTML}${genreCtx || 'Gênero Desconhecido'}</div>`;
+                        receiverBlockHTML += `<div style="font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 600; color: #818cf8; margin-top: 12px; margin-bottom: 8px; line-height: 1.3; display: flex; align-items: center; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">${genreImgHTML}${genreCtx || 'Gênero Desconhecido'}</div>`;
 
                         for (const indicatorName of Object.keys(receiverData.indicationsByGenre[genreCtx].indicators)) {
                             receiverBlockHTML += `<div style="margin-left: 16px; margin-bottom: 8px;">
-                                                    <p style="font-size: 16px; font-weight: 500; color: #94a3b8; margin-bottom: 4px; line-height: 1.4;">Indicado por: ${indicatorName}</p>
+                                                    <p style="font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 500; color: #94a3b8; margin-bottom: 4px; line-height: 1.4; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">Indicado por: ${indicatorName}</p>
                                                     <ul style="list-style: none; padding-left: 0;">`;
                             for (const indData of receiverData.indicationsByGenre[genreCtx].indicators[indicatorName]) {
                                 const ind = await indData.animeImagePromise; 
@@ -1444,14 +1501,14 @@
                                                               gameState.participants.find(p=>p.name === receiverData.name)?.animeToWatch.genreContext === ind.genreContext;
 
                                 if (exportType === 'history') {
-                                    if (isCurrentAnimeToWatch) statusTagHTML = `<span style="font-size: 28px; margin-left: 10px; line-height: 1; color: #3b82f6;">🎲</span>`; // Sorteado
-                                    else if (ind.status === 'watched') statusTagHTML = `<span style="font-size: 28px; margin-left: 10px; line-height: 1; color: #10b981;">✅</span>`; // Visto
-                                    else if (gameState.gameMode === 'tradicional' && ind.status === 'pending') statusTagHTML = `<span style="font-size: 28px; margin-left: 10px; line-height: 1; color: #f59e0b;">⏳</span>`; // Pendente (tradicional)
+                                    if (isCurrentAnimeToWatch) statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 28px; margin-left: 10px; line-height: 1; color: #3b82f6; vertical-align: middle;">🎲</span>`; 
+                                    else if (ind.status === 'watched') statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 28px; margin-left: 10px; line-height: 1; color: #10b981; vertical-align: middle;">✅</span>`; 
+                                    else if (gameState.gameMode === 'tradicional' && ind.status === 'pending') statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 28px; margin-left: 10px; line-height: 1; color: #f59e0b; vertical-align: middle;">⏳</span>`; 
                                 } else if (exportType === 'current' && gameState.gameMode === 'tradicional' && ind.status === 'pending') {
-                                    statusTagHTML = `<span style="font-size: 28px; margin-left: 10px; line-height: 1; color: #f59e0b;">⏳</span>`; // Pendente (tradicional)
+                                    statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 28px; margin-left: 10px; line-height: 1; color: #f59e0b; vertical-align: middle;">⏳</span>`; 
                                 }
                                 receiverBlockHTML += `
-                                        <li style="display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 18px; color: #e2e8f0; line-height: 1.4;">
+                                        <li style="display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 18px; color: #e2e8f0; line-height: 1.4; font-family: 'Inter', sans-serif; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
                                             <img src="${ind.finalAnimeImageUrl}" alt="Capa de ${ind.animeTitle}" style="width: 40px; height: 60px; object-fit: cover; border-radius: 2px; flex-shrink: 0; overflow: hidden;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_40x60}'">
                                             <span style="flex-grow: 1;">${ind.animeTitle}</span>
                                             ${statusTagHTML}
@@ -1462,7 +1519,7 @@
                     }
                      if (hasIndicationsForThisReceiverInBlock) {
                          listContentHTML += `<div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px dashed #475569;">
-                                                 <h4 style="font-size: 24px; font-weight: 600; color: #a5b4fc; margin-bottom: 12px; line-height: 1.3;">${receiverData.name}</h4>
+                                                 <h4 style="font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 600; color: #a5b4fc; margin-bottom: 12px; line-height: 1.3; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">${receiverData.name}</h4>
                                                  ${receiverBlockHTML}
                                              </div>`;
                     }
@@ -1470,7 +1527,7 @@
 
 
                 if (!hasAnyIndications) {
-                    listContentHTML += `<p style="font-size: 18px; text-align: center; color: #94a3b8; margin-top: 16px; line-height: 1.4;">Nenhuma indicação encontrada para os critérios atuais.</p>`;
+                    listContentHTML += `<p style="font-family: 'Inter', sans-serif; font-size: 18px; text-align: center; color: #94a3b8; margin-top: 16px; line-height: 1.4; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">Nenhuma indicação encontrada para os critérios atuais.</p>`;
                 }
                 exportContentDiv.innerHTML = listContentHTML;
 
@@ -1481,7 +1538,7 @@
                 const canvas = await html2canvas(exportContentDiv, { 
                     backgroundColor: '#0f172a', 
                     useCORS: true, 
-                    scale: 1.5, // Reduzido um pouco, pode ajudar com fontes grandes
+                    scale: 1.5, 
                     logging: true,
                     windowWidth: exportContentDiv.scrollWidth,
                     windowHeight: exportContentDiv.scrollHeight
@@ -1547,57 +1604,88 @@
             const reader = new FileReader();
             reader.onload = async (event) => {
                 try {
-                    const importedJson = event.target.result;
-                    const importedData = JSON.parse(importedJson);
+                    // 1. Carregar os dados existentes do localStorage para allGamesData
+                    loadAllGamesData(); // Garante que allGamesData está atualizado com o que já existe
 
-                    if (typeof importedData !== 'object' || importedData === null ||
-                        typeof importedData.games !== 'object' || importedData.games === null ||
-                        !importedData.hasOwnProperty('activeGameId')) {
-                        showAlert("Arquivo JSON inválido ou formato de dados incorreto.", "error");
+                    const importedJson = event.target.result;
+                    const importedDataContainer = JSON.parse(importedJson);
+
+                    if (typeof importedDataContainer !== 'object' || importedDataContainer === null ||
+                        typeof importedDataContainer.games !== 'object' || importedDataContainer.games === null ) {
+                        showAlert("Arquivo JSON inválido ou formato de dados de jogos incorreto.", "error");
                         importFileInput.value = '';
                         return;
                     }
 
-                    for (const gameId in importedData.games) {
-                        const game = importedData.games[gameId];
-                        if (typeof game !== 'object' || game === null ||
-                            !game.hasOwnProperty('id') || !game.hasOwnProperty('name') ||
-                            !game.hasOwnProperty('currentPhase') || !game.hasOwnProperty('participants')) {
-                            showAlert(`Jogo com ID ${gameId} no arquivo importado tem formato inválido. Importação cancelada.`, "error", 5000);
-                            importFileInput.value = '';
-                            return;
-                        }
-                        game.participants = (game.participants || []).map(p => {
-                             if (typeof p !== 'object' || p === null || !p.hasOwnProperty('id') || !p.hasOwnProperty('name')) {
-                                 throw new Error(`Participante inválido no jogo ID ${gameId}`);
+                    let importedGamesCount = 0;
+                    let overwrittenGamesCount = 0;
+
+                    for (const gameId in importedDataContainer.games) {
+                        if (Object.prototype.hasOwnProperty.call(importedDataContainer.games, gameId)) {
+                            const gameFromFile = importedDataContainer.games[gameId];
+                            
+                            if (typeof gameFromFile !== 'object' || gameFromFile === null ||
+                                !gameFromFile.hasOwnProperty('id') || !gameFromFile.hasOwnProperty('name') ||
+                                !gameFromFile.hasOwnProperty('currentPhase') || !gameFromFile.hasOwnProperty('participants')) {
+                                console.warn(`Jogo com ID ${gameId} no arquivo importado tem formato inválido. Jogo ignorado.`);
+                                continue; 
                             }
-                            return {
-                                ...p,
-                                receivedIndications: p.receivedIndications || [],
-                                animeToWatch: p.animeToWatch || null,
-                                genreHistory: p.genreHistory || [],
-                                currentAssignedGenre: p.currentAssignedGenre || p.assignedGenre, 
-                                watchedAnimesHistory: p.watchedAnimesHistory || []
+
+                            const sanitizedGame = {
+                                ...BASE_GAME_INSTANCE_STATE,
+                                ...JSON.parse(JSON.stringify(gameFromFile)), 
+                                id: gameFromFile.id || generateUUID(),
+                                name: gameFromFile.name || BASE_GAME_INSTANCE_STATE.name,
+                                createdAt: gameFromFile.createdAt || new Date().toISOString(),
+                                userId: gameFromFile.userId || generateUUID(),
+                                gameMode: gameFromFile.gameMode || BASE_GAME_INSTANCE_STATE.gameMode,
+                                currentPhase: Object.values(PHASES).includes(gameFromFile.currentPhase) ? gameFromFile.currentPhase : PHASES.REGISTRATION,
+                                participants: (gameFromFile.participants || []).map(p_in => {
+                                    const participantData = {...p_in};
+                                    return {
+                                        id: participantData.id || generateUUID(),
+                                        name: participantData.name || "Participante Desconhecido",
+                                        assignedGenre: participantData.assignedGenre || null,
+                                        genreDrawNumber: participantData.genreDrawNumber || null,
+                                        currentAssignedGenre: participantData.currentAssignedGenre || participantData.assignedGenre || null,
+                                        genreHistory: Array.isArray(participantData.genreHistory) ? [...participantData.genreHistory] : [],
+                                        animeToWatch: participantData.animeToWatch ? { ...participantData.animeToWatch } : null,
+                                        receivedIndications: Array.isArray(participantData.receivedIndications) ? participantData.receivedIndications.map(ind => ({ ...ind })) : [],
+                                        watchedAnimesHistory: Array.isArray(participantData.watchedAnimesHistory) ? participantData.watchedAnimesHistory.map(hist => ({ ...hist })) : []
+                                    };
+                                }),
+                                assignedGenreNames: Array.isArray(gameFromFile.assignedGenreNames) ? [...gameFromFile.assignedGenreNames] : [],
                             };
-                        });
-                        game.gameMode = game.gameMode || 'infinito';
-                        game.assignedGenreNames = game.assignedGenreNames || [];
-                        game.userId = game.userId || generateUUID(); 
-                        game.createdAt = game.createdAt || new Date().toISOString();
+                             if (sanitizedGame.participants.length > 0) {
+                                const isValidTabId = gameFromFile.currentIndicatorTabId && sanitizedGame.participants.find(p => p.id === gameFromFile.currentIndicatorTabId);
+                                sanitizedGame.currentIndicatorTabId = isValidTabId ? gameFromFile.currentIndicatorTabId : sanitizedGame.participants[0].id;
+                            } else {
+                                sanitizedGame.currentIndicatorTabId = null;
+                            }
+
+                            if (allGamesData.games[sanitizedGame.id]) {
+                                overwrittenGamesCount++;
+                            } else {
+                                importedGamesCount++;
+                            }
+                            allGamesData.games[sanitizedGame.id] = sanitizedGame; 
+                        }
                     }
                     
-                    if (importedData.activeGameId && !importedData.games[importedData.activeGameId]) {
-                        importedData.activeGameId = null;
-                    }
-
-                    allGamesData = importedData;
+                    // Manter o activeGameId como null para permanecer na tela de gerenciamento
+                    allGamesData.activeGameId = null; 
+                    
                     saveAllGamesData(); 
-                    
-                    loadAllGamesData(); 
+                    loadAllGamesData(); // Recarrega o gameState (que será {} devido ao activeGameId ser null)
 
-                    showAlert("Dados importados com sucesso! O aplicativo será atualizado.", "success", 4000);
+                    let successMessage = "Dados importados com sucesso!";
+                    if (importedGamesCount > 0) successMessage += ` ${importedGamesCount} novo(s) jogo(s) adicionado(s).`;
+                    if (overwrittenGamesCount > 0) successMessage += ` ${overwrittenGamesCount} jogo(s) existente(s) atualizado(s).`;
+                    successMessage;
+                    showAlert(successMessage, "success", 6000);
+                    
                     importFileInput.value = ''; 
-                    renderApp(); 
+                    renderApp(); // Irá renderizar a tela de gerenciamento
 
                 } catch (error) {
                     console.error("Erro ao importar dados:", error);
