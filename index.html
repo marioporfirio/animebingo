@@ -17,18 +17,18 @@
         ::-webkit-scrollbar-thumb:hover { background: #4338ca; }
         .hidden { display: none !important; }
         .modal-overlay {
-            position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.8); 
+            position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center;
             padding: 1rem; z-index: 110; overflow-y: auto;
         }
         .modal-content {
-            background-color: #1e293b; padding: 1.5rem 2rem; border-radius: 0.75rem; 
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); 
+            background-color: #1e293b; padding: 1.5rem 2rem; border-radius: 0.75rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
             text-align: center; max-width: 28rem; width: 100%; margin: auto;
         }
-        .search-results-modal-content { 
-            background-color: #1e293b; padding: 1.5rem; border-radius: 0.75rem; 
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); 
+        .search-results-modal-content {
+            background-color: #1e293b; padding: 1.5rem; border-radius: 0.75rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
             width: 90%; max-width: 48rem; max-height: 80vh; overflow-y: auto;
         }
         .search-result-item {
@@ -42,13 +42,13 @@
         .search-result-actions { display: flex; align-items: center; }
 
         .indication-card {
-            display: flex; align-items: center; gap: 0.75rem; 
-            padding: 0.75rem; background-color: #334155; 
-            border-radius: 0.5rem; border: 1px solid #475569; 
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; background-color: #334155;
+            border-radius: 0.5rem; border: 1px solid #475569;
         }
         .indication-card img { width: 60px; height: 90px; object-fit: cover; border-radius: 0.25rem; }
         .indication-card-info { text-align: left; flex-grow: 1; }
-        .tab-button-active { border-color: #6366f1 !important; color: #6366f1 !important; } 
+        .tab-button-active { border-color: #6366f1 !important; color: #6366f1 !important; }
         .game-list-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 0.75rem 1rem; background-color: #334155; border-radius: 0.5rem;
@@ -56,61 +56,61 @@
         }
         .game-list-item:hover { background-color: #475569; }
         .game-list-item span { flex-grow: 1; }
-        .score-badge {
-            background-color: #facc15; color: #1e293b; 
+        .score-badge { /* Estilo para o app, será mantido para a interface normal */
+            background-color: #facc15; color: #1e293b;
             padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.9em;
+            display: inline-block; vertical-align: middle; line-height: 1.3;
         }
-        .genre-legend-item { 
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
-            aspect-ratio: 1 / 1; padding: 0.5rem; box-sizing: border-box; overflow: hidden; position: relative; 
-            cursor: pointer; 
+        .genre-legend-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            aspect-ratio: 1 / 1; padding: 0.5rem; box-sizing: border-box; overflow: hidden; position: relative;
+            cursor: pointer;
         }
         .genre-legend-item:hover {
             background-color: #475569;
         }
-        .genre-legend-item.selected-for-club { /* Estilo para gênero selecionado no modo clube */
+        .genre-legend-item.selected-for-club {
             outline: 3px solid #818cf8;
             outline-offset: -3px;
             box-shadow: 0 0 10px #818cf8;
         }
-        .genre-legend-item .genre-image-wrapper { 
+        .genre-legend-item .genre-image-wrapper {
             width: 100%; flex-grow: 1; display: flex; align-items: center; justify-content: center;
-            overflow: hidden; margin-bottom: 0.375rem; 
+            overflow: hidden; margin-bottom: 0.375rem;
         }
-        .genre-legend-item img { 
-            max-width: 85%; max-height: 85%; object-fit: contain; border-radius: 0.375rem; 
+        .genre-legend-item img {
+            max-width: 85%; max-height: 85%; object-fit: contain; border-radius: 0.375rem;
         }
-        .genre-legend-item p { 
-            font-size: 1.1rem; line-height: 1.2; font-weight: 600; color: #c7d2fe; 
-            text-align: center; width: 100%; margin-top: 0.25rem; padding-bottom: 0.5rem; flex-shrink: 0; 
+        .genre-legend-item p {
+            font-size: 1.1rem; line-height: 1.2; font-weight: 600; color: #c7d2fe;
+            text-align: center; width: 100%; margin-top: 0.25rem; padding-bottom: 0.5rem; flex-shrink: 0;
         }
         .genre-participant-overlay {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.65); 
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.65);
             color: white; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 0.25rem; border-radius: 0.375rem; opacity: 0; 
-            transition: opacity 0.3s ease-in-out; pointer-events: none; 
+            text-align: center; padding: 0.25rem; border-radius: 0.375rem; opacity: 0;
+            transition: opacity 0.3s ease-in-out; pointer-events: none;
         }
         .genre-legend-item.assigned .genre-participant-overlay { opacity: 1; }
         .genre-participant-overlay .name {
             font-weight: bold; font-size: 1.25rem; word-break: break-word; text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
         }
          .genre-participant-overlay .tag {
-            font-size: 0.9rem; background-color: #ef4444; color: white; padding: 0.2rem 0.5rem; 
+            font-size: 0.9rem; background-color: #ef4444; color: white; padding: 0.2rem 0.5rem;
             border-radius: 0.25rem; margin-top: 0.3rem; text-transform: uppercase; font-weight: bold;
         }
-        /* Estilos base para os containers de exportação */
-        .export-base-container { 
-            font-family: 'Inter', sans-serif; 
-            color: #e2e8f0; /* Cor de texto padrão */
-            padding: 24px; 
-            background-color: #0f172a; 
-            border: 2px solid #0ea5e9; 
-            border-radius: 0.5rem; 
+        .export-base-container {
+            font-family: 'Inter', sans-serif;
+            color: #e2e8f0;
+            padding: 24px;
+            background-color: #0f172a;
+            border: 2px solid #0ea5e9;
+            border-radius: 0.5rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            width: 800px; /* Largura fixa para consistência */
-            position: absolute; /* Para renderização fora da tela */
-            left: -9999px; /* Posiciona fora da tela */
-            line-height: 1.5; /* Line-height padrão */
+            width: 800px;
+            position: absolute;
+            left: -9999px;
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -140,7 +140,7 @@
             <button id="closeGenreRevealModalButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg">OK</button>
         </div>
     </div>
-    
+
     <div id="animeRevealModal" class="modal-overlay hidden">
         <div class="modal-content">
             <h3 id="animeRevealParticipantName" class="text-2xl font-semibold text-indigo-400 mb-4"></h3>
@@ -167,7 +167,7 @@
         <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 pb-1 sm:pb-2">
             Anime Bingo
         </h1>
-        <p id="currentGameNameDisplay" class="text-lg sm:text-xl text-indigo-300 mt-4"></p> 
+        <p id="currentGameNameDisplay" class="text-lg sm:text-xl text-indigo-300 mt-4"></p>
         <p id="userIdDisplay" class="text-xs mt-1 text-slate-400"></p>
     </header>
 
@@ -224,9 +224,12 @@
         <div id="actualGameContent" class="hidden">
             <section id="registrationPhaseSection">
                 <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-indigo-400 flex items-center"><span role="img" aria-label="ícone de usuários" class="mr-3 text-2xl">👥</span> Cadastro de Participantes</h2>
-                <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                <div class="flex flex-col sm:flex-row gap-4 mb-2">
                     <input type="text" id="participantNameInput" placeholder="Nome do Participante" class="flex-grow p-3 rounded-lg bg-slate-700 border border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder-slate-400"/>
-                    <button id="addParticipantButton" class="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-600 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center"><span role="img" aria-label="adicionar" class="mr-2 text-lg">+</span> Adicionar</button>
+                    <input type="text" id="participantMalUsernameInput" placeholder="Username ou URL da Lista MAL (Opcional)" class="sm:w-1/3 p-3 rounded-lg bg-slate-700 border border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder-slate-400 text-sm"/>
+                </div>
+                 <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                    <button id="addParticipantButton" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-600 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center"><span role="img" aria-label="adicionar" class="mr-2 text-lg">+</span> Adicionar Participante</button>
                 </div>
                 <p id="maxParticipantsWarning" class="text-sm text-yellow-400 mb-4 p-3 bg-yellow-900 bg-opacity-50 rounded-md border border-yellow-700 hidden"><span role="img" aria-label="informação" class="inline mr-2">ℹ️</span> Máximo de participantes atingido.</p>
                 <div id="participantsList" class="space-y-3 mb-8 max-h-60 overflow-y-auto pr-2"></div>
@@ -278,7 +281,7 @@
                     <button id="goToAnimeDrawPhaseButton" class="w-full sm:flex-grow bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg text-lg flex items-center justify-center hidden"><span role="img" aria-label="televisão" class="mr-2 text-xl">📺</span> Iniciar Sorteio de Animes</button>
                 </div>
             </section>
-            
+
             <section id="animeDrawPhaseSection" class="hidden">
                  <h2 id="animeDrawPhaseTitle" class="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-purple-400 flex items-center"><span role="img" aria-label="televisão" class="mr-3 text-2xl">📺</span> Sorteio de Anime</h2>
                  <div id="clubGenreForAnimeDrawDisplay" class="mb-4 text-center hidden">
@@ -291,9 +294,9 @@
                  <div id="participantsToDrawAnimeList" class="space-y-3"></div> <button id="drawClubAnimeButton" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg text-lg hidden">Sortear Anime do Clube</button> <button id="goToWatchLoopButton" class="w-full mt-6 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg flex items-center justify-center hidden"><span role="img" aria-label="olhos" class="mr-2 text-xl">👀</span> Próxima Fase</button>
             </section>
 
-            <section id="watchLoopPhaseSection" class="hidden"> 
+            <section id="watchLoopPhaseSection" class="hidden">
                 <h2 id="watchLoopPhaseTitle" class="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-teal-400 flex items-center"><span role="img" aria-label="olhos" class="mr-3 text-2xl">👀</span> Acompanhamento / Resultado</h2>
-                <div id="watchLoopContentIndividual" class="space-y-6"></div> 
+                <div id="watchLoopContentIndividual" class="space-y-6"></div>
                 <div id="watchLoopContentClub" class="hidden p-4 bg-slate-700/70 rounded-lg shadow-md mb-4 text-center">
                     <h3 class="text-2xl font-semibold text-green-400 mb-3">Resultado do Bingo Clube!</h3>
                     <div id="clubResultGenre" class="mb-2">
@@ -326,18 +329,22 @@
         </div>
     </main>
 
-    <footer class="mt-12 text-center w-full md:max-w-[70rem] px-4"> 
+    <footer class="mt-12 text-center w-full md:max-w-[70rem] px-4">
         <div class="mb-4">
             <button id="toggleGenreLegendButton" class="text-indigo-400 hover:text-indigo-300 underline text-sm">Mostrar/Ocultar Legenda de Gêneros</button>
         </div>
-        <div id="genreLegendContainer" class="hidden"> 
+        <div id="genreLegendContainer" class="hidden">
             <h3 class="text-xl font-semibold mb-4 text-indigo-400">Gêneros Disponíveis para Sorteio</h3>
-            <div id="genreGridFooter" class="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3 mx-auto"></div> 
+            <div id="genreGridFooter" class="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3 mx-auto"></div>
         </div>
         <p class="text-xs text-slate-500 mt-8">Desenvolvido com <span role="img" aria-label="coração">❤️</span> para os fãs de anime.<span id="footerUserId" class="block mt-1"></span></p>
     </footer>
 
     <script>
+        // Jikan API (não oficial do MAL)
+        const JIKAN_API_BASE_URL = "https://api.jikan.moe/v4";
+
+
         let initialGenres = [
     { name: "Ação/Aventura", imageUrl: "https://raw.githubusercontent.com/marioporfirio/animebingo/c6d5c9f27e507f6ed6800bc7812f37e6a8be9188/images/acaoaventura.png" },
     { name: "Comédia", imageUrl: "https://raw.githubusercontent.com/marioporfirio/animebingo/c6d5c9f27e507f6ed6800bc7812f37e6a8be9188/images/comedia.png" },
@@ -373,54 +380,55 @@
 
 
         const PHASES = {
-            GAME_MANAGEMENT: "GAME_MANAGEMENT", 
+            GAME_MANAGEMENT: "GAME_MANAGEMENT",
             REGISTRATION: "REGISTRATION",
-            INDIVIDUAL_DRAW_SELECTION: "INDIVIDUAL_DRAW_SELECTION", 
-            CLUB_GENRE_SETUP: "CLUB_GENRE_SETUP", 
-            INDICATION: "INDICATION", 
-            ANIME_DRAW_SELECTION: "ANIME_DRAW_SELECTION", 
-            CLUB_ANIME_DRAW: "CLUB_ANIME_DRAW", // Specific phase for club anime draw logic before results
-            WATCH_LOOP: "WATCH_LOOP", 
-            CLUB_RESULT_DISPLAY: "CLUB_RESULT_DISPLAY" // Specific phase for showing club results
+            INDIVIDUAL_DRAW_SELECTION: "INDIVIDUAL_DRAW_SELECTION",
+            CLUB_GENRE_SETUP: "CLUB_GENRE_SETUP",
+            INDICATION: "INDICATION",
+            ANIME_DRAW_SELECTION: "ANIME_DRAW_SELECTION",
+            CLUB_ANIME_DRAW: "CLUB_ANIME_DRAW",
+            WATCH_LOOP: "WATCH_LOOP",
+            CLUB_RESULT_DISPLAY: "CLUB_RESULT_DISPLAY"
         };
 
         const ALL_GAMES_STORAGE_KEY = 'animeBingoAllGamesData_v1';
-        
-        const BASE_GAME_INSTANCE_STATE = { 
-            id: null, 
+
+        const BASE_GAME_INSTANCE_STATE = {
+            id: null,
             name: "Anime Bingo",
             createdAt: null,
-            userId: null, 
-            gameMode: 'infinito', 
-            currentPhase: PHASES.REGISTRATION, 
+            userId: null,
+            gameMode: 'infinito',
+            currentPhase: PHASES.REGISTRATION,
             participants: [],
-            assignedGenreNames: [], 
+            assignedGenreNames: [],
             currentIndicatorTabId: null,
-            clubGenre: null, 
-            clubAnimeIndication: null, // Stores the single anime drawn for the club
-            clubIndications: [] // Stores all indications made by participants for the club genre
+            clubGenre: null,
+            clubAnimeIndication: null,
+            clubIndications: []
         };
-        
-        let allGamesData = { 
-            activeGameId: null,
-            games: {} 
-        };
-        let gameState = {}; 
 
-        let participantNameInput, addParticipantButton, participantsListDiv, goToNextPhaseFromRegistrationButton, maxParticipantsWarning,
+        let allGamesData = {
+            activeGameId: null,
+            games: {}
+        };
+        let gameState = {};
+
+        let participantNameInput, participantMalUsernameInput, addParticipantButton, participantsListDiv, goToNextPhaseFromRegistrationButton, maxParticipantsWarning,
             registrationPhaseSection, individualDrawPhaseSection, participantsToDrawListDiv, drawnParticipantsListDiv,
             goToIndicationPhaseButton, indicationPhaseSection, indicationTabsDiv, indicationContentDiv, goToAnimeDrawPhaseButton, exportIndicationsButton,
-            animeDrawPhaseSection, participantsToDrawAnimeListDiv, goToWatchLoopButton, 
-            watchLoopPhaseSection, watchLoopContentDiv, allAnimesWatchedMessage, 
+            animeDrawPhaseSection, participantsToDrawAnimeListDiv, goToWatchLoopButton,
+            watchLoopPhaseSection, watchLoopContentDiv, allAnimesWatchedMessage,
             resetGameButton, genreGridFooterDiv, userIdDisplay, footerUserId,
             customAlertDiv, alertIconSpan, alertMessageContentSpan, alertCloseButton, alertConfirmButtonsDiv, alertCancelBtn, alertConfirmBtn,
-            genreRevealModal, genreRevealParticipantNameModalTitle, /* genreRevealIconContainer, (unused) */ genreRevealIconImg, genreRevealNameText, genreRevealNumberText, closeGenreRevealModalButton, 
-            animeRevealModal, animeRevealParticipantName, animeRevealCover, animeRevealTitleLink, animeRevealIndicator, closeAnimeRevealModalButton, 
+            genreRevealModal, genreRevealParticipantNameModalTitle,
+            genreRevealIconImg, genreRevealNameText, genreRevealNumberText, closeGenreRevealModalButton,
+            animeRevealModal, animeRevealParticipantName, animeRevealCover, animeRevealTitleLink, animeRevealIndicator, closeAnimeRevealModalButton,
             gameManagementSection, newGameNameInput, newGameModeSelect, createNewGameButton, savedGamesListDiv, actualGameContentDiv, currentGameNameDisplay, switchGameButton,
-            searchResultsModal, searchResultsListDiv, closeSearchResultsModalButton, animeRevealScore, 
+            searchResultsModal, searchResultsListDiv, closeSearchResultsModalButton, animeRevealScore,
             toggleGenreLegendButton, genreLegendContainer, exportWatchListButton, exportFullIndicationHistoryButton,
             importFileInput, importGamesButton, exportAllGamesButton,
-            
+
             clubGenreSetupPhaseSection, clubGenreDrawModeContent, drawClubGenreButton, clubGenreChooseModeContent,
             chosenClubGenreDisplay, chosenClubGenreIcon, chosenClubGenreName, goToClubIndicationPhaseButton,
             indicationPhaseTitle, clubGenreForIndicationDisplay, clubGenreForIndicationIcon, clubGenreForIndicationName,
@@ -430,14 +438,14 @@
             clubResultAnime, clubResultAnimeCover, clubResultAnimeTitleLink, clubResultAnimeIndicator,
             clubResultParticipants, clubResultParticipantsList, exportClubResultButton;
 
-            
+
         let currentAlertResolve = null;
-        let currentSearchContext = null; 
+        let currentSearchContext = null;
 
         const PLACEHOLDER_IMG_60x90 = 'https://placehold.co/60x90/1e293b/4f46e5?text=Capa';
         const PLACEHOLDER_IMG_150x225 = 'https://placehold.co/150x225/1e293b/4f46e5?text=Anime';
         const PLACEHOLDER_IMG_ERROR_60x90 = 'https://placehold.co/60x90/1e293b/ff0000?text=Erro';
-        const PLACEHOLDER_IMG_SEARCH_RESULT = 'https://placehold.co/50x75/1e293b/4f46e5?text=Capa'; // Adjusted size
+        const PLACEHOLDER_IMG_SEARCH_RESULT = 'https://placehold.co/50x75/1e293b/4f46e5?text=Capa';
         const PLACEHOLDER_IMG_GENRE_ICON = 'https://placehold.co/64x64/1e293b/4f46e5?text=Icon';
         const PLACEHOLDER_IMG_ERROR_80x120 = 'https://placehold.co/80x120/1e293b/ff0000?text=Erro';
         const PLACEHOLDER_IMG_ERROR_40x60 = 'https://placehold.co/40x60/1e293b/ff0000?text=Erro';
@@ -446,26 +454,26 @@
 
         // FUNÇÕES PRIMÁRIAS
         function generateUUID() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); }); }
-        
+
         function saveAllGamesData() {
             localStorage.setItem(ALL_GAMES_STORAGE_KEY, JSON.stringify(allGamesData));
         }
 
         function saveCurrentGameToAllGames() {
-            if (allGamesData.activeGameId && gameState && gameState.id === allGamesData.activeGameId) { 
-                allGamesData.games[allGamesData.activeGameId] = { ...gameState }; 
+            if (allGamesData.activeGameId && gameState && gameState.id === allGamesData.activeGameId) {
+                allGamesData.games[allGamesData.activeGameId] = { ...gameState };
                 saveAllGamesData();
             }
         }
-        
+
         function loadAllGamesData() {
             const savedData = localStorage.getItem(ALL_GAMES_STORAGE_KEY);
             if (savedData) {
                 const parsedData = JSON.parse(savedData);
-                allGamesData = { 
-                    activeGameId: null, 
-                    games: {}, 
-                    ...parsedData 
+                allGamesData = {
+                    activeGameId: null,
+                    games: {},
+                    ...parsedData
                 };
                 if (!allGamesData.games) {
                     allGamesData.games = {};
@@ -475,33 +483,34 @@
             }
 
             if (allGamesData.activeGameId && allGamesData.games[allGamesData.activeGameId]) {
-                const gameToLoad = JSON.parse(JSON.stringify(allGamesData.games[allGamesData.activeGameId])); 
-                gameState = { 
-                    ...BASE_GAME_INSTANCE_STATE, 
+                const gameToLoad = JSON.parse(JSON.stringify(allGamesData.games[allGamesData.activeGameId]));
+                gameState = {
+                    ...BASE_GAME_INSTANCE_STATE,
                     ...gameToLoad,
-                    id: gameToLoad.id || generateUUID(), 
-                    name: gameToLoad.name || BASE_GAME_INSTANCE_STATE.name, 
+                    id: gameToLoad.id || generateUUID(),
+                    name: gameToLoad.name || BASE_GAME_INSTANCE_STATE.name,
                     createdAt: gameToLoad.createdAt || new Date().toISOString(),
-                    userId: gameToLoad.userId || generateUUID(), // Ensure userId is always present
+                    userId: gameToLoad.userId || generateUUID(),
                     gameMode: gameToLoad.gameMode || BASE_GAME_INSTANCE_STATE.gameMode,
                     currentPhase: gameToLoad.currentPhase || BASE_GAME_INSTANCE_STATE.currentPhase,
                 };
                 gameState.participants = (gameToLoad.participants || []).map(p => ({
                     id: p.id || generateUUID(),
                     name: p.name || "Participante Desconhecido",
+                    malUsername: p.malUsername || null,
                     assignedGenre: p.assignedGenre || null,
                     genreDrawNumber: p.genreDrawNumber || null,
-                    currentAssignedGenre: p.currentAssignedGenre || p.assignedGenre || null, 
-                    genreHistory: Array.isArray(p.genreHistory) ? [...p.genreHistory] : [], 
-                    animeToWatch: p.animeToWatch ? {...p.animeToWatch} : null, 
-                    receivedIndications: Array.isArray(p.receivedIndications) ? p.receivedIndications.map(ind => ({...ind})) : [], 
+                    currentAssignedGenre: p.currentAssignedGenre || p.assignedGenre || null,
+                    genreHistory: Array.isArray(p.genreHistory) ? [...p.genreHistory] : [],
+                    animeToWatch: p.animeToWatch ? {...p.animeToWatch} : null,
+                    receivedIndications: Array.isArray(p.receivedIndications) ? p.receivedIndications.map(ind => ({...ind})) : [],
                     watchedAnimesHistory: Array.isArray(p.watchedAnimesHistory) ? p.watchedAnimesHistory.map(hist => ({...hist})) : []
                 }));
                 gameState.assignedGenreNames = Array.isArray(gameToLoad.assignedGenreNames) ? [...gameToLoad.assignedGenreNames] : [];
                 gameState.clubGenre = gameToLoad.clubGenre ? {...gameToLoad.clubGenre} : null;
                 gameState.clubAnimeIndication = gameToLoad.clubAnimeIndication ? {...gameToLoad.clubAnimeIndication} : null;
                 gameState.clubIndications = Array.isArray(gameToLoad.clubIndications) ? gameToLoad.clubIndications.map(ind => ({...ind})) : [];
-                
+
                 gameState.currentIndicatorTabId = gameToLoad.currentIndicatorTabId || (gameState.participants[0]?.id || null);
                 if (gameState.participants.length > 0 && !gameState.participants.find(p => p.id === gameState.currentIndicatorTabId)) {
                     gameState.currentIndicatorTabId = gameState.participants[0].id;
@@ -510,8 +519,8 @@
                 }
 
             } else {
-                allGamesData.activeGameId = null; 
-                gameState = {}; 
+                allGamesData.activeGameId = null;
+                gameState = {};
             }
         }
 
@@ -537,11 +546,11 @@
                     return;
                 }
                 const img = new Image();
-                img.crossOrigin = 'anonymous'; 
-                img.onload = () => resolve(src); 
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(src);
                 img.onerror = (err) => {
-                    console.warn(`Falha ao carregar/verificar CORS para imagem: ${src}. Usando placeholder: ${placeholderOnError}`);
-                    resolve(placeholderOnError); 
+                    console.warn(`Falha ao carregar/verificar CORS para imagem: ${src}. Usando placeholder: ${placeholderOnError}. Erro:`, err);
+                    resolve(placeholderOnError);
                 };
                 img.src = src;
             });
@@ -553,27 +562,28 @@
             gameState.participants.forEach((p, index) => {
                 const div = document.createElement('div');
                 div.className = 'flex items-center justify-between bg-slate-700 p-3 rounded-lg shadow';
-                div.innerHTML = `<span class="text-indigo-300">${index + 1}. ${p.name}</span>
+                const malUsernameDisplay = p.malUsername ? `<span class="text-xs text-slate-400 ml-2">(MAL: ${p.malUsername})</span>` : '';
+                div.innerHTML = `<span class="text-indigo-300">${index + 1}. ${p.name} ${malUsernameDisplay}</span>
                                          <button data-id="${p.id}" class="removeParticipantButton text-red-400 hover:text-red-300"><span role="img" aria-label="remover">🗑️</span></button>`;
                 participantsListDiv.appendChild(div);
             });
             document.querySelectorAll('.removeParticipantButton').forEach(btn => btn.onclick = e => handleRemoveParticipant(e.currentTarget.dataset.id));
-            
-            const maxParticipants = (gameState.gameMode === 'infinito' || gameState.gameMode === 'tradicional') ? initialGenres.length : Infinity; // No modo clube, não há limite de participantes baseado em gêneros
+
+            const maxParticipants = (gameState.gameMode === 'infinito' || gameState.gameMode === 'tradicional') ? initialGenres.length : Infinity;
             addParticipantButton.disabled = gameState.participants.length >= maxParticipants && maxParticipants !== Infinity;
             maxParticipantsWarning.classList.toggle('hidden', gameState.participants.length < maxParticipants || maxParticipants === Infinity);
             if(maxParticipants !== Infinity) maxParticipantsWarning.innerHTML = `<span role="img" aria-label="informação" class="inline mr-2">ℹ️</span> Máximo de ${maxParticipants} participantes para este modo.`;
-            else maxParticipantsWarning.classList.add('hidden'); // Esconde se não houver limite
-            
+            else maxParticipantsWarning.classList.add('hidden');
+
             goToNextPhaseFromRegistrationButton.classList.toggle('hidden', gameState.participants.length === 0);
         }
 
-        function renderIndividualDrawSelection() { 
+        function renderIndividualDrawSelection() {
             participantsToDrawListDiv.innerHTML = '';
             drawnParticipantsListDiv.innerHTML = '';
             let participantsYetToDraw = 0;
             gameState.participants.forEach(p => {
-                if (!p.assignedGenre) { 
+                if (!p.assignedGenre) {
                     participantsYetToDraw++;
                     const div = document.createElement('div');
                     div.className = 'flex items-center justify-between bg-slate-700 p-3 rounded-lg shadow';
@@ -595,25 +605,31 @@
             document.querySelectorAll('.draw-genre-for-participant-button').forEach(btn => btn.onclick = e => handleIndividualGenreDraw(e.currentTarget.dataset.id));
             goToIndicationPhaseButton.classList.toggle('hidden', participantsYetToDraw > 0 || gameState.participants.length === 0);
         }
-        
+
         function showGenreRevealModal(participantName, genre, isClubGenre = false) {
-            genreRevealParticipantNameModalTitle.textContent = isClubGenre ? `Gênero para o Clube!` :`Sorteio para ${participantName}!`; 
-            genreRevealIconImg.src = genre.imageUrl || PLACEHOLDER_IMG_150x225; 
+            genreRevealParticipantNameModalTitle.textContent = isClubGenre ? `Gênero para o Clube!` :`Sorteio para ${participantName}!`;
+            genreRevealIconImg.src = genre.imageUrl || PLACEHOLDER_IMG_150x225;
             genreRevealIconImg.alt = genre.name;
             genreRevealNameText.textContent = genre.name;
-            genreRevealNumberText.textContent = genre.drawnNumber || ''; 
-            genreRevealNumberText.classList.toggle('hidden', !genre.drawnNumber && !isClubGenre); 
+            genreRevealNumberText.textContent = genre.drawnNumber || '';
+            genreRevealNumberText.classList.toggle('hidden', !genre.drawnNumber && !isClubGenre);
             document.querySelector('#genreRevealModal .text-slate-300.mb-1').textContent = (isClubGenre || !genre.drawnNumber) ? 'Gênero Sorteado/Escolhido:' : 'Número Sorteado:';
 
             genreRevealModal.classList.remove('hidden');
         }
-        
+
         function renderIndicationPhase() {
             const isClubMode = gameState.gameMode === 'clube_sorteado' || gameState.gameMode === 'clube_escolhido';
-            
+
             indicationPhaseTitle.innerHTML = `<span role="img" aria-label="caneta" class="mr-3 text-2xl">✏️</span> ${isClubMode ? 'Indicações para o Clube' : 'Fase de Indicações de Anime'}`;
             clubGenreForIndicationDisplay.classList.toggle('hidden', !isClubMode || !gameState.clubGenre);
-            exportIndicationsButton.classList.toggle('hidden', isClubMode && (!gameState.clubIndications || gameState.clubIndications.length === 0));
+
+            if (isClubMode) {
+                exportIndicationsButton.classList.toggle('hidden', !gameState.clubIndications || gameState.clubIndications.length === 0);
+            } else {
+                const canIndicate = gameState.participants.length > 1 && gameState.participants.some(p => p.currentAssignedGenre);
+                exportIndicationsButton.classList.toggle('hidden', !canIndicate);
+            }
 
 
             if (isClubMode && gameState.clubGenre) {
@@ -621,15 +637,15 @@
                 clubGenreForIndicationName.textContent = gameState.clubGenre.name;
             }
 
-            indicationTabsDiv.innerHTML = ''; 
-            indicationContentDiv.innerHTML = ''; 
+            indicationTabsDiv.innerHTML = '';
+            indicationContentDiv.innerHTML = '';
 
             if (isClubMode) {
                 gameState.participants.forEach(indicator => {
                     const indicatorDiv = document.createElement('div');
                     indicatorDiv.className = 'mb-4 p-3 bg-slate-700/50 rounded-lg';
                     indicatorDiv.innerHTML = `<h4 class="text-lg font-semibold text-indigo-300 mb-2">Indicação de ${indicator.name} para o gênero "${gameState.clubGenre?.name || 'N/D'}"</h4>`;
-                    
+
                     const existingIndication = gameState.clubIndications.find(ind => ind.indicatorId === indicator.id);
 
                     if (existingIndication) {
@@ -638,7 +654,7 @@
                                 <img src="${existingIndication.animeImageUrl || PLACEHOLDER_IMG_60x90}" alt="Capa de ${existingIndication.animeTitle}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG_ERROR_60x90}';">
                                 <div class="indication-card-info">
                                     <a href="${existingIndication.malUrl}" target="_blank" class="font-semibold text-green-400 hover:underline">${existingIndication.animeTitle}</a>
-                                    ${existingIndication.score ? `<span class="score-badge ml-2">${existingIndication.score.toFixed(2)}</span>` : ''}
+                                    ${existingIndication.score ? `<span class="score-badge">${existingIndication.score.toFixed(2)}</span>` : ''}
                                 </div>
                                 <button data-indicator-id="${indicator.id}" class="remove-club-indication-button text-red-400 hover:text-red-300 ml-auto p-1"><span role="img" aria-label="remover indicação">🗑️</span></button>
                             </div>`;
@@ -686,35 +702,40 @@
 
                 const indicatorSection = document.createElement('div');
                 indicatorSection.innerHTML = `<h3 class="text-xl font-semibold text-yellow-400 mb-3 mt-2">Indicações de ${currentIndicator.name}:</h3>`;
-                
-                gameState.participants.forEach(receiver => {
-                    if (receiver.id === currentIndicator.id) return; 
-                    if (!receiver.currentAssignedGenre) return; 
 
-                    const existingIndication = receiver.receivedIndications?.find(ind => ind.indicatorId === currentIndicator.id && ind.genreContext === receiver.currentAssignedGenre); 
-                    const receiverGenreDetails = initialGenres.find(g => g.name === receiver.currentAssignedGenre); 
-                    
+                gameState.participants.forEach(receiver => {
+                    if (receiver.id === currentIndicator.id) return;
+                    if (!receiver.currentAssignedGenre) return;
+
+                    const existingIndication = receiver.receivedIndications?.find(ind => ind.indicatorId === currentIndicator.id && ind.genreContext === receiver.currentAssignedGenre);
+                    const receiverGenreDetails = initialGenres.find(g => g.name === receiver.currentAssignedGenre);
+
                     const receiverDiv = document.createElement('div');
                     receiverDiv.className = 'mb-4 p-3 bg-slate-700/50 rounded-lg';
                     let receiverInfoHTML = `<p class="mb-2 text-indigo-300">Para: <span class="font-semibold">${receiver.name}</span>`;
                     if (receiverGenreDetails) {
                         receiverInfoHTML += ` - Gênero Atual: <img src="${receiverGenreDetails.imageUrl || PLACEHOLDER_IMG_SEARCH_RESULT}" alt="${receiverGenreDetails.name}" class="inline-block w-5 h-5 object-contain mx-1 rounded-sm"> ${receiverGenreDetails.name}`;
                     }
+                     if (receiver.malUsername) {
+                        receiverInfoHTML += ` <span class="text-xs text-slate-400">(MAL: ${receiver.malUsername})</span>`;
+                    }
                     receiverInfoHTML += `</p>`;
+
                     receiverDiv.innerHTML = receiverInfoHTML;
 
+
                     if (existingIndication) {
-                        receiverDiv.innerHTML += `
+                        indicatorDiv.innerHTML += `
                                 <div class="indication-card">
                                     <img src="${existingIndication.animeImageUrl || PLACEHOLDER_IMG_60x90}" alt="Capa de ${existingIndication.animeTitle}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG_ERROR_60x90}';">
                                     <div class="indication-card-info">
                                         <a href="${existingIndication.malUrl}" target="_blank" class="font-semibold text-green-400 hover:underline">${existingIndication.animeTitle}</a>
-                                        ${existingIndication.score ? `<span class="score-badge ml-2">${existingIndication.score.toFixed(2)}</span>` : ''}
+                                        ${existingIndication.score ? `<span class="score-badge">${existingIndication.score.toFixed(2)}</span>` : ''}
                                     </div>
                                     <button data-indicator-id="${currentIndicator.id}" data-receiver-id="${receiver.id}" class="remove-indication-button text-red-400 hover:text-red-300 ml-auto p-1"><span role="img" aria-label="remover indicação">🗑️</span></button>
                                 </div>`;
                     } else {
-                        receiverDiv.innerHTML += `
+                        indicatorDiv.innerHTML += `
                                 <div class="flex flex-col sm:flex-row gap-2 items-center">
                                     <input type="text" data-indicator-id="${currentIndicator.id}" data-receiver-id="${receiver.id}" placeholder="Nome do Anime ou URL MAL" class="indication-input w-full sm:flex-grow p-2 rounded bg-slate-600 border border-slate-500 placeholder-slate-400 text-sm">
                                     <button data-indicator-id="${currentIndicator.id}" data-receiver-id="${receiver.id}" class="indicate-anime-button bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg text-sm w-full sm:w-auto">Indicar</button>
@@ -729,9 +750,13 @@
                     input.addEventListener('keypress', (event) => {
                         if (event.key === 'Enter') {
                             event.preventDefault();
-                            const correspondingButton = input.nextElementSibling; 
-                            if (correspondingButton && correspondingButton.classList.contains('indicate-anime-button')) {
-                                correspondingButton.click();
+                            let sibling = input.nextElementSibling;
+                            while(sibling) {
+                                if(sibling.classList.contains('indicate-anime-button')) {
+                                    sibling.click();
+                                    break;
+                                }
+                                sibling = sibling.nextElementSibling;
                             }
                         }
                     });
@@ -739,33 +764,33 @@
                 document.querySelectorAll('.remove-indication-button').forEach(btn => btn.onclick = handleRemoveIndication);
 
                 let allOriginalModesDone = true;
-                if (gameState.participants.length < 2 && gameState.participants.length > 0) { 
-                    allOriginalModesDone = true; 
+                if (gameState.participants.length < 2 && gameState.participants.length > 0) {
+                    allOriginalModesDone = true;
                 } else if (gameState.participants.length >=2) {
-                     for (const p1 of gameState.participants) { 
-                         for (const p2 of gameState.participants) { 
+                     for (const p1 of gameState.participants) {
+                         for (const p2 of gameState.participants) {
                              if (p1.id === p2.id) continue;
-                             if (!p2.currentAssignedGenre) {allOriginalModesDone = false; break;} 
+                             if (!p2.currentAssignedGenre) {allOriginalModesDone = false; break;}
                              if (!p2.receivedIndications?.find(ind => ind.indicatorId === p1.id && ind.genreContext === p2.currentAssignedGenre)) {
                                  allOriginalModesDone = false; break;
                              }
                          }
                          if (!allOriginalModesDone) break;
                      }
-                } else { 
+                } else {
                     allOriginalModesDone = false;
                 }
                 goToAnimeDrawPhaseButton.classList.toggle('hidden', !allOriginalModesDone || gameState.participants.length === 0);
             }
         }
 
-        async function handleIndicationSubmit(event, isClubIndication = false) {
+        async function handleIndicationSubmit(event, isClubIndication = false, forceIndicate = false) {
             const button = event.currentTarget;
             const indicatorId = button.dataset.indicatorId;
-            const receiverId = !isClubIndication ? button.dataset.receiverId : null; 
-            const inputElement = isClubIndication ? 
-                                 document.querySelector(`input.club-indication-input[data-indicator-id="${indicatorId}"]`) : 
-                                 document.querySelector(`input.indication-input[data-indicator-id="${indicatorId}"][data-receiver-id="${receiverId}"]`);
+            const receiverId = !isClubIndication ? button.dataset.receiverId : null;
+            const inputElement = isClubIndication ?
+                document.querySelector(`input.club-indication-input[data-indicator-id="${indicatorId}"]`) :
+                document.querySelector(`input.indication-input[data-indicator-id="${indicatorId}"][data-receiver-id="${receiverId}"]`);
             const inputValue = inputElement.value.trim();
 
             if (!inputValue) {
@@ -774,38 +799,91 @@
             }
 
             button.disabled = true;
-            button.textContent = '...';
+            button.textContent = 'Verificando...';
+
+            const isDirectUrlIndication = inputValue.match(/myanimelist\.net\/anime\/(\d+)/);
+            let performMalListCheck = !isClubIndication && !forceIndicate && !isDirectUrlIndication;
+
+
+            if (performMalListCheck) {
+                const receiver = gameState.participants.find(p => p.id === receiverId);
+                const receiverMalUsername = receiver?.malUsername;
+
+                if (receiverMalUsername && receiverMalUsername.trim() !== "") {
+                    let animeToIndicateMalId = null;
+                    let preliminaryAnimeTitle = inputValue;
+
+                    const searchResultsArray = await searchAnimeByName(inputValue, indicatorId, receiverId, isClubIndication, true /* isPreliminarySearch */);
+                    if (searchResultsArray && searchResultsArray.length > 0 && searchResultsArray[0].mal_id) {
+                        animeToIndicateMalId = searchResultsArray[0].mal_id;
+                        preliminaryAnimeTitle = searchResultsArray[0].title || inputValue;
+                    } else {
+                        showAlert(`Não foi possível encontrar o ID do anime "${inputValue}" para verificar a lista do MAL. A indicação será tentada sem verificação prévia.`, "warning", 4500);
+                        performMalListCheck = false;
+                    }
+
+                    if (performMalListCheck && animeToIndicateMalId) {
+                        showAlert(`Verificando "${preliminaryAnimeTitle}" na lista de ${receiverMalUsername}...`, 'info', 3000);
+                        await checkAnimeOnUserListsJikan(receiverMalUsername, animeToIndicateMalId, async (listStatusData) => {
+                            if (listStatusData && listStatusData.isOnList === true) {
+                                const statusTraduzido = listStatusData.status.replace('_', ' ');
+                                const confirm = await showConfirmAlert(`O anime "${preliminaryAnimeTitle}" JÁ ESTÁ na lista "${statusTraduzido}" de ${receiverMalUsername} no MAL. Deseja indicar mesmo assim?`);
+                                if (confirm) {
+                                    await proceedWithIndication(inputValue, indicatorId, receiverId, isClubIndication, button);
+                                } else {
+                                    button.disabled = false;
+                                    button.textContent = 'Indicar';
+                                }
+                            } else if (listStatusData && listStatusData.isOnList === false) {
+                                showAlert(`"${preliminaryAnimeTitle}" NÃO está em nenhuma lista de ${receiverMalUsername}. Indicando...`, "success", 2000);
+                                await proceedWithIndication(inputValue, indicatorId, receiverId, isClubIndication, button);
+                            } else {
+                                showAlert(`Não foi possível verificar a lista de ${receiverMalUsername} no MAL (usuário não encontrado pela Jikan ou erro na API). Tentando indicar diretamente...`, "warning");
+                                await proceedWithIndication(inputValue, indicatorId, receiverId, isClubIndication, button);
+                            }
+                        });
+                        return;
+                    }
+                } else {
+                     performMalListCheck = false;
+                }
+            }
+            await proceedWithIndication(inputValue, indicatorId, receiverId, isClubIndication, button);
+        }
+
+        async function proceedWithIndication(inputValue, indicatorId, receiverId, isClubIndication, buttonElement) {
+            buttonElement.disabled = true;
+            buttonElement.textContent = 'Indicando...';
 
             const malUrlMatch = inputValue.match(/myanimelist\.net\/anime\/(\d+)/);
             if (malUrlMatch && malUrlMatch[1]) {
                 const malId = malUrlMatch[1];
                 await fetchAnimeDetailsById(malId, indicatorId, receiverId, inputValue, isClubIndication);
             } else {
-                await searchAnimeByNameOnJikan(inputValue, indicatorId, receiverId, isClubIndication);
+                await searchAnimeByName(inputValue, indicatorId, receiverId, isClubIndication);
             }
-            button.disabled = false;
-            button.textContent = isClubIndication ? 'Indicar para o Clube' : 'Indicar'; 
+            buttonElement.disabled = false;
+            buttonElement.textContent = isClubIndication ? 'Indicar para o Clube' : 'Indicar';
         }
+
 
         async function handleClubIndicationSubmit(event) {
             await handleIndicationSubmit(event, true);
         }
-        
+
         function renderSearchResults(results) {
             searchResultsListDiv.innerHTML = '';
-            if (results.length === 0) {
+            if (!results || results.length === 0) {
                 searchResultsListDiv.innerHTML = '<p class="text-slate-400">Nenhum resultado encontrado.</p>';
                 return;
             }
             results.forEach(anime => {
-                const title = anime.title || anime.title_english || anime.title_japanese || "Título Desconhecido"; 
-                const imageUrl = anime.images?.jpg?.small_image_url || PLACEHOLDER_IMG_SEARCH_RESULT;
+                const title = anime.title || anime.titles?.find(t=>t.type === "Default")?.title || "Título Desconhecido";
+                const imageUrl = anime.images?.jpg?.image_url || PLACEHOLDER_IMG_SEARCH_RESULT;
                 const score = anime.score ? `<span class="score-badge">${anime.score.toFixed(2)}</span>` : '<span class="text-xs text-slate-400">N/A</span>';
                 const typeYear = `${anime.type || ''}${anime.year ? ' (' + anime.year + ')' : ''}`;
                 const episodes = anime.episodes ? `${anime.episodes} ep` : 'Ep. N/A';
                 const genres = anime.genres?.slice(0, 2).map(g => g.name).join(', ') || 'Gêneros N/A';
-                const themes = anime.themes?.slice(0, 1).map(t => t.name).join(', ') || '';
-                const demographics = anime.demographics?.map(d => d.name).join(', ') || '';
 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'search-result-item';
@@ -814,7 +892,7 @@
                         <div class="search-result-info">
                             <p class="font-semibold text-sky-300">${title}</p>
                             <p class="text-xs text-slate-300">${typeYear} - ${episodes}</p>
-                            <p class="text-xs text-slate-400">${[genres, themes, demographics].filter(Boolean).join(' | ')}</p>
+                            <p class="text-xs text-slate-400">${genres}</p>
                         </div>
                         <div class="search-result-actions flex flex-col items-end gap-1 ml-auto">
                             ${score}
@@ -827,43 +905,58 @@
             searchResultsModal.classList.remove('hidden');
         }
 
-        async function searchAnimeByNameOnJikan(query, indicatorId, receiverId, isClubIndication = false) {
+        async function searchAnimeByName(query, indicatorId, receiverId, isClubIndication = false, isPreliminarySearch = false) {
             try {
-                const response = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=10`);
-                if (!response.ok) { const err = await response.json(); throw new Error(`Jikan Search API: ${response.status} - ${err.message || 'Erro'}`); }
+                const response = await fetch(`${JIKAN_API_BASE_URL}/anime?q=${encodeURIComponent(query)}&limit=10`);
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({message: response.statusText}));
+                    throw new Error(`Jikan Search API: ${response.status} - ${err.message || 'Erro desconhecido'}`);
+                }
                 const data = await response.json();
-                
+
+                if (isPreliminarySearch) {
+                    return data.data;
+                }
+
                 if (!data.data || data.data.length === 0) {
                     showAlert(`Nenhum resultado encontrado para "${query}". Tente uma URL direta do MAL.`, "info");
                     return;
                 }
-                currentSearchContext = { indicatorId, receiverId, isClubIndication }; 
-                renderSearchResults(data.data); 
+                currentSearchContext = { indicatorId, receiverId, isClubIndication };
+                renderSearchResults(data.data);
             } catch (error) {
-                console.error("Erro ao buscar animes por nome:", error);
-                showAlert(`Erro na busca: ${error.message}. Tente uma URL direta.`, "error");
+                console.error("Erro ao buscar animes por nome na API Jikan:", error);
+                showAlert(`Erro na busca Jikan: ${error.message}.`, "error");
+                if (isPreliminarySearch) return null;
             }
         }
 
         async function handleSearchResultSelection(event) {
             const button = event.currentTarget;
             const malId = button.dataset.malId;
-            const malUrl = button.dataset.malUrl; 
+            const malUrl = button.dataset.malUrl;
             if (currentSearchContext && malId) {
                 await fetchAnimeDetailsById(malId, currentSearchContext.indicatorId, currentSearchContext.receiverId, malUrl, currentSearchContext.isClubIndication);
             }
             searchResultsModal.classList.add('hidden');
-            currentSearchContext = null; 
+            currentSearchContext = null;
         }
 
-        async function fetchAnimeDetailsById(malId, indicatorId, receiverId, originalMalUrl, isClubIndication = false) {
+        async function fetchAnimeDetailsById(malId, indicatorId, receiverId, originalMalUrl, isClubIndication = false, isForVerificationOnly = false) {
             try {
-                const response = await fetch(`https://api.jikan.moe/v4/anime/${malId}`);
-                if (!response.ok) { const err = await response.json(); throw new Error(`Jikan Detail API: ${response.status} - ${err.message || 'Erro'}`);}
+                const response = await fetch(`${JIKAN_API_BASE_URL}/anime/${malId}`);
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({message: response.statusText}));
+                    throw new Error(`Jikan Detail API: ${response.status} - ${err.message || 'Erro desconhecido'}`);
+                }
                 const data = await response.json(); const animeData = data.data;
-                const animeTitle = animeData.title || animeData.title_english || animeData.title_japanese || 'Título Desconhecido'; 
+                const animeTitle = animeData.title || animeData.titles?.find(t=>t.type === "Default")?.title || 'Título Desconhecido';
                 const animeImageUrl = animeData.images?.jpg?.large_image_url || animeData.images?.jpg?.image_url || PLACEHOLDER_IMG_60x90;
-                const score = animeData.score || null; 
+                const score = animeData.score || null;
+
+                if (isForVerificationOnly) {
+                    return { title: animeTitle, mal_id: animeData.mal_id };
+                }
 
                 const indicator = gameState.participants.find(p => p.id === indicatorId);
 
@@ -871,14 +964,14 @@
                     if (!gameState.clubIndications) gameState.clubIndications = [];
                     gameState.clubIndications = gameState.clubIndications.filter(ind => ind.indicatorId !== indicatorId);
                     gameState.clubIndications.push({
-                        indicatorId, 
-                        indicatorName: indicator.name, 
-                        malId, 
-                        animeTitle, 
-                        animeImageUrl, 
-                        malUrl: originalMalUrl || animeData.url, 
-                        score,
-                        genreContext: gameState.clubGenre.name 
+                        indicatorId,
+                        indicatorName: indicator.name,
+                        malId,
+                        animeTitle,
+                        animeImageUrl,
+                        malUrl: originalMalUrl || animeData.url,
+                        score, // Manter score nos dados
+                        genreContext: gameState.clubGenre.name
                     });
                     showAlert(`"${animeTitle}" indicado por ${indicator.name} para o gênero do clube: ${gameState.clubGenre.name}!`, "success");
                 } else {
@@ -888,34 +981,83 @@
                         return;
                     }
                     if (!receiver.receivedIndications) receiver.receivedIndications = [];
-                    receiver.receivedIndications = receiver.receivedIndications.filter(ind => !(ind.indicatorId === indicatorId && ind.genreContext === receiver.currentAssignedGenre) ); 
-                    
-                    receiver.receivedIndications.push({ 
-                        indicatorId, 
-                        indicatorName: indicator.name, 
-                        malId, 
-                        animeTitle, 
-                        animeImageUrl, 
-                        malUrl: originalMalUrl || animeData.url, 
-                        score, 
+                    receiver.receivedIndications = receiver.receivedIndications.filter(ind => !(ind.indicatorId === indicatorId && ind.genreContext === receiver.currentAssignedGenre) );
+
+                    receiver.receivedIndications.push({
+                        indicatorId,
+                        indicatorName: indicator.name,
+                        malId,
+                        animeTitle,
+                        animeImageUrl,
+                        malUrl: originalMalUrl || animeData.url,
+                        score, // Manter score nos dados
                         status: 'pending',
-                        genreContext: receiver.currentAssignedGenre 
+                        genreContext: receiver.currentAssignedGenre
                     });
                     showAlert(`"${animeTitle}" indicado para ${receiver.name} (Gênero: ${receiver.currentAssignedGenre})!`, "success");
                 }
                 renderApp();
             } catch (error) {
-                console.error("Erro ao buscar detalhes do anime por ID:", error);
-                showAlert(`Erro ao buscar detalhes: ${error.message}.`, "error");
+                console.error("Erro ao buscar detalhes do anime por ID na API Jikan:", error);
+                showAlert(`Erro ao buscar detalhes Jikan: ${error.message}.`, "error");
+                 if (isForVerificationOnly) return null;
             }
         }
 
-        function handleRemoveIndication(event) { 
+        async function checkAnimeOnUserListsJikan(username, animeMalId, callback) {
+            if (!username || !animeMalId) {
+                if (callback) callback(null);
+                return;
+            }
+            console.log(`[checkAnimeOnUserListsJikan] Verificando anime ID ${animeMalId} em TODAS as listas de ${username}`);
+            try {
+                const response = await fetch(`${JIKAN_API_BASE_URL}/users/${username}/animelist`);
+
+                if (response.status === 404 || response.status === 400) {
+                    console.warn(`[checkAnimeOnUserListsJikan] Usuário ${username} não encontrado ou inválido na Jikan (status ${response.status}).`);
+                    if (callback) callback(null);
+                    return;
+                }
+                if (!response.ok) {
+                    const errText = await response.text();
+                    console.error(`[checkAnimeOnUserListsJikan] Erro da API Jikan ao buscar lista de ${username}: ${response.status} - ${errText}`);
+                    if (callback) callback(null);
+                    return;
+                }
+                const data = await response.json();
+                console.log(`[checkAnimeOnUserListsJikan] Lista completa de ${username} recebida:`, data.data?.length, "entradas");
+
+                if (data && data.data) {
+                    const entry = data.data.find(e => e.anime?.mal_id == animeMalId);
+                    if (entry) {
+                        console.log(`[checkAnimeInUserListJikan] Anime ID ${animeMalId} ENCONTRADO na lista de ${username} com status "${entry.status}".`);
+                        if (callback) callback({ isOnList: true, status: entry.status });
+                    } else {
+                        console.log(`[checkAnimeInUserListJikan] Anime ID ${animeMalId} NÃO ENCONTRADO em nenhuma lista de ${username}.`);
+                        if (callback) callback({ isOnList: false });
+                    }
+                } else {
+                    console.warn(`[checkAnimeInUserListJikan] Nenhum dado na lista de ${username}.`);
+                    if (callback) callback({ isOnList: false });
+                }
+            } catch (error) {
+                console.error(`[checkAnimeInUserListJikan] Erro ao verificar lista de animes de ${username}:`, error);
+                if (callback) callback(null);
+            }
+        }
+
+        async function handleCheckMalList(event) {
+            showAlert("Funcionalidade de verificação agora é automática ao indicar.", "info");
+            console.log("handleCheckMalList chamada, mas a verificação agora é automática.");
+        }
+
+
+        function handleRemoveIndication(event) {
             const button = event.currentTarget;
             const indicatorId = button.dataset.indicatorId;
             const receiverId = button.dataset.receiverId;
             const receiver = gameState.participants.find(p => p.id === receiverId);
-            
+
             if (receiver && receiver.receivedIndications) {
                 const indicationToRemove = receiver.receivedIndications.find(ind => ind.indicatorId === indicatorId && ind.genreContext === receiver.currentAssignedGenre);
                 if (indicationToRemove) {
@@ -925,7 +1067,7 @@
                 }
             }
         }
-        function handleRemoveClubIndication(event) { 
+        function handleRemoveClubIndication(event) {
             const button = event.currentTarget;
             const indicatorId = button.dataset.indicatorId;
             if (gameState.clubIndications) {
@@ -939,10 +1081,10 @@
         }
 
 
-        function renderAnimeDrawPhase() { 
+        function renderAnimeDrawPhase() {
             const isClubMode = gameState.gameMode === 'clube_sorteado' || gameState.gameMode === 'clube_escolhido';
             animeDrawPhaseTitle.textContent = isClubMode ? "📺 Sorteio de Anime do Clube" : "📺 Sorteio de Anime para Assistir";
-            
+
             clubGenreForAnimeDrawDisplay.classList.toggle('hidden', !isClubMode || !gameState.clubGenre);
             if (isClubMode && gameState.clubGenre) {
                 clubGenreForAnimeDrawIcon.src = gameState.clubGenre.imageUrl || PLACEHOLDER_IMG_GENRE_ICON;
@@ -950,15 +1092,14 @@
             }
 
             participantsToDrawAnimeListDiv.classList.toggle('hidden', isClubMode);
-            drawClubAnimeButton.classList.toggle('hidden', !isClubMode || gameState.clubAnimeIndication); // Hide if anime already drawn for club
-            
-            participantsToDrawAnimeListDiv.innerHTML = ''; 
+            drawClubAnimeButton.classList.toggle('hidden', !isClubMode || gameState.clubAnimeIndication);
+
+            participantsToDrawAnimeListDiv.innerHTML = '';
 
             if (isClubMode) {
-                // If club anime is already drawn, show it
                 if(gameState.clubAnimeIndication) {
                     const anime = gameState.clubAnimeIndication;
-                    const scoreHTML = anime.score ? `<span class="score-badge ml-2">${anime.score.toFixed(2)}</span>` : '';
+                    const scoreHTML = anime.score ? `<span class="score-badge">${anime.score.toFixed(2)}</span>` : '';
                     participantsToDrawAnimeListDiv.innerHTML = `
                         <div class="p-4 bg-slate-700/70 rounded-lg shadow-md text-center">
                             <h3 class="text-xl font-semibold text-green-400 mb-2">Anime Sorteado para o Clube:</h3>
@@ -971,20 +1112,20 @@
                 }
                 const allClubIndicationsMade = gameState.participants.length > 0 && gameState.participants.every(p => gameState.clubIndications.some(ind => ind.indicatorId === p.id));
                 drawClubAnimeButton.disabled = !(gameState.clubIndications && gameState.clubIndications.length > 0 && allClubIndicationsMade);
-                goToWatchLoopButton.classList.toggle('hidden', !gameState.clubAnimeIndication); 
-            } else { // Individual modes
+                goToWatchLoopButton.classList.toggle('hidden', !gameState.clubAnimeIndication);
+            } else {
                 let participantsYetToDrawAnime = 0;
                 gameState.participants.forEach(p => {
-                    if (!p.animeToWatch && p.currentAssignedGenre) { 
+                    if (!p.animeToWatch && p.currentAssignedGenre) {
                         const indicationsForCurrentGenre = p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.currentAssignedGenre).length || 0;
-                        if (indicationsForCurrentGenre > 0) { 
+                        if (indicationsForCurrentGenre > 0) {
                             participantsYetToDrawAnime++;
                             const div = document.createElement('div');
                             div.className = 'flex items-center justify-between bg-slate-700 p-3 rounded-lg shadow';
                             div.innerHTML = `<span class="text-indigo-300">${p.name} (Gênero: ${p.currentAssignedGenre})</span>
                                                  <button data-id="${p.id}" class="draw-anime-button bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">Sortear Anime para ${p.name.split(' ')[0]}</button>`;
                             participantsToDrawAnimeListDiv.appendChild(div);
-                        } else if (p.currentAssignedGenre) { 
+                        } else if (p.currentAssignedGenre) {
                              const pEl = document.createElement('p');
                              pEl.className = 'text-slate-400 p-3 bg-slate-700 rounded-lg shadow';
                              pEl.innerHTML = `${p.name} - Aguardando indicações para o gênero ${p.currentAssignedGenre}.`;
@@ -998,9 +1139,9 @@
                     }
                 });
 
-                const allParticipantsHaveAnimeOrNoGenreOrNoIndications = gameState.participants.every(p => 
-                    p.animeToWatch || 
-                    !p.currentAssignedGenre || 
+                const allParticipantsHaveAnimeOrNoGenreOrNoIndications = gameState.participants.every(p =>
+                    p.animeToWatch ||
+                    !p.currentAssignedGenre ||
                     (p.currentAssignedGenre && (p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.currentAssignedGenre).length === 0))
                 );
 
@@ -1009,14 +1150,14 @@
                 } else if (gameState.participants.length === 0) {
                     participantsToDrawAnimeListDiv.innerHTML = '<p class="text-slate-400 text-center p-3">Nenhum participante.</p>';
                 }
-                document.querySelectorAll('.draw-anime-button').forEach(btn => btn.onclick = e => handleDrawAnimeForParticipant(e.currentTarget.dataset.id)); 
+                document.querySelectorAll('.draw-anime-button').forEach(btn => btn.onclick = e => handleDrawAnimeForParticipant(e.currentTarget.dataset.id));
                 goToWatchLoopButton.classList.toggle('hidden', participantsYetToDrawAnime > 0 || gameState.participants.length === 0);
             }
         }
-        
-        function handleDrawAnimeForParticipant(viewerId) { 
+
+        function handleDrawAnimeForParticipant(viewerId) {
             const viewer = gameState.participants.find(p => p.id === viewerId);
-            if (!viewer || viewer.animeToWatch) return; 
+            if (!viewer || viewer.animeToWatch) return;
             if (!viewer.currentAssignedGenre) {
                 showAlert(`Nenhum gênero atual definido para ${viewer.name}. Volte para o sorteio de gênero.`, "error");
                 return;
@@ -1025,16 +1166,16 @@
             const pendingIndications = viewer.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === viewer.currentAssignedGenre);
             if (!pendingIndications || pendingIndications.length === 0) {
                 showAlert(`Nenhum anime foi indicado para ${viewer.name} no gênero ${viewer.currentAssignedGenre}. Redirecionando para indicações.`, "error");
-                gameState.currentPhase = PHASES.INDICATION; 
-                gameState.currentIndicatorTabId = gameState.participants.find(p => p.id !== viewerId)?.id || gameState.participants[0]?.id; 
-                renderApp(); 
+                gameState.currentPhase = PHASES.INDICATION;
+                gameState.currentIndicatorTabId = gameState.participants.find(p => p.id !== viewerId)?.id || gameState.participants[0]?.id;
+                renderApp();
                 return;
             }
             const randomIndex = Math.floor(Math.random() * pendingIndications.length);
             const chosenIndication = pendingIndications[randomIndex];
-            
-            viewer.animeToWatch = { ...chosenIndication, statusInternal: 'watching' }; 
-            showAnimeRevealModal(viewer.name, viewer.animeToWatch); 
+
+            viewer.animeToWatch = { ...chosenIndication, statusInternal: 'watching' };
+            showAnimeRevealModal(viewer.name, viewer.animeToWatch);
             renderApp();
         }
 
@@ -1052,38 +1193,36 @@
             const chosenClubAnime = gameState.clubIndications[randomIndex];
             gameState.clubAnimeIndication = { ...chosenClubAnime };
 
-            showAnimeRevealModal("o Clube", gameState.clubAnimeIndication); 
-            
-            // gameState.currentPhase = PHASES.CLUB_RESULT_DISPLAY; // Transition to results after drawing
-            renderApp(); // Re-render to show the drawn anime and update buttons
+            showAnimeRevealModal("o Clube", gameState.clubAnimeIndication);
+            renderApp();
         }
-        
-        function showAnimeRevealModal(participantName, anime) { 
+
+        function showAnimeRevealModal(participantName, anime) {
             animeRevealParticipantName.textContent = `Anime para ${participantName} assistir!`;
             animeRevealCover.src = anime.animeImageUrl || PLACEHOLDER_IMG_150x225;
             animeRevealCover.alt = `Capa de ${anime.animeTitle}`;
             animeRevealTitleLink.href = anime.malUrl || '#';
             animeRevealTitleLink.textContent = anime.animeTitle;
             animeRevealIndicator.textContent = anime.indicatorName;
-            animeRevealScore.innerHTML = anime.score ? `<span class="score-badge">${anime.score.toFixed(2)}</span>` : '';
+            animeRevealScore.innerHTML = anime.score ? `<span class="score-badge">${anime.score.toFixed(2)}</span>` : ''; // Mantém na modal
             animeRevealModal.classList.remove('hidden');
         }
 
         function renderWatchLoopPhase() {
             const isClubMode = gameState.gameMode === 'clube_sorteado' || gameState.gameMode === 'clube_escolhido';
-            
+
             if (watchLoopPhaseTitle) {
                 watchLoopPhaseTitle.textContent = isClubMode ? "👀 Resultado do Bingo Clube" : "👀 Acompanhamento de Animes";
             }
 
             if (watchLoopContentIndividual) watchLoopContentIndividual.classList.toggle('hidden', isClubMode);
             if (watchLoopContentClub) watchLoopContentClub.classList.toggle('hidden', !isClubMode || !gameState.clubAnimeIndication);
-            
+
             if (isClubMode) {
                 if (exportWatchListButton) exportWatchListButton.classList.add('hidden');
                 if (exportFullIndicationHistoryButton) exportFullIndicationHistoryButton.classList.toggle('hidden', !gameState.clubIndications || gameState.clubIndications.length === 0);
                 if (exportClubResultButton) exportClubResultButton.classList.toggle('hidden', !gameState.clubAnimeIndication);
-            } else { 
+            } else {
                 if (exportWatchListButton) exportWatchListButton.classList.remove('hidden');
                 if (exportClubResultButton) exportClubResultButton.classList.add('hidden');
                 const hasAnyIndividualIndications = gameState.participants.some(p => p.receivedIndications && p.receivedIndications.length > 0);
@@ -1095,42 +1234,47 @@
                 if (clubResultGenreIcon) {
                     clubResultGenreIcon.src = gameState.clubGenre.imageUrl ? gameState.clubGenre.imageUrl : PLACEHOLDER_IMG_GENRE_ICON;
                     clubResultGenreIcon.alt = gameState.clubGenre.name || 'Ícone Gênero';
-                } 
+                }
                 if (clubResultGenreName) clubResultGenreName.textContent = gameState.clubGenre.name || 'Gênero não definido';
                 if (clubResultAnimeCover) {
                     clubResultAnimeCover.src = gameState.clubAnimeIndication.animeImageUrl ? gameState.clubAnimeIndication.animeImageUrl : PLACEHOLDER_IMG_150x225;
                     clubResultAnimeCover.alt = `Capa de ${gameState.clubAnimeIndication.animeTitle || 'Anime não definido'}`;
-                } 
+                }
                 if (clubResultAnimeTitleLink) {
                     clubResultAnimeTitleLink.href = gameState.clubAnimeIndication.malUrl || '#';
-                    clubResultAnimeTitleLink.textContent = gameState.clubAnimeIndication.animeTitle || 'Título não disponível';
+                    let titleHTML = gameState.clubAnimeIndication.animeTitle || 'Título não disponível';
+                    // Mantendo o score na UI da tela, mas será removido da exportação PNG
+                    if (gameState.clubAnimeIndication.score) {
+                         titleHTML += ` <span class="score-badge">${gameState.clubAnimeIndication.score.toFixed(2)}</span>`;
+                    }
+                    clubResultAnimeTitleLink.innerHTML = titleHTML;
                 }
                 if (clubResultAnimeIndicator) clubResultAnimeIndicator.textContent = `Indicado por: ${gameState.clubAnimeIndication.indicatorName || 'Desconhecido'}`;
                 if (clubResultParticipantsList) clubResultParticipantsList.innerHTML = gameState.participants.map(p => `<span class="inline-block bg-slate-600 px-2 py-1 rounded-md text-sm mr-2 mb-2">${p.name}</span>`).join('');
             } else if (!isClubMode) {
                 if (watchLoopContentIndividual) {
-                    watchLoopContentIndividual.innerHTML = ''; 
-                    let allParticipantsFinishedAllCycles = true; 
+                    watchLoopContentIndividual.innerHTML = '';
+                    let allParticipantsFinishedAllCycles = true;
 
                     gameState.participants.forEach(p => {
                         const card = document.createElement('div');
                         card.className = 'p-4 bg-slate-700/70 rounded-lg shadow-md mb-4';
-                        const genreDetails = initialGenres.find(g => g.name === p.currentAssignedGenre); 
+                        const genreDetails = initialGenres.find(g => g.name === p.currentAssignedGenre);
                         let contentHTML = `<h3 class="text-xl font-semibold text-indigo-300 mb-2">${p.name}</h3>`;
-                        if (genreDetails) { 
+                        if (genreDetails) {
                             contentHTML += `<p class="text-sm text-slate-400 mb-2">Gênero Atual: <img src="${genreDetails.imageUrl || PLACEHOLDER_IMG_SEARCH_RESULT}" alt="${genreDetails.name}" class="inline-block w-5 h-5 object-contain mx-1 rounded-sm"> ${genreDetails.name}</p>`;
                         } else if (p.assignedGenre && !p.currentAssignedGenre && (p.genreHistory?.length || 0) >= initialGenres.length && gameState.gameMode === 'infinito') {
                              contentHTML += `<p class="text-green-400 font-semibold">🎉 ${p.name} finalizou todos os ciclos de gênero!</p>`;
-                        } else if (!p.currentAssignedGenre && p.assignedGenre && gameState.gameMode === 'tradicional'){ 
+                        } else if (!p.currentAssignedGenre && p.assignedGenre && gameState.gameMode === 'tradicional'){
                             const initialGenreDetails = initialGenres.find(g => g.name === p.assignedGenre);
                             if(initialGenreDetails) contentHTML += `<p class="text-sm text-slate-400 mb-2">Gênero Sorteado: <img src="${initialGenreDetails.imageUrl || PLACEHOLDER_IMG_SEARCH_RESULT}" alt="${initialGenreDetails.name}" class="inline-block w-5 h-5 object-contain mx-1 rounded-sm"> ${initialGenreDetails.name}</p>`;
                         }
-                        
+
                         const pendingIndicationsForCurrentGenre = p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.currentAssignedGenre) || [];
 
                         if (p.animeToWatch && p.animeToWatch.statusInternal === 'watching') {
                             allParticipantsFinishedAllCycles = false;
-                            const scoreHTML = p.animeToWatch.score ? `<span class="score-badge ml-2">${p.animeToWatch.score.toFixed(2)}</span>` : '';
+                            const scoreHTML = p.animeToWatch.score ? `<span class="score-badge">${p.animeToWatch.score.toFixed(2)}</span>` : '';
                             contentHTML += `
                                     <p class="text-sm text-slate-300 mb-1">Assistindo agora:</p>
                                     <div class="flex items-center gap-3 mb-3 p-2 bg-slate-600 rounded">
@@ -1143,11 +1287,11 @@
                                     </div>
                                     <button data-id="${p.id}" class="mark-as-watched-button bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full">Marcar como Visto</button>
                             `;
-                        } else if (p.currentAssignedGenre && pendingIndicationsForCurrentGenre.length > 0) { 
+                        } else if (p.currentAssignedGenre && pendingIndicationsForCurrentGenre.length > 0) {
                             allParticipantsFinishedAllCycles = false;
                             contentHTML += `<button data-id="${p.id}" class="draw-next-anime-button bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full">Sortear Próximo Anime (Gênero: ${p.currentAssignedGenre})</button>`;
-                        } else if (p.currentAssignedGenre && pendingIndicationsForCurrentGenre.length === 0) { 
-                            allParticipantsFinishedAllCycles = false; 
+                        } else if (p.currentAssignedGenre && pendingIndicationsForCurrentGenre.length === 0) {
+                            allParticipantsFinishedAllCycles = false;
                              contentHTML += `<p class="text-yellow-400 mb-2">Aguardando indicações para o gênero: ${p.currentAssignedGenre}.</p>`;
                              contentHTML += `<button data-id="${p.id}" class="go-to-indicate-for-participant-button bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full">Ir para Indicações</button>`;
                              if (gameState.gameMode === 'infinito') {
@@ -1159,20 +1303,20 @@
                                  } else if (p.receivedIndications?.filter(ind => ind.status === 'watched').length === p.receivedIndications?.length && p.receivedIndications?.length > 0){
                                      contentHTML = `<p class="text-green-400 font-semibold">🎉 ${p.name} finalizou todos os ciclos de gênero!</p>`;
                                  }
-                             } else { 
+                             } else {
                                  contentHTML = `<p class="text-green-400 font-semibold">🎉 ${p.name} concluiu as indicações para o gênero ${p.currentAssignedGenre}!</p>`;
                              }
-                        } else if (!p.currentAssignedGenre && p.assignedGenre && gameState.gameMode === 'infinito') { 
+                        } else if (!p.currentAssignedGenre && p.assignedGenre && gameState.gameMode === 'infinito') {
                             allParticipantsFinishedAllCycles = false;
                             contentHTML += `<button data-id="${p.id}" class="draw-new-genre-button bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full mt-2">Sortear Novo Gênero</button>`;
-                        } else if (!p.currentAssignedGenre && !p.assignedGenre) { 
+                        } else if (!p.currentAssignedGenre && !p.assignedGenre) {
                              allParticipantsFinishedAllCycles = false;
                              contentHTML += `<p class="text-slate-400">Aguardando sorteio inicial de gênero.</p>`;
-                        } else { 
+                        } else {
                             if(gameState.gameMode === 'tradicional' || (p.genreHistory && p.genreHistory.length >= initialGenres.length)) {
                                 contentHTML += `<p class="text-green-400 font-semibold">🎉 ${p.name} finalizou sua participação!</p>`;
                             } else {
-                                allParticipantsFinishedAllCycles = false; 
+                                allParticipantsFinishedAllCycles = false;
                                 contentHTML += `<p class="text-slate-400">Aguardando próximo passo.</p>`;
                             }
                         }
@@ -1182,20 +1326,20 @@
                             contentHTML += `<h4 class="text-sm font-medium text-slate-400 mt-4 mb-1">Animes já vistos:</h4><ul class="list-disc list-inside text-xs text-slate-500">`;
                             watchedAnimesInHistory.forEach(ind => {
                                 const scoreText = ind.score ? ` (Nota: ${ind.score.toFixed(2)})` : '';
-                                const genreContextText = ind.genreContext ? ` <span class="text-slate-400 italic">(Gênero: ${ind.genreContext})</span>` : ''; 
+                                const genreContextText = ind.genreContext ? ` <span class="text-slate-400 italic">(Gênero: ${ind.genreContext})</span>` : '';
                                 contentHTML += `<li><a href="${ind.malUrl}" target="_blank" class="hover:underline">${ind.animeTitle}</a>${scoreText} (por ${ind.indicatorName})${genreContextText}</li>`;
                             });
                             contentHTML += `</ul>`;
                         }
                         card.innerHTML = contentHTML;
-                        watchLoopContentIndividual.appendChild(card); 
+                        watchLoopContentIndividual.appendChild(card);
                     });
-                    
+
                     const everyoneTrulyFinishedOriginalModes = gameState.participants.every(p => {
                         if (gameState.gameMode === 'tradicional') {
                             const pendingForCurrentGenre = p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.assignedGenre).length || 0;
                             return !p.animeToWatch && pendingForCurrentGenre === 0;
-                        } else { // Modo Infinito
+                        } else {
                             const lastGenre = p.genreHistory && p.genreHistory.length > 0 ? p.genreHistory[p.genreHistory.length - 1] : null;
                             let availableNewGenres = initialGenres.filter(g => g.name !== lastGenre);
                             if (p.genreHistory && p.genreHistory.length >= initialGenres.length) availableNewGenres = [];
@@ -1207,45 +1351,45 @@
                     }
                 }
             }
-            
+
             document.querySelectorAll('.mark-as-watched-button').forEach(btn => btn.onclick = e => handleMarkAsWatched(e.currentTarget.dataset.id));
             document.querySelectorAll('.draw-next-anime-button').forEach(btn => btn.onclick = e => handleDrawNextAnimeToWatch(e.currentTarget.dataset.id));
             document.querySelectorAll('.draw-new-genre-button').forEach(btn => btn.onclick = e => drawNewGenreForParticipant(e.currentTarget.dataset.id));
             document.querySelectorAll('.go-to-indicate-for-participant-button').forEach(btn => {
                 btn.onclick = (e) => {
                     const participantId = e.currentTarget.dataset.id;
-                    gameState.currentIndicatorTabId = gameState.participants.find(p => p.id !== participantId)?.id || gameState.participants[0]?.id; 
+                    gameState.currentIndicatorTabId = gameState.participants.find(p => p.id !== participantId)?.id || gameState.participants[0]?.id;
                     gameState.currentPhase = PHASES.INDICATION;
                     renderApp();
                 };
             });
         }
-        
+
         function handleMarkAsWatched(participantId) {
             const participant = gameState.participants.find(p => p.id === participantId);
             if (participant && participant.animeToWatch) {
                 if (!participant.watchedAnimesHistory) participant.watchedAnimesHistory = [];
                 participant.watchedAnimesHistory.push({
                     ...participant.animeToWatch,
-                    genreContext: participant.currentAssignedGenre 
+                    genreContext: participant.currentAssignedGenre
                 });
 
-                const indicationInList = participant.receivedIndications.find(ind => 
-                    ind.malId === participant.animeToWatch.malId && 
+                const indicationInList = participant.receivedIndications.find(ind =>
+                    ind.malId === participant.animeToWatch.malId &&
                     ind.indicatorId === participant.animeToWatch.indicatorId &&
-                    ind.genreContext === participant.currentAssignedGenre 
+                    ind.genreContext === participant.currentAssignedGenre
                 );
                 if (indicationInList) {
                     indicationInList.status = 'watched';
                 }
-                
-                participant.animeToWatch = null; 
+
+                participant.animeToWatch = null;
                 showAlert("Anime marcado como visto!", "success");
 
                 if(gameState.gameMode === 'infinito') {
-                    drawNewGenreForParticipant(participantId); 
-                } else { 
-                    renderApp(); 
+                    drawNewGenreForParticipant(participantId);
+                } else {
+                    renderApp();
                 }
             }
         }
@@ -1255,15 +1399,15 @@
             if (!participant) return;
 
             const lastGenre = participant.genreHistory && participant.genreHistory.length > 0 ? participant.genreHistory[participant.genreHistory.length - 1] : null;
-            
+
             let availableGenresForNewDraw = initialGenres.filter(g => g.name !== lastGenre);
-            if (availableGenresForNewDraw.length === 0 && initialGenres.length > 0) { 
-                 availableGenresForNewDraw = initialGenres; 
+            if (availableGenresForNewDraw.length === 0 && initialGenres.length > 0) {
+                 availableGenresForNewDraw = initialGenres;
             }
-            if (availableGenresForNewDraw.length === 0) { 
+            if (availableGenresForNewDraw.length === 0) {
                 showAlert(`Todos os gêneros já foram sorteados para ${participant.name}! Ele finalizou o bingo!`, "success", 5000);
-                participant.currentAssignedGenre = null; 
-                renderApp(); 
+                participant.currentAssignedGenre = null;
+                renderApp();
                 return;
             }
 
@@ -1272,56 +1416,55 @@
 
             participant.currentAssignedGenre = chosenNewGenre.name;
             if(!participant.genreHistory) participant.genreHistory = [];
-            participant.genreHistory.push(chosenNewGenre.name); 
-            
-            // Clear pending indications for the new genre cycle, keep watched ones
+            participant.genreHistory.push(chosenNewGenre.name);
+
             participant.receivedIndications = participant.receivedIndications.filter(ind => ind.status === 'watched');
-            
+
             showAlert(`Novo gênero sorteado para ${participant.name}: ${chosenNewGenre.name}! Indiquem animes!`, "success", 5000);
             showGenreRevealModal(participant.name, { ...chosenNewGenre, drawnNumber: newDrawnNumber, imageUrl: chosenNewGenre.imageUrl });
-            
+
             gameState.currentPhase = PHASES.INDICATION;
-            gameState.currentIndicatorTabId = gameState.participants.find(p => p.id !== participantId)?.id || gameState.participants[0]?.id; 
-            renderApp(); 
+            gameState.currentIndicatorTabId = gameState.participants.find(p => p.id !== participantId)?.id || gameState.participants[0]?.id;
+            renderApp();
         }
 
 
         function handleDrawNextAnimeToWatch(participantId) {
             const participant = gameState.participants.find(p => p.id === participantId);
-            if (!participant || participant.animeToWatch) return; 
+            if (!participant || participant.animeToWatch) return;
 
             const pendingIndications = participant.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === participant.currentAssignedGenre);
-            
+
             if (!pendingIndications || pendingIndications.length === 0) {
                 showAlert(`Nenhum anime pendente indicado para ${participant.name} no gênero ${participant.currentAssignedGenre}. Peça indicações!`, "info", 4000);
-                if (gameState.gameMode === 'infinito') { 
+                if (gameState.gameMode === 'infinito') {
                     gameState.currentPhase = PHASES.INDICATION;
-                    gameState.currentIndicatorTabId = gameState.participants.find(p => p.id !== participantId)?.id || gameState.participants[0]?.id; 
+                    gameState.currentIndicatorTabId = gameState.participants.find(p => p.id !== participantId)?.id || gameState.participants[0]?.id;
                 }
-                renderApp(); 
+                renderApp();
                 return;
             }
             const randomIndex = Math.floor(Math.random() * pendingIndications.length);
             const chosenIndication = pendingIndications[randomIndex];
-            
+
             participant.animeToWatch = { ...chosenIndication, statusInternal: 'watching' };
-            showAnimeRevealModal(participant.name, participant.animeToWatch); 
+            showAnimeRevealModal(participant.name, participant.animeToWatch);
             renderApp();
         }
-        
+
         function renderGenreGridFooter() {
-            if (!genreGridFooterDiv) { return; } 
+            if (!genreGridFooterDiv) { return; }
             genreGridFooterDiv.innerHTML = '';
-            initialGenres.forEach(genre => { 
+            initialGenres.forEach(genre => {
                 const div = document.createElement('div');
-                div.className = 'genre-legend-item bg-slate-700 rounded-lg shadow text-center'; 
-                
-                let overlayHTMLContent = ''; 
+                div.className = 'genre-legend-item bg-slate-700 rounded-lg shadow text-center';
+
+                let overlayHTMLContent = '';
                 if (gameState.gameMode === 'infinito' || gameState.gameMode === 'tradicional') {
                     const participantsWithThisGenre = gameState.participants?.filter(p => p.currentAssignedGenre === genre.name) || [];
                     if (participantsWithThisGenre.length > 0) {
-                        div.classList.add('assigned'); 
-                        const names = participantsWithThisGenre.map(p => p.name.split(' ')[0]).join(', '); 
+                        div.classList.add('assigned');
+                        const names = participantsWithThisGenre.map(p => p.name.split(' ')[0]).join(', ');
                         overlayHTMLContent = `
                             <div class="genre-participant-overlay">
                                 <span class="name">${names}</span>
@@ -1329,37 +1472,37 @@
                             </div>`;
                     }
                 }
-                
+
                 if (gameState.gameMode === 'clube_escolhido' && gameState.currentPhase === PHASES.CLUB_GENRE_SETUP) {
                     if (gameState.clubGenre && gameState.clubGenre.name === genre.name) {
                         div.classList.add('selected-for-club');
                     }
                     div.onclick = () => handleChooseClubGenre(genre.name, genre.imageUrl, genre.numbers ? genre.numbers[0] : undefined);
                 } else {
-                    div.onclick = null; 
+                    div.onclick = null;
                 }
-                
+
                 div.innerHTML = `
                         <div class="genre-image-wrapper">
                             <img src="${genre.imageUrl || PLACEHOLDER_IMG_GENRE_ICON}" alt="${genre.name}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG_ERROR_60x90}';">
                         </div>
                         <p class="text-indigo-300 leading-tight">${genre.name}</p>
-                        ${overlayHTMLContent}`; 
+                        ${overlayHTMLContent}`;
                 genreGridFooterDiv.appendChild(div);
             });
         }
 
         function renderApp() {
-            if (!allGamesData.activeGameId || !gameState || Object.keys(gameState).length === 0) { 
+            if (!allGamesData.activeGameId || !gameState || Object.keys(gameState).length === 0) {
                 gameManagementSection.classList.remove('hidden');
                 actualGameContentDiv.classList.add('hidden');
                 renderGameManagementScreen();
                 return;
             }
-            
+
             gameManagementSection.classList.add('hidden');
             actualGameContentDiv.classList.remove('hidden');
-            
+
             let modeDisplayName = "Desconhecido";
             if (gameState.gameMode === 'infinito') modeDisplayName = "Infinito";
             else if (gameState.gameMode === 'tradicional') modeDisplayName = "Tradicional";
@@ -1389,42 +1532,66 @@
                 watchLoopPhaseSection.classList.remove('hidden');
                 renderWatchLoopPhase();
             }
-            
+
             resetGameButton.classList.toggle('hidden', !allGamesData.activeGameId || (gameState.currentPhase === PHASES.REGISTRATION && gameState.participants.length === 0) );
-            
-            if (allGamesData.activeGameId && gameState.id) { 
-                userIdDisplay.textContent = `ID do Bingo: ${gameState.id}`; 
-                footerUserId.textContent = `ID do Bingo: ${gameState.id}`; 
-            } else { 
-                userIdDisplay.textContent = ''; 
-                footerUserId.textContent = ''; 
+
+            if (allGamesData.activeGameId && gameState.id) {
+                userIdDisplay.textContent = `ID do Bingo: ${gameState.id}`;
+                footerUserId.textContent = `ID do Bingo: ${gameState.id}`;
+            } else {
+                userIdDisplay.textContent = '';
+                footerUserId.textContent = '';
             }
-            
+
             if (genreLegendContainer && !genreLegendContainer.classList.contains('hidden')) {
                  renderGenreGridFooter();
             }
-            saveCurrentGameToAllGames(); 
+            saveCurrentGameToAllGames();
         }
 
         function handleAddParticipant() {
             const name = participantNameInput.value.trim();
+            let malIdentifier = participantMalUsernameInput.value.trim();
+            let finalMalUsername = null;
+
             if (!name) { showAlert("O nome do participante não pode estar vazio.", "error"); return; }
-            
-            const maxParticipants = (gameState.gameMode === 'infinito' || gameState.gameMode === 'tradicional') ? initialGenres.length : Infinity; 
-            if (gameState.participants.length >= maxParticipants && maxParticipants !== Infinity) { 
-                showAlert(`Máximo de ${maxParticipants} participantes para este modo.`, "error"); return; 
+
+            if (malIdentifier) {
+                const malListUrlMatch = malIdentifier.match(/myanimelist\.net\/animelist\/([a-zA-Z0-9_-]+)/i);
+                if (malListUrlMatch && malListUrlMatch[1]) {
+                    finalMalUsername = malListUrlMatch[1];
+                    console.log(`Username MAL extraído da URL: ${finalMalUsername}`);
+                } else {
+                    if (/^[a-zA-Z0-9_-]{2,16}$/.test(malIdentifier)) {
+                        finalMalUsername = malIdentifier;
+                    } else if (malIdentifier) {
+                        showAlert("O identificador MAL fornecido não parece ser um username válido nem uma URL de lista MAL. O campo MAL será ignorado.", "warning", 4000);
+                        finalMalUsername = null;
+                    }
+                }
+            }
+
+            const maxParticipants = (gameState.gameMode === 'infinito' || gameState.gameMode === 'tradicional') ? initialGenres.length : Infinity;
+            if (gameState.participants.length >= maxParticipants && maxParticipants !== Infinity) {
+                showAlert(`Máximo de ${maxParticipants} participantes para este modo.`, "error"); return;
             }
 
             if (gameState.participants.find(p => p.name.toLowerCase() === name.toLowerCase())) { showAlert("Este nome já existe.", "error"); return; }
-            gameState.participants.push({ 
-                id: generateUUID(), name, assignedGenre: null, genreDrawNumber: null, 
-                currentAssignedGenre: null, genreHistory: [], 
+
+            gameState.participants.push({
+                id: generateUUID(), name,
+                malUsername: finalMalUsername,
+                assignedGenre: null, genreDrawNumber: null,
+                currentAssignedGenre: null, genreHistory: [],
                 animeToWatch: null, receivedIndications: [], watchedAnimesHistory: []
             });
-            participantNameInput.value = ""; showAlert(`${name} adicionado!`, "success"); renderApp();
+            participantNameInput.value = "";
+            participantMalUsernameInput.value = "";
+            showAlert(`${name} adicionado${finalMalUsername ? ` (MAL: ${finalMalUsername})` : ''}!`, "success");
+            renderApp();
         };
 
-         function handleRemoveParticipant(participantId) {
+        function handleRemoveParticipant(participantId) {
             const pName = gameState.participants.find(p=>p.id === participantId)?.name;
             gameState.participants = gameState.participants.filter(p => p.id !== participantId);
             gameState.participants.forEach(p => {
@@ -1440,28 +1607,29 @@
             gameState.assignedGenreNames = gameState.assignedGenreNames.filter(ag => ag.participantId !== participantId);
             showAlert(`${pName} removido.`, "success"); renderApp();
         }
-        
-        function handleIndividualGenreDraw(participantId) { 
+
+        function handleIndividualGenreDraw(participantId) {
             const participant = gameState.participants.find(p => p.id === participantId);
-            if (!participant || participant.assignedGenre) return; 
-            
+            if (!participant || participant.assignedGenre) return;
+
             const availableGenres = initialGenres.filter(g => !gameState.assignedGenreNames.some(ag => ag.genreName === g.name));
             if (availableGenres.length === 0) { showAlert("Não há mais gêneros únicos para distribuir inicialmente!", "error"); return; }
-            
+
             const chosenGenre = availableGenres[Math.floor(Math.random() * availableGenres.length)];
             const drawnNumber = chosenGenre.numbers[Math.floor(Math.random() * chosenGenre.numbers.length)];
-            
-            participant.assignedGenre = chosenGenre.name; 
-            participant.genreDrawNumber = drawnNumber;
-            participant.currentAssignedGenre = chosenGenre.name; 
-            if(!participant.genreHistory) participant.genreHistory = [];
-            participant.genreHistory.push(chosenGenre.name); 
 
-            gameState.assignedGenreNames.push({participantId: participant.id, genreName: chosenGenre.name}); 
+            participant.assignedGenre = chosenGenre.name;
+            participant.genreDrawNumber = drawnNumber;
+            participant.currentAssignedGenre = chosenGenre.name;
+            if(!participant.genreHistory) participant.genreHistory = [];
+            participant.genreHistory.push(chosenGenre.name);
+
+            gameState.assignedGenreNames.push({participantId: participant.id, genreName: chosenGenre.name});
             showGenreRevealModal(participant.name, { ...chosenGenre, drawnNumber: drawnNumber, imageUrl: chosenGenre.imageUrl });
-            renderApp(); 
+            renderApp();
         }
-        
+
+
         async function handleResetGame() {
             if (await showConfirmAlert('<p class="font-semibold mb-2">Confirmar Reinício do Bingo Atual</p><p>Isso irá manter os participantes, mas limpará todos os gêneros sorteados, animes indicados e progresso de visualização. Deseja prosseguir?</p>')) {
                 const currentGameId = allGamesData.activeGameId;
@@ -1469,6 +1637,7 @@
                     const currentParticipantsData = allGamesData.games[currentGameId].participants.map(p => ({
                         id: p.id,
                         name: p.name,
+                        malUsername: p.malUsername || null,
                         assignedGenre: null,
                         genreDrawNumber: null,
                         currentAssignedGenre: null,
@@ -1479,23 +1648,23 @@
                     }));
 
                     allGamesData.games[currentGameId] = {
-                        ...BASE_GAME_INSTANCE_STATE, 
+                        ...BASE_GAME_INSTANCE_STATE,
                         id: currentGameId,
-                        name: allGamesData.games[currentGameId].name, 
-                        gameMode: allGamesData.games[currentGameId].gameMode || 'infinito', 
-                        createdAt: allGamesData.games[currentGameId].createdAt, 
-                        userId: allGamesData.games[currentGameId].userId || generateUUID(), 
-                        participants: currentParticipantsData, 
-                        currentPhase: PHASES.REGISTRATION, // Reset to registration
+                        name: allGamesData.games[currentGameId].name,
+                        gameMode: allGamesData.games[currentGameId].gameMode || 'infinito',
+                        createdAt: allGamesData.games[currentGameId].createdAt,
+                        userId: allGamesData.games[currentGameId].userId || generateUUID(),
+                        participants: currentParticipantsData,
+                        currentPhase: PHASES.REGISTRATION,
                         assignedGenreNames: [],
                         clubGenre: null,
                         clubAnimeIndication: null,
                         clubIndications: []
                     };
-                    
+
                     gameState = { ...allGamesData.games[currentGameId] };
-                    showAlert("Bingo reiniciado! Os participantes foram mantidos.", "success", 4000); 
-                    renderApp(); 
+                    showAlert("Bingo reiniciado! Os participantes foram mantidos.", "success", 4000);
+                    renderApp();
                 } else {
                     showAlert("Nenhum bingo ativo para reiniciar.", "error");
                 }
@@ -1513,8 +1682,8 @@
                 name: gameName,
                 gameMode: gameMode,
                 createdAt: new Date().toISOString(),
-                userId: generateUUID(), // Unique ID for this game instance for potential sharing/sync later
-                participants: [], 
+                userId: generateUUID(),
+                participants: [],
                 assignedGenreNames: [],
                 clubGenre: null,
                 clubAnimeIndication: null,
@@ -1522,7 +1691,7 @@
             };
             allGamesData.games[newGameId] = newGame;
             allGamesData.activeGameId = newGameId;
-            gameState = { ...newGame }; 
+            gameState = { ...newGame };
             newGameNameInput.value = '';
             let modeDisplayName = "Desconhecido";
             if (gameMode === 'infinito') modeDisplayName = "Infinito";
@@ -1530,36 +1699,34 @@
             else if (gameMode === 'clube_sorteado') modeDisplayName = "Clube (Gênero Sorteado)";
             else if (gameMode === 'clube_escolhido') modeDisplayName = "Clube (Gênero Escolhido)";
             showAlert(`Bingo "${gameName}" (Modo: ${modeDisplayName}) criado e carregado!`, "success");
-            saveAllGamesData(); 
-            renderApp(); 
+            saveAllGamesData();
+            renderApp();
         }
 
         function loadSelectedGame(gameId) {
             const gameDataFromStorage = allGamesData.games[gameId];
 
             if (gameDataFromStorage) {
-                allGamesData.activeGameId = gameId; 
+                allGamesData.activeGameId = gameId;
 
-                gameState = JSON.parse(JSON.stringify(BASE_GAME_INSTANCE_STATE)); // Start with a clean base
-                const loadedGameData = JSON.parse(JSON.stringify(gameDataFromStorage)); // Deep copy of loaded game
-                
-                // Merge top-level properties
+                gameState = JSON.parse(JSON.stringify(BASE_GAME_INSTANCE_STATE));
+                const loadedGameData = JSON.parse(JSON.stringify(gameDataFromStorage));
+
                 for (const key in loadedGameData) {
-                    if (Object.prototype.hasOwnProperty.call(loadedGameData, key) && 
-                        key !== 'participants' && 
-                        key !== 'assignedGenreNames' && 
+                    if (Object.prototype.hasOwnProperty.call(loadedGameData, key) &&
+                        key !== 'participants' &&
+                        key !== 'assignedGenreNames' &&
                         key !== 'clubIndications' &&
-                        key !== 'clubGenre' && 
-                        key !== 'clubAnimeIndication' && 
-                        key !== 'animeToWatch') { // animeToWatch is per participant
+                        key !== 'clubGenre' &&
+                        key !== 'clubAnimeIndication' &&
+                        key !== 'animeToWatch') {
                         if (loadedGameData[key] !== undefined) {
                             gameState[key] = loadedGameData[key];
                         }
                     }
                 }
-                // Ensure critical properties have fallbacks
                 gameState.id = loadedGameData.id || gameState.id || generateUUID();
-                gameState.name = loadedGameData.name || gameState.name; // gameState.name is from BASE
+                gameState.name = loadedGameData.name || gameState.name;
                 gameState.createdAt = loadedGameData.createdAt || gameState.createdAt || new Date().toISOString();
                 gameState.userId = loadedGameData.userId || gameState.userId || generateUUID();
                 gameState.gameMode = loadedGameData.gameMode || gameState.gameMode;
@@ -1570,6 +1737,7 @@
                     return {
                         id: p_in.id || generateUUID(),
                         name: p_in.name || "Participante Desconhecido",
+                        malUsername: p_in.malUsername || null,
                         assignedGenre: p_in.assignedGenre || null,
                         genreDrawNumber: p_in.genreDrawNumber || null,
                         currentAssignedGenre: p_in.currentAssignedGenre || p_in.assignedGenre || null,
@@ -1579,12 +1747,12 @@
                         watchedAnimesHistory: Array.isArray(p_in.watchedAnimesHistory) ? p_in.watchedAnimesHistory.map(hist => ({ ...hist })) : []
                     };
                 });
-                
+
                 gameState.assignedGenreNames = Array.isArray(loadedGameData.assignedGenreNames) ? [...loadedGameData.assignedGenreNames] : [];
                 gameState.clubGenre = loadedGameData.clubGenre ? { ...loadedGameData.clubGenre } : null;
                 gameState.clubAnimeIndication = loadedGameData.clubAnimeIndication ? { ...loadedGameData.clubAnimeIndication } : null;
                 gameState.clubIndications = Array.isArray(loadedGameData.clubIndications) ? loadedGameData.clubIndications.map(ind => ({ ...ind })) : [];
-                
+
                 if (gameState.participants.length > 0) {
                     const isValidTabId = loadedGameData.currentIndicatorTabId && gameState.participants.find(p => p.id === loadedGameData.currentIndicatorTabId);
                     gameState.currentIndicatorTabId = isValidTabId ? loadedGameData.currentIndicatorTabId : gameState.participants[0].id;
@@ -1596,12 +1764,12 @@
                     console.warn(`[loadSelectedGame] Fase inválida "${gameState.currentPhase}" carregada para o jogo "${gameState.name}". Redefinindo para REGISTRATION.`);
                     gameState.currentPhase = PHASES.REGISTRATION;
                 }
-                
-                const displayNameForAlert = gameState.name || "Bingo Carregado"; 
+
+                const displayNameForAlert = gameState.name || "Bingo Carregado";
                 showAlert(`Bingo "${displayNameForAlert}" carregado!`, "success");
-                
-                saveAllGamesData(); 
-                renderApp();    
+
+                saveAllGamesData();
+                renderApp();
             } else {
                 showAlert("Erro ao carregar o bingo: Jogo com ID especificado não encontrado.", "error");
             }
@@ -1617,11 +1785,11 @@
                     delete allGamesData.games[gameId];
                     if (allGamesData.activeGameId === gameId) {
                         allGamesData.activeGameId = null;
-                        gameState = {}; 
+                        gameState = {};
                     }
                     showAlert(`Bingo "${gameToDelete.name}" excluído.`, "success");
                     saveAllGamesData();
-                    renderApp(); 
+                    renderApp();
                 }
             });
         }
@@ -1630,7 +1798,7 @@
             actualGameContentDiv.classList.add('hidden');
             gameManagementSection.classList.remove('hidden');
             currentGameNameDisplay.textContent = 'Gerenciador de Bingos';
-            userIdDisplay.textContent = ''; 
+            userIdDisplay.textContent = '';
             footerUserId.textContent = '';
             savedGamesListDiv.innerHTML = '';
             const gameIds = Object.keys(allGamesData.games);
@@ -1660,16 +1828,16 @@
                 document.querySelectorAll('.delete-game-button').forEach(btn => btn.onclick = (e) => deleteGame(e.currentTarget.dataset.gameId));
             }
         }
-        
+
         async function exportAnimeWatchList() {
              if(exportWatchListButton) exportWatchListButton.disabled = true;
             showAlert("Preparando exportação da lista para assistir...", "info", Infinity);
 
             try {
-                await document.fonts.ready; 
+                await document.fonts.ready;
 
                 const exportContentDiv = document.createElement('div');
-                exportContentDiv.id = 'exportImageContainer'; 
+                exportContentDiv.id = 'exportImageContainer';
                 exportContentDiv.className = 'export-base-container';
                 document.body.appendChild(exportContentDiv);
 
@@ -1683,7 +1851,7 @@
                     if (participant.animeToWatch && participant.animeToWatch.animeTitle) {
                         hasAnimesToWatch = true;
                         const animeImageUrl = participant.animeToWatch.animeImageUrl || PLACEHOLDER_IMG_60x90;
-                        
+
                         imageLoadPromises.push(
                             ensureImageIsAccessible(animeImageUrl, PLACEHOLDER_IMG_ERROR_80x120)
                                 .then(finalUrl => {
@@ -1693,15 +1861,14 @@
                                         genreDisplay: genreDetails ? `<span style="font-family: 'Inter', sans-serif; font-size: 16px; color: #cbd5e1; margin-left: 8px; line-height: 1.4; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">(Gênero Atual: ${genreDetails.name})</span>` : '',
                                         animeTitle: participant.animeToWatch.animeTitle,
                                         finalAnimeImageUrl: finalUrl,
-                                        indicatorName: participant.animeToWatch.indicatorName,
-                                        score: participant.animeToWatch.score
+                                        indicatorName: participant.animeToWatch.indicatorName
                                     });
                                 })
                         );
                     }
                 }
 
-                await Promise.all(imageLoadPromises.map(p => p.catch(e => e))); 
+                await Promise.all(imageLoadPromises.map(p => p.catch(e => { console.error("Erro no carregamento de imagem (WatchList):", e); return e;})));
 
                 if (!hasAnimesToWatch) {
                     listContentHTML += '<p style="font-family: \'Inter\', sans-serif; font-size: 18px; text-align: center; color: #94a3b8; margin-top: 16px; line-height: 1.4; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">Nenhum anime sorteado para assistir no momento.</p>';
@@ -1709,18 +1876,22 @@
                     const orderedRenderData = [];
                     gameState.participants.forEach(p => {
                         const found = participantsRenderData.find(r => r.name === p.name && p.animeToWatch && r.animeTitle === p.animeToWatch.animeTitle);
-                        if (found) orderedRenderData.push(found);
+                        if (found && found.finalAnimeImageUrl) orderedRenderData.push(found);
                     });
 
                     orderedRenderData.forEach(pData => {
-                        const scoreHTML = pData.score ? `<span style="font-family: 'Inter', sans-serif; background-color: #facc15; color: #1e293b; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.8em; margin-left: 8px;">${pData.score.toFixed(2)}</span>` : '';
+                        const titleHTML = `
+                            <p style="font-family: 'Inter', sans-serif; font-size: 22px; color: #f1f5f9; font-weight: 500; margin-bottom: 8px; line-height: 1.3;">
+                                ${pData.animeTitle}
+                            </p>`;
+
                         listContentHTML += `
                                 <div style="padding: 16px 0; border-bottom: 1px solid #334155; margin-bottom: 16px;">
                                     <h4 style="font-family: 'Inter', sans-serif; font-size: 26px; font-weight: 600; color: #a5b4fc; margin-bottom: 16px; line-height: 1.3; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">${pData.name} ${pData.genreDisplay}</h4>
                                     <div style="display: flex; align-items: center; gap: 20px; margin-left: 12px; padding-top: 8px;">
                                         <img src="${pData.finalAnimeImageUrl}" alt="Capa do anime ${pData.animeTitle}" style="width: 80px; height: 120px; object-fit: cover; border-radius: 4px; flex-shrink: 0; border: 1px solid #475569; overflow: hidden;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_80x120}'">
-                                        <div style="text-align: left; padding-top: 4px;">
-                                            <p style="font-family: 'Inter', sans-serif; font-size: 22px; color: #f1f5f9; font-weight: 500; margin-bottom: 8px; line-height: 1.3; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">${pData.animeTitle} ${scoreHTML}</p>
+                                        <div style="text-align: left; padding-top: 4px; display: flex; flex-direction: column; justify-content: center;">
+                                            ${titleHTML}
                                             <p style="font-family: 'Inter', sans-serif; font-size: 18px; color: #cbd5e1; line-height: 1.4; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">Indicado por: ${pData.indicatorName}</p>
                                         </div>
                                     </div>
@@ -1728,16 +1899,16 @@
                     });
                 }
                 exportContentDiv.innerHTML = listContentHTML;
-                
-                void exportContentDiv.offsetHeight; 
+
+                void exportContentDiv.offsetHeight;
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
 
-                const canvas = await html2canvas(exportContentDiv, { 
-                    backgroundColor: '#0f172a', 
-                    useCORS: true, 
-                    scale: 2, 
-                    logging: false, // Quieter logs
+                const canvas = await html2canvas(exportContentDiv, {
+                    backgroundColor: '#0f172a',
+                    useCORS: true,
+                    scale: 2,
+                    logging: true,
                     windowWidth: exportContentDiv.scrollWidth,
                     windowHeight: exportContentDiv.scrollHeight
                 });
@@ -1754,24 +1925,26 @@
                 console.error("Erro ao exportar imagem da lista para assistir:", error);
                 showAlert("Erro ao exportar imagem. Verifique o console.", "error");
             } finally {
-                if (document.getElementById('exportImageContainer')) { 
+                if (document.getElementById('exportImageContainer')) {
                     document.body.removeChild(document.getElementById('exportImageContainer'));
                 }
                 if(exportWatchListButton) exportWatchListButton.disabled = false;
-                customAlertDiv.classList.add('hidden'); 
+                customAlertDiv.classList.add('hidden');
             }
         }
 
         async function exportIndicationsList(exportType) {
+            console.log(`[ExportIndications] Iniciando exportação tipo: ${exportType}`);
             const isClubMode = gameState.gameMode === 'clube_sorteado' || gameState.gameMode === 'clube_escolhido';
             const exportButton = isClubMode ? exportFullIndicationHistoryButton : (exportType === 'current' ? exportIndicationsButton : exportFullIndicationHistoryButton);
-            
+
             if (exportButton) exportButton.disabled = true;
             showAlert(`Preparando exportação do ${exportType === 'current' && !isClubMode ? 'histórico atual' : 'histórico completo'}...`, "info", Infinity);
 
             const containerId = 'exportAllIndicationsContainer';
             try {
                 await document.fonts.ready;
+                console.log("[ExportIndications] Fontes prontas.");
 
                 let exportContentDiv = document.getElementById(containerId);
                 if (exportContentDiv) exportContentDiv.remove();
@@ -1780,6 +1953,7 @@
                 exportContentDiv.id = containerId;
                 exportContentDiv.className = 'export-base-container';
                 document.body.appendChild(exportContentDiv);
+                console.log("[ExportIndications] Container de exportação criado.");
 
                 let titleText;
                 if (isClubMode) {
@@ -1790,9 +1964,10 @@
                 let listContentHTML = `<h3 style="font-family: 'Inter', sans-serif; font-size: 30px; font-weight: 700; color: #38bdf8; text-align: center; margin-bottom: 20px; padding-bottom: 10px; line-height: 1.2;">${titleText} - ${gameState.name || 'Bingo'}</h3>`;
                 let hasAnyIndications = false;
 
-                const imageLoadTracker = []; // { type: 'genreIcon'/'animeCover', url, alt, data }
+                const imageLoadTracker = [];
 
                 if (isClubMode) {
+                    console.log("[ExportIndications] Modo Clube detectado.");
                     if (gameState.clubGenre && gameState.clubGenre.name) {
                         imageLoadTracker.push({
                             type: 'clubGenreIcon',
@@ -1807,12 +1982,13 @@
                                 type: 'clubAnimeCover',
                                 url: ind.animeImageUrl || PLACEHOLDER_IMG_SEARCH_RESULT,
                                 alt: ind.animeTitle,
-                                data: ind // Store the whole indication object
+                                data: ind // Mantém o score aqui para uso interno, mas não será renderizado
                             });
                         });
                         hasAnyIndications = true;
                     }
-                } else { // Individual Modes
+                } else {
+                    console.log("[ExportIndications] Modo Individual detectado.");
                     gameState.participants.forEach(receiver => {
                         const indicationsToProcess = receiver.receivedIndications || [];
                         indicationsToProcess.forEach(ind => {
@@ -1833,18 +2009,22 @@
                                 type: 'animeCover',
                                 url: ind.animeImageUrl || PLACEHOLDER_IMG_SEARCH_RESULT,
                                 alt: ind.animeTitle,
-                                data: { ...ind, receiverName: receiver.name } // Add receiverName for grouping
+                                data: { ...ind, receiverName: receiver.name } // Mantém o score aqui
                             });
                         });
                     });
                 }
 
                 const allImagePromises = imageLoadTracker.map(item =>
-                    ensureImageIsAccessible(item.url, 
+                    ensureImageIsAccessible(item.url,
                         item.type === 'clubGenreIcon' || item.type === 'genreIcon' ? PLACEHOLDER_IMG_ERROR_20x20 : PLACEHOLDER_IMG_ERROR_40x60)
                     .then(finalUrl => ({ ...item, finalUrl }))
+                    .catch(err => {
+                        console.error(`Erro ao carregar imagem para exportar (${item.alt || 'desconhecido'}):`, err);
+                        return { ...item, finalUrl: (item.type === 'clubGenreIcon' || item.type === 'genreIcon' ? PLACEHOLDER_IMG_ERROR_20x20 : PLACEHOLDER_IMG_ERROR_40x60), errorState: true };
+                    })
                 );
-                const resolvedItems = await Promise.all(allImagePromises.map(p => p.catch(e => e)));
+                const resolvedItems = await Promise.all(allImagePromises);
 
 
                 if (isClubMode) {
@@ -1862,7 +2042,7 @@
                     } else {
                         const indicationsByIndicator = {};
                         resolvedItems.filter(item => item && item.type === 'clubAnimeCover' && item.finalUrl).forEach(item => {
-                            const ind = item.data; // This is the original indication object
+                            const ind = item.data;
                             if (!indicationsByIndicator[ind.indicatorName]) {
                                 indicationsByIndicator[ind.indicatorName] = [];
                             }
@@ -1874,21 +2054,19 @@
                                                     <h4 style="font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 600; color: #a5b4fc; margin-bottom: 10px;">${indicatorName} indicou:</h4>
                                                     <ul style="list-style: none; padding-left: 0;">`;
                             indicationsByIndicator[indicatorName].forEach(ind => {
-                                const scoreHTML = ind.score ? `<span style="font-family: 'Inter', sans-serif; background-color: #facc15; color: #1e293b; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.8em; margin-left: 8px;">${ind.score.toFixed(2)}</span>` : '';
                                 listContentHTML += `<li style="display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 17px; color: #e2e8f0; line-height: 1.4; font-family: 'Inter', sans-serif;">
                                                         <img src="${ind.finalAnimeImageUrl}" alt="Capa de ${ind.animeTitle}" style="width: 45px; height: 67px; object-fit: cover; border-radius: 3px; flex-shrink: 0;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_40x60}'">
                                                         <span style="flex-grow: 1;">${ind.animeTitle}</span>
-                                                        ${scoreHTML}
                                                     </li>`;
                             });
                             listContentHTML += `</ul></div>`;
                         }
                     }
                 } else { // Individual Modes Logic
-                    const receiversData = {}; // Keyed by receiverName
+                    const receiversData = {};
                     resolvedItems.filter(item => item && item.finalUrl).forEach(item => {
                         if (item.type === 'animeCover') {
-                            const indData = item.data; // Contains receiverName
+                            const indData = item.data;
                             if (!receiversData[indData.receiverName]) {
                                 receiversData[indData.receiverName] = { name: indData.receiverName, indicationsByGenre: {} };
                             }
@@ -1906,7 +2084,7 @@
                             receiversData[indData.receiverName].indicationsByGenre[indData.genreContext].indicators[indData.indicatorName].push({ ...indData, finalAnimeImageUrl: item.finalUrl });
                         }
                     });
-                    
+
                     for (const receiverName in receiversData) {
                         const receiver = receiversData[receiverName];
                         listContentHTML += `<div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px dashed #475569;">
@@ -1923,14 +2101,29 @@
                                 genreData.indicators[indicatorName].forEach(ind => {
                                     let statusTagHTML = '';
                                     const participant = gameState.participants.find(p => p.name === receiverName);
-                                    const isCurrentAnimeToWatch = participant?.animeToWatch && participant.animeToWatch.malId === ind.malId && participant.animeToWatch.indicatorId === ind.indicatorId && participant.animeToWatch.genreContext === ind.genreContext;
+                                    const isCurrentAnimeToWatch = participant?.animeToWatch &&
+                                                                  participant.animeToWatch.malId == ind.malId &&
+                                                                  participant.animeToWatch.indicatorId === ind.indicatorId &&
+                                                                  participant.animeToWatch.genreContext === ind.genreContext;
 
                                     if (exportType === 'history') {
-                                        if (isCurrentAnimeToWatch) statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 28px; margin-left: 10px; line-height: 1; color: #3b82f6; vertical-align: middle;">🎲</span>`;
-                                        else if (ind.status === 'watched') statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 28px; margin-left: 10px; line-height: 1; color: #10b981; vertical-align: middle;">✅</span>`;
-                                        else if (ind.status === 'pending') statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 28px; margin-left: 10px; line-height: 1; color: #f59e0b; vertical-align: middle;">⏳</span>`;
-                                    } else if (exportType === 'current' && ind.status === 'pending') {
-                                        statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 28px; margin-left: 10px; line-height: 1; color: #f59e0b; vertical-align: middle;">⏳</span>`;
+                                        if (gameState.gameMode === 'infinito') {
+                                            if (isCurrentAnimeToWatch) {
+                                                statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #3b82f6; vertical-align: middle;">🎲</span>`;
+                                            }
+                                        } else if (gameState.gameMode === 'tradicional') {
+                                            if (isCurrentAnimeToWatch) {
+                                                statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #3b82f6; vertical-align: middle;">🎲</span>`;
+                                            } else if (ind.status === 'watched') {
+                                                statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #10b981; vertical-align: middle;">✅</span>`;
+                                            } else if (ind.status === 'pending') {
+                                                statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #f59e0b; vertical-align: middle;">⏳</span>`;
+                                            }
+                                        }
+                                    } else if (exportType === 'current') {
+                                        if (ind.status === 'pending' && ind.genreContext === participant?.currentAssignedGenre) {
+                                             statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #f59e0b; vertical-align: middle;">⏳</span>`;
+                                        }
                                     }
                                     listContentHTML += `<li style="display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 18px; color: #e2e8f0; line-height: 1.4; font-family: 'Inter', sans-serif;">
                                                             <img src="${ind.finalAnimeImageUrl}" alt="Capa de ${ind.animeTitle}" style="width: 40px; height: 60px; object-fit: cover; border-radius: 2px; flex-shrink: 0;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_40x60}'">
@@ -1954,33 +2147,47 @@
                 void exportContentDiv.offsetHeight;
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
+                try {
+                    const canvas = await html2canvas(exportContentDiv, {
+                        backgroundColor: '#0f172a',
+                        useCORS: true,
+                        scale: 1.5,
+                        logging: true,
+                        windowWidth: exportContentDiv.scrollWidth,
+                        windowHeight: exportContentDiv.scrollHeight
+                    });
+                    const imageURL = canvas.toDataURL('image/png');
 
-                const canvas = await html2canvas(exportContentDiv, {
-                    backgroundColor: '#0f172a',
-                    useCORS: true,
-                    scale: 1.5, // Adjusted scale for potentially larger content
-                    logging: false,
-                    windowWidth: exportContentDiv.scrollWidth,
-                    windowHeight: exportContentDiv.scrollHeight
-                });
-                const imageURL = canvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                const filenamePrefix = isClubMode ? 'indicacoes_clube' : (exportType === 'current' ? 'indicacoes_atuais' : 'historico_indicacoes');
-                link.download = `${filenamePrefix}_${(gameState.name || 'bingo').replace(/\s+/g, '_')}.png`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                showAlert("Lista de indicações exportada como imagem!", "success");
+                    if (!imageURL || imageURL === "data:,") {
+                        console.error("[ExportIndications] Canvas gerado está em branco ou inválido.");
+                        showAlert("Erro: A imagem gerada para exportação está em branco. Verifique o console.", "error");
+                        throw new Error("Canvas em branco");
+                    }
+
+                    const link = document.createElement('a');
+                    link.href = imageURL;
+                    const filenamePrefix = isClubMode ? 'indicacoes_clube' : (exportType === 'current' ? 'indicacoes_atuais' : 'historico_indicacoes');
+                    link.download = `${filenamePrefix}_${(gameState.name || 'bingo').replace(/\s+/g, '_')}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showAlert("Lista de indicações exportada como imagem!", "success");
+                } catch (canvasError) {
+                    console.error("[ExportIndications] Erro DURANTE html2canvas ou download:", canvasError);
+                    showAlert("Erro ao gerar a imagem de indicações. Verifique o console para detalhes.", "error");
+                }
+
 
             } catch (error) {
-                console.error(`Erro ao exportar imagem de indicações (${exportType}):`, error);
-                showAlert("Erro ao exportar imagem de indicações. Verifique o console.", "error");
+                console.error(`Erro GERAL ao exportar imagem de indicações (${exportType}):`, error);
+                showAlert("Erro GERAL ao exportar imagem de indicações. Verifique o console.", "error");
             } finally {
                 if (document.getElementById(containerId)) {
                     document.body.removeChild(document.getElementById(containerId));
                 }
                 if (exportButton) exportButton.disabled = false;
                 customAlertDiv.classList.add('hidden');
+                console.log("[ExportIndications] Exportação finalizada.");
             }
         }
 
@@ -1999,7 +2206,7 @@
 
                 exportContentDiv = document.createElement('div');
                 exportContentDiv.id = containerId;
-                exportContentDiv.className = 'export-base-container'; 
+                exportContentDiv.className = 'export-base-container';
                 document.body.appendChild(exportContentDiv);
 
                 let contentHTML = `<h3 style="font-family: 'Inter', sans-serif; font-size: 32px; font-weight: 700; color: #38bdf8; margin-bottom: 24px; padding-bottom: 12px; text-align: center; border-bottom: 1px solid #0ea5e9;">Resultado do Bingo Clube - ${gameState.name || 'Bingo'}</h3>`;
@@ -2012,11 +2219,10 @@
                     imagesToLoad.push(ensureImageIsAccessible(gameState.clubAnimeIndication.animeImageUrl || PLACEHOLDER_IMG_150x225, PLACEHOLDER_IMG_ERROR_80x120).then(url => ({ type: 'anime', url, data: gameState.clubAnimeIndication })));
                 }
 
-                const resolvedImages = await Promise.all(imagesToLoad.map(p => p.catch(e => e)));
-                const genreImage = resolvedImages.find(img => img && img.type === 'genre');
-                const animeImage = resolvedImages.find(img => img && img.type === 'anime');
+                const resolvedImages = await Promise.all(imagesToLoad.map(p => p.catch(e => { console.error("Erro no carregamento de imagem (ClubResult):", e); return e;})));
+                const genreImage = resolvedImages.find(img => img && img.type === 'genre' && img.url);
+                const animeImage = resolvedImages.find(img => img && img.type === 'anime' && img.url);
 
-                // Section for Club Genre
                 if (genreImage && genreImage.url) {
                     contentHTML += `<div style="margin-bottom: 20px; text-align: center;">
                                         <p style="font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 600; color: #a5b4fc; margin-bottom: 8px;">Gênero do Clube:</p>
@@ -2025,18 +2231,12 @@
                                    </div>`;
                 }
 
-                // Section for Club Anime
                 if (animeImage && animeImage.url) {
-                    // Adjusted scoreHTML for better vertical alignment and smaller size
-                    const scoreHTML = animeImage.data.score 
-                        ? `<span style="font-family: 'Inter', sans-serif; background-color: #facc15; color: #1e293b; padding: 1px 5px; border-radius: 3px; font-weight: bold; font-size: 0.8em; margin-left: 8px; display: inline-flex; align-items: center; justify-content: center; height: 20px; vertical-align: middle;">${animeImage.data.score.toFixed(2)}</span>` 
-                        : '';
                     contentHTML += `<div style="margin-top: 20px; padding-top:20px; border-top: 1px dashed #475569; text-align: center;">
                                         <p style="font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 600; color: #67e8f9; margin-bottom: 10px;">Anime Sorteado para o Clube:</p>
                                         <img src="${animeImage.url}" alt="Capa de ${animeImage.data.animeTitle}" style="width: 150px; height: 225px; object-fit: cover; border-radius: 8px; margin: 0 auto 10px auto; display: block; border: 1px solid #475569;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_80x120}'">
-                                        <p style="font-family: 'Inter', sans-serif; font-size: 26px; font-weight: 700; color: #5eead4; margin-bottom: 5px; display: flex; align-items: center; justify-content: center;">
-                                            <span style="line-height: 1;">${animeImage.data.animeTitle}</span>
-                                            ${scoreHTML}
+                                        <p style="font-family: 'Inter', sans-serif; font-size: 26px; font-weight: 700; color: #5eead4; margin-bottom: 5px; line-height: 1.3; text-align: center;">
+                                            ${animeImage.data.animeTitle}
                                         </p>
                                         <p style="font-family: 'Inter', sans-serif; font-size: 16px; color: #cbd5e1;">Indicado por: ${animeImage.data.indicatorName}</p>
                                    </div>`;
@@ -2044,17 +2244,22 @@
 
                 exportContentDiv.innerHTML = contentHTML;
                 void exportContentDiv.offsetHeight;
-                await new Promise(resolve => setTimeout(resolve, 500)); // Ensure rendering
+                await new Promise(resolve => setTimeout(resolve, 500));
 
                 const canvas = await html2canvas(exportContentDiv, {
                     backgroundColor: '#0f172a',
                     useCORS: true,
                     scale: 2,
-                    logging: false, 
+                    logging: true,
                     windowWidth: exportContentDiv.scrollWidth,
                     windowHeight: exportContentDiv.scrollHeight
                 });
                 const imageURL = canvas.toDataURL('image/png');
+                if (!imageURL || imageURL === "data:,") {
+                    console.error("[ExportClubResult] Canvas gerado está em branco ou inválido.");
+                    showAlert("Erro: A imagem gerada para exportação está em branco. Verifique o console.", "error");
+                    throw new Error("Canvas em branco");
+                }
                 const link = document.createElement('a');
                 link.href = imageURL;
                 link.download = `resultado_clube_${(gameState.name || 'bingo').replace(/\s+/g, '_')}.png`;
@@ -2079,14 +2284,14 @@
         // Backup and Restore Functions
         function handleExportAllGamesData() {
             try {
-                saveCurrentGameToAllGames(); 
+                saveCurrentGameToAllGames();
 
-                const dataStr = JSON.stringify(allGamesData, null, 2); 
+                const dataStr = JSON.stringify(allGamesData, null, 2);
                 const blob = new Blob([dataStr], { type: "application/json" });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                const date = new Date().toISOString().slice(0, 10); 
+                const date = new Date().toISOString().slice(0, 10);
                 a.download = `anime_bingo_dados_${date}.json`;
                 document.body.appendChild(a);
                 a.click();
@@ -2108,14 +2313,14 @@
             const file = importFileInput.files[0];
             if (file.type !== "application/json") {
                 showAlert("Por favor, selecione um arquivo .json válido.", "error");
-                importFileInput.value = ''; 
+                importFileInput.value = '';
                 return;
             }
 
             const reader = new FileReader();
             reader.onload = async (event) => {
                 try {
-                    loadAllGamesData(); // Load existing data first to merge into
+                    loadAllGamesData();
 
                     const importedJson = event.target.result;
                     const importedDataContainer = JSON.parse(importedJson);
@@ -2133,28 +2338,29 @@
                     for (const gameId in importedDataContainer.games) {
                         if (Object.prototype.hasOwnProperty.call(importedDataContainer.games, gameId)) {
                             const gameFromFile = importedDataContainer.games[gameId];
-                            
+
                             if (typeof gameFromFile !== 'object' || gameFromFile === null ||
                                 !gameFromFile.hasOwnProperty('id') || !gameFromFile.hasOwnProperty('name') ||
                                 !gameFromFile.hasOwnProperty('currentPhase') || !gameFromFile.hasOwnProperty('participants')) {
                                 console.warn(`Jogo com ID ${gameId} no arquivo importado tem formato inválido. Jogo ignorado.`);
-                                continue; 
+                                continue;
                             }
 
                             const sanitizedGame = {
-                                ...BASE_GAME_INSTANCE_STATE, // Start with defaults
-                                ...JSON.parse(JSON.stringify(gameFromFile)), // Deep copy values from file
-                                id: gameFromFile.id || generateUUID(), // Ensure ID
+                                ...BASE_GAME_INSTANCE_STATE,
+                                ...JSON.parse(JSON.stringify(gameFromFile)),
+                                id: gameFromFile.id || generateUUID(),
                                 name: gameFromFile.name || BASE_GAME_INSTANCE_STATE.name,
                                 createdAt: gameFromFile.createdAt || new Date().toISOString(),
                                 userId: gameFromFile.userId || generateUUID(),
                                 gameMode: gameFromFile.gameMode || BASE_GAME_INSTANCE_STATE.gameMode,
                                 currentPhase: Object.values(PHASES).includes(gameFromFile.currentPhase) ? gameFromFile.currentPhase : PHASES.REGISTRATION,
                                 participants: (gameFromFile.participants || []).map(p_in => {
-                                    const participantData = {...p_in}; // Shallow copy first level
-                                    return { // Deep copy/sanitize nested structures
+                                    const participantData = {...p_in};
+                                    return {
                                         id: participantData.id || generateUUID(),
                                         name: participantData.name || "Participante Desconhecido",
+                                        malUsername: participantData.malUsername || null,
                                         assignedGenre: participantData.assignedGenre || null,
                                         genreDrawNumber: participantData.genreDrawNumber || null,
                                         currentAssignedGenre: participantData.currentAssignedGenre || participantData.assignedGenre || null,
@@ -2181,22 +2387,22 @@
                             } else {
                                 importedGamesCount++;
                             }
-                            allGamesData.games[sanitizedGame.id] = sanitizedGame; 
+                            allGamesData.games[sanitizedGame.id] = sanitizedGame;
                         }
                     }
-                    
-                    allGamesData.activeGameId = null; // No game active after import, user should choose from list
-                    gameState = {}; 
-                    
-                    saveAllGamesData(); 
-                    
+
+                    allGamesData.activeGameId = null;
+                    gameState = {};
+
+                    saveAllGamesData();
+
                     let successMessage = "Dados importados com sucesso!";
                     if (importedGamesCount > 0) successMessage += ` ${importedGamesCount} novo(s) jogo(s) adicionado(s).`;
                     if (overwrittenGamesCount > 0) successMessage += ` ${overwrittenGamesCount} jogo(s) existente(s) atualizado(s).`;
                     showAlert(successMessage, "success", 6000);
-                    
-                    importFileInput.value = ''; 
-                    renderApp(); 
+
+                    importFileInput.value = '';
+                    renderApp();
 
                 } catch (error) {
                     console.error("Erro ao importar dados:", error);
@@ -2217,7 +2423,7 @@
         function renderClubGenreSetupPhase() {
             clubGenreDrawModeContent.classList.toggle('hidden', gameState.gameMode !== 'clube_sorteado' || gameState.clubGenre);
             clubGenreChooseModeContent.classList.toggle('hidden', gameState.gameMode !== 'clube_escolhido' || gameState.clubGenre);
-            
+
             if (gameState.clubGenre) {
                 chosenClubGenreDisplay.classList.remove('hidden');
                 chosenClubGenreIcon.src = gameState.clubGenre.imageUrl || PLACEHOLDER_IMG_GENRE_ICON;
@@ -2228,7 +2434,7 @@
                 chosenClubGenreDisplay.classList.add('hidden');
                 goToClubIndicationPhaseButton.classList.add('hidden');
             }
-            renderGenreGridFooter(); 
+            renderGenreGridFooter();
         }
 
         function handleDrawClubGenre() {
@@ -2238,14 +2444,14 @@
             }
             const randomIndex = Math.floor(Math.random() * initialGenres.length);
             const chosenGenre = initialGenres[randomIndex];
-            const drawnNumber = chosenGenre.numbers ? chosenGenre.numbers[Math.floor(Math.random() * chosenGenre.numbers.length)] : null; 
+            const drawnNumber = chosenGenre.numbers ? chosenGenre.numbers[Math.floor(Math.random() * chosenGenre.numbers.length)] : null;
 
             gameState.clubGenre = {
                 name: chosenGenre.name,
                 imageUrl: chosenGenre.imageUrl,
-                drawnNumber: drawnNumber 
+                drawnNumber: drawnNumber
             };
-            gameState.clubIndications = []; 
+            gameState.clubIndications = [];
             gameState.clubAnimeIndication = null;
 
             showGenreRevealModal("o Clube", gameState.clubGenre, true);
@@ -2254,12 +2460,12 @@
 
         function handleChooseClubGenre(genreName, genreImageUrl, genreNumber) {
             if (gameState.gameMode !== 'clube_escolhido' || gameState.currentPhase !== PHASES.CLUB_GENRE_SETUP) {
-                return; 
+                return;
             }
             gameState.clubGenre = {
                 name: genreName,
                 imageUrl: genreImageUrl,
-                drawnNumber: genreNumber 
+                drawnNumber: genreNumber
             };
             gameState.clubIndications = [];
             gameState.clubAnimeIndication = null;
@@ -2272,9 +2478,10 @@
         // DOM READY E INICIALIZAÇÃO
         document.addEventListener('DOMContentLoaded', () => {
             participantNameInput = document.getElementById('participantNameInput');
+            participantMalUsernameInput = document.getElementById('participantMalUsernameInput');
             addParticipantButton = document.getElementById('addParticipantButton');
             participantsListDiv = document.getElementById('participantsList');
-            goToNextPhaseFromRegistrationButton = document.getElementById('goToNextPhaseFromRegistrationButton'); 
+            goToNextPhaseFromRegistrationButton = document.getElementById('goToNextPhaseFromRegistrationButton');
             maxParticipantsWarning = document.getElementById('maxParticipantsWarning');
             registrationPhaseSection = document.getElementById('registrationPhaseSection');
             individualDrawPhaseSection = document.getElementById('individualDrawPhaseSection');
@@ -2287,12 +2494,12 @@
             goToAnimeDrawPhaseButton = document.getElementById('goToAnimeDrawPhaseButton');
             animeDrawPhaseSection = document.getElementById('animeDrawPhaseSection');
             participantsToDrawAnimeListDiv = document.getElementById('participantsToDrawAnimeList');
-            goToWatchLoopButton = document.getElementById('goToWatchLoopButton'); 
+            goToWatchLoopButton = document.getElementById('goToWatchLoopButton');
             watchLoopPhaseSection = document.getElementById('watchLoopPhaseSection');
-            watchLoopContentIndividual = document.getElementById('watchLoopContentIndividual'); 
+            watchLoopContentIndividual = document.getElementById('watchLoopContentIndividual');
             allAnimesWatchedMessage = document.getElementById('allAnimesWatchedMessage');
             resetGameButton = document.getElementById('resetGameButton');
-            genreGridFooterDiv = document.getElementById('genreGridFooter'); 
+            genreGridFooterDiv = document.getElementById('genreGridFooter');
             userIdDisplay = document.getElementById('userIdDisplay');
             footerUserId = document.getElementById('footerUserId');
             customAlertDiv = document.getElementById('customAlert');
@@ -2303,17 +2510,17 @@
             alertCancelBtn = document.getElementById('alertCancelBtn');
             alertConfirmBtn = document.getElementById('alertConfirmBtn');
             genreRevealModal = document.getElementById('genreRevealModal');
-            genreRevealParticipantNameModalTitle = document.getElementById('genreRevealParticipantNameModalTitle'); 
-            genreRevealIconImg = document.getElementById('genreRevealIconImg'); 
-            genreRevealNameText = document.getElementById('genreRevealNameText'); 
-            genreRevealNumberText = document.getElementById('genreRevealNumberText'); 
+            genreRevealParticipantNameModalTitle = document.getElementById('genreRevealParticipantNameModalTitle');
+            genreRevealIconImg = document.getElementById('genreRevealIconImg');
+            genreRevealNameText = document.getElementById('genreRevealNameText');
+            genreRevealNumberText = document.getElementById('genreRevealNumberText');
             closeGenreRevealModalButton = document.getElementById('closeGenreRevealModalButton');
             animeRevealModal = document.getElementById('animeRevealModal');
             animeRevealParticipantName = document.getElementById('animeRevealParticipantName');
             animeRevealCover = document.getElementById('animeRevealCover');
-            animeRevealTitleLink = document.getElementById('animeRevealTitleLink'); 
+            animeRevealTitleLink = document.getElementById('animeRevealTitleLink');
             animeRevealIndicator = document.getElementById('animeRevealIndicator');
-            animeRevealScore = document.getElementById('animeRevealScore'); 
+            animeRevealScore = document.getElementById('animeRevealScore');
             closeAnimeRevealModalButton = document.getElementById('closeAnimeRevealModalButton');
             gameManagementSection = document.getElementById('gameManagementSection');
             newGameNameInput = document.getElementById('newGameNameInput');
@@ -2326,17 +2533,16 @@
             searchResultsModal = document.getElementById('searchResultsModal');
             searchResultsListDiv = document.getElementById('searchResultsList');
             closeSearchResultsModalButton = document.getElementById('closeSearchResultsModalButton');
-            toggleGenreLegendButton = document.getElementById('toggleGenreLegendButton'); 
-            genreLegendContainer = document.getElementById('genreLegendContainer'); 
-            exportIndicationsButton = document.getElementById('exportIndicationsButton'); 
-            exportFullIndicationHistoryButton = document.getElementById('exportFullIndicationHistoryButton'); 
+            toggleGenreLegendButton = document.getElementById('toggleGenreLegendButton');
+            genreLegendContainer = document.getElementById('genreLegendContainer');
+            exportIndicationsButton = document.getElementById('exportIndicationsButton');
+            exportFullIndicationHistoryButton = document.getElementById('exportFullIndicationHistoryButton');
             exportWatchListButton = document.getElementById('exportWatchListButton');
-            
+
             importFileInput = document.getElementById('importFileInput');
             importGamesButton = document.getElementById('importGamesButton');
             exportAllGamesButton = document.getElementById('exportAllGamesButton');
 
-            // Elementos do Modo Clube
             clubGenreSetupPhaseSection = document.getElementById('clubGenreSetupPhaseSection');
             clubGenreDrawModeContent = document.getElementById('clubGenreDrawModeContent');
             drawClubGenreButton = document.getElementById('drawClubGenreButton');
@@ -2375,21 +2581,26 @@
             if (closeGenreRevealModalButton) closeGenreRevealModalButton.onclick = () => genreRevealModal.classList.add('hidden');
             if (closeAnimeRevealModalButton) closeAnimeRevealModalButton.onclick = () => animeRevealModal.classList.add('hidden');
             if (closeSearchResultsModalButton) closeSearchResultsModalButton.onclick = () => {searchResultsModal.classList.add('hidden'); currentSearchContext = null;};
-            
+
             if (participantNameInput) {
-                participantNameInput.addEventListener('keypress', (event) => { 
+                participantNameInput.addEventListener('keypress', (event) => {
                     if (event.key === 'Enter') { event.preventDefault(); if(addParticipantButton) addParticipantButton.click(); }
                 });
             }
-            if(newGameNameInput) { 
+             if (participantMalUsernameInput) {
+                participantMalUsernameInput.addEventListener('keypress', (event) => {
+                    if (event.key === 'Enter') { event.preventDefault(); if(addParticipantButton) addParticipantButton.click(); }
+                });
+            }
+            if(newGameNameInput) {
                 newGameNameInput.addEventListener('keypress', (event) => {
                     if (event.key === 'Enter') { event.preventDefault(); if(createNewGameButton) createNewGameButton.click(); }
                 });
             }
-            if (toggleGenreLegendButton) { 
+            if (toggleGenreLegendButton) {
                 toggleGenreLegendButton.onclick = () => {
                     genreLegendContainer.classList.toggle('hidden');
-                    if (!genreLegendContainer.classList.contains('hidden')) { 
+                    if (!genreLegendContainer.classList.contains('hidden')) {
                         renderGenreGridFooter();
                     }
                 };
@@ -2401,7 +2612,7 @@
 
 
             if (addParticipantButton) addParticipantButton.onclick = handleAddParticipant;
-            
+
             if(goToNextPhaseFromRegistrationButton) goToNextPhaseFromRegistrationButton.onclick = () => {
                 if (gameState.gameMode === 'infinito' || gameState.gameMode === 'tradicional') {
                     gameState.currentPhase = PHASES.INDIVIDUAL_DRAW_SELECTION;
@@ -2410,59 +2621,58 @@
                 }
                 renderApp();
             };
-            if(goToIndicationPhaseButton) goToIndicationPhaseButton.onclick = () => { 
-                gameState.participants.forEach(p => { 
-                    if(!p.receivedIndications) p.receivedIndications = []; 
-                }); 
-                gameState.currentPhase = PHASES.INDICATION; 
-                gameState.currentIndicatorTabId = gameState.participants[0]?.id || null; 
-                renderApp(); 
+            if(goToIndicationPhaseButton) goToIndicationPhaseButton.onclick = () => {
+                gameState.participants.forEach(p => {
+                    if(!p.receivedIndications) p.receivedIndications = [];
+                });
+                gameState.currentPhase = PHASES.INDICATION;
+                gameState.currentIndicatorTabId = gameState.participants[0]?.id || null;
+                renderApp();
             };
             if(goToAnimeDrawPhaseButton) goToAnimeDrawPhaseButton.onclick = () => {
                 if (gameState.gameMode === 'clube_sorteado' || gameState.gameMode === 'clube_escolhido') {
-                    gameState.currentPhase = PHASES.CLUB_ANIME_DRAW; // Go to club anime draw phase
+                    gameState.currentPhase = PHASES.CLUB_ANIME_DRAW;
                 } else {
-                    gameState.currentPhase = PHASES.ANIME_DRAW_SELECTION; 
+                    gameState.currentPhase = PHASES.ANIME_DRAW_SELECTION;
                 }
-                renderApp(); 
+                renderApp();
             };
-            if(goToWatchLoopButton) goToWatchLoopButton.onclick = () => { 
+            if(goToWatchLoopButton) goToWatchLoopButton.onclick = () => {
                 if (gameState.gameMode === 'clube_sorteado' || gameState.gameMode === 'clube_escolhido') {
-                    gameState.currentPhase = PHASES.CLUB_RESULT_DISPLAY; // Show results directly
+                    gameState.currentPhase = PHASES.CLUB_RESULT_DISPLAY;
                 } else {
-                    gameState.currentPhase = PHASES.WATCH_LOOP; 
+                    gameState.currentPhase = PHASES.WATCH_LOOP;
                 }
-                renderApp(); 
+                renderApp();
             };
             if(resetGameButton) resetGameButton.onclick = handleResetGame;
             if(createNewGameButton) createNewGameButton.onclick = createNewGame;
             if(switchGameButton) switchGameButton.onclick = () => {
-                allGamesData.activeGameId = null; 
-                gameState = {}; 
-                saveAllGamesData(); 
-                renderApp(); 
+                allGamesData.activeGameId = null;
+                gameState = {};
+                saveAllGamesData();
+                renderApp();
             };
 
             if (importGamesButton) importGamesButton.onclick = handleImportGamesData;
             if (exportAllGamesButton) exportAllGamesButton.onclick = handleExportAllGamesData;
 
-            // Event listeners para modo clube
             if(drawClubGenreButton) drawClubGenreButton.onclick = handleDrawClubGenre;
             if(goToClubIndicationPhaseButton) goToClubIndicationPhaseButton.onclick = () => {
                 if (!gameState.clubGenre) {
                     showAlert("Por favor, defina um gênero para o clube primeiro.", "error");
                     return;
                 }
-                gameState.currentPhase = PHASES.INDICATION; 
-                gameState.currentIndicatorTabId = gameState.participants[0]?.id || null; // Not strictly needed for club indication but good for consistency
+                gameState.currentPhase = PHASES.INDICATION;
+                gameState.currentIndicatorTabId = gameState.participants[0]?.id || null;
                 renderApp();
             };
             if(drawClubAnimeButton) drawClubAnimeButton.onclick = handleDrawClubAnime;
 
 
-            loadAllGamesData(); 
-            renderApp(); 
-            renderGenreGridFooter(); 
+            loadAllGamesData();
+            renderApp();
+            renderGenreGridFooter();
         });
     </script>
 </body>
