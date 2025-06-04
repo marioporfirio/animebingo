@@ -226,7 +226,7 @@
                 <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-indigo-400 flex items-center"><span role="img" aria-label="ícone de usuários" class="mr-3 text-2xl">👥</span> Cadastro de Participantes</h2>
                 <div class="flex flex-col sm:flex-row gap-4 mb-2">
                     <input type="text" id="participantNameInput" placeholder="Nome do Participante" class="flex-grow p-3 rounded-lg bg-slate-700 border border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder-slate-400"/>
-                    <input type="text" id="participantMalUsernameInput" placeholder="Username ou URL da Lista MAL (Opcional)" class="sm:w-1/3 p-3 rounded-lg bg-slate-700 border border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder-slate-400 text-sm"/>
+                    <!-- Input de MAL Username REMOVIDO daqui -->
                 </div>
                  <div class="flex flex-col sm:flex-row gap-4 mb-6">
                     <button id="addParticipantButton" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-600 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center"><span role="img" aria-label="adicionar" class="mr-2 text-lg">+</span> Adicionar Participante</button>
@@ -497,7 +497,7 @@
                 gameState.participants = (gameToLoad.participants || []).map(p => ({
                     id: p.id || generateUUID(),
                     name: p.name || "Participante Desconhecido",
-                    malUsername: p.malUsername || null,
+                    malUsername: null, // MAL Username removido
                     assignedGenre: p.assignedGenre || null,
                     genreDrawNumber: p.genreDrawNumber || null,
                     currentAssignedGenre: p.currentAssignedGenre || p.assignedGenre || null,
@@ -562,8 +562,8 @@
             gameState.participants.forEach((p, index) => {
                 const div = document.createElement('div');
                 div.className = 'flex items-center justify-between bg-slate-700 p-3 rounded-lg shadow';
-                const malUsernameDisplay = p.malUsername ? `<span class="text-xs text-slate-400 ml-2">(MAL: ${p.malUsername})</span>` : '';
-                div.innerHTML = `<span class="text-indigo-300">${index + 1}. ${p.name} ${malUsernameDisplay}</span>
+                // const malUsernameDisplay = p.malUsername ? `<span class="text-xs text-slate-400 ml-2">(MAL: ${p.malUsername})</span>` : ''; // REMOVIDO
+                div.innerHTML = `<span class="text-indigo-300">${index + 1}. ${p.name}</span>
                                          <button data-id="${p.id}" class="removeParticipantButton text-red-400 hover:text-red-300"><span role="img" aria-label="remover">🗑️</span></button>`;
                 participantsListDiv.appendChild(div);
             });
@@ -716,9 +716,7 @@
                     if (receiverGenreDetails) {
                         receiverInfoHTML += ` - Gênero Atual: <img src="${receiverGenreDetails.imageUrl || PLACEHOLDER_IMG_SEARCH_RESULT}" alt="${receiverGenreDetails.name}" class="inline-block w-5 h-5 object-contain mx-1 rounded-sm"> ${receiverGenreDetails.name}`;
                     }
-                     if (receiver.malUsername) {
-                        receiverInfoHTML += ` <span class="text-xs text-slate-400">(MAL: ${receiver.malUsername})</span>`;
-                    }
+                    // MAL username display removido daqui também
                     receiverInfoHTML += `</p>`;
 
                     receiverDiv.innerHTML = receiverInfoHTML;
@@ -784,7 +782,7 @@
             }
         }
 
-        async function handleIndicationSubmit(event, isClubIndication = false, forceIndicate = false) {
+        async function handleIndicationSubmit(event, isClubIndication = false) {
             const button = event.currentTarget;
             const indicatorId = button.dataset.indicatorId;
             const receiverId = !isClubIndication ? button.dataset.receiverId : null;
@@ -799,57 +797,12 @@
             }
 
             button.disabled = true;
-            button.textContent = 'Verificando...';
+            button.textContent = 'Indicando...'; // Mudado de 'Verificando...'
 
-            const isDirectUrlIndication = inputValue.match(/myanimelist\.net\/anime\/(\d+)/);
-            let performMalListCheck = !isClubIndication && !forceIndicate && !isDirectUrlIndication;
-
-
-            if (performMalListCheck) {
-                const receiver = gameState.participants.find(p => p.id === receiverId);
-                const receiverMalUsername = receiver?.malUsername;
-
-                if (receiverMalUsername && receiverMalUsername.trim() !== "") {
-                    let animeToIndicateMalId = null;
-                    let preliminaryAnimeTitle = inputValue;
-
-                    const searchResultsArray = await searchAnimeByName(inputValue, indicatorId, receiverId, isClubIndication, true /* isPreliminarySearch */);
-                    if (searchResultsArray && searchResultsArray.length > 0 && searchResultsArray[0].mal_id) {
-                        animeToIndicateMalId = searchResultsArray[0].mal_id;
-                        preliminaryAnimeTitle = searchResultsArray[0].title || inputValue;
-                    } else {
-                        showAlert(`Não foi possível encontrar o ID do anime "${inputValue}" para verificar a lista do MAL. A indicação será tentada sem verificação prévia.`, "warning", 4500);
-                        performMalListCheck = false;
-                    }
-
-                    if (performMalListCheck && animeToIndicateMalId) {
-                        showAlert(`Verificando "${preliminaryAnimeTitle}" na lista de ${receiverMalUsername}...`, 'info', 3000);
-                        await checkAnimeOnUserListsJikan(receiverMalUsername, animeToIndicateMalId, async (listStatusData) => {
-                            if (listStatusData && listStatusData.isOnList === true) {
-                                const statusTraduzido = listStatusData.status.replace('_', ' ');
-                                const confirm = await showConfirmAlert(`O anime "${preliminaryAnimeTitle}" JÁ ESTÁ na lista "${statusTraduzido}" de ${receiverMalUsername} no MAL. Deseja indicar mesmo assim?`);
-                                if (confirm) {
-                                    await proceedWithIndication(inputValue, indicatorId, receiverId, isClubIndication, button);
-                                } else {
-                                    button.disabled = false;
-                                    button.textContent = 'Indicar';
-                                }
-                            } else if (listStatusData && listStatusData.isOnList === false) {
-                                showAlert(`"${preliminaryAnimeTitle}" NÃO está em nenhuma lista de ${receiverMalUsername}. Indicando...`, "success", 2000);
-                                await proceedWithIndication(inputValue, indicatorId, receiverId, isClubIndication, button);
-                            } else {
-                                showAlert(`Não foi possível verificar a lista de ${receiverMalUsername} no MAL (usuário não encontrado pela Jikan ou erro na API). Tentando indicar diretamente...`, "warning");
-                                await proceedWithIndication(inputValue, indicatorId, receiverId, isClubIndication, button);
-                            }
-                        });
-                        return;
-                    }
-                } else {
-                     performMalListCheck = false;
-                }
-            }
+            // Não há mais verificação da lista MAL, então prossegue diretamente.
             await proceedWithIndication(inputValue, indicatorId, receiverId, isClubIndication, button);
         }
+
 
         async function proceedWithIndication(inputValue, indicatorId, receiverId, isClubIndication, buttonElement) {
             buttonElement.disabled = true;
@@ -970,7 +923,7 @@
                         animeTitle,
                         animeImageUrl,
                         malUrl: originalMalUrl || animeData.url,
-                        score, // Manter score nos dados
+                        score, // Score é salvo nos dados
                         genreContext: gameState.clubGenre.name
                     });
                     showAlert(`"${animeTitle}" indicado por ${indicator.name} para o gênero do clube: ${gameState.clubGenre.name}!`, "success");
@@ -990,7 +943,7 @@
                         animeTitle,
                         animeImageUrl,
                         malUrl: originalMalUrl || animeData.url,
-                        score, // Manter score nos dados
+                        score, // Score é salvo nos dados
                         status: 'pending',
                         genreContext: receiver.currentAssignedGenre
                     });
@@ -1004,52 +957,8 @@
             }
         }
 
-        async function checkAnimeOnUserListsJikan(username, animeMalId, callback) {
-            if (!username || !animeMalId) {
-                if (callback) callback(null);
-                return;
-            }
-            console.log(`[checkAnimeOnUserListsJikan] Verificando anime ID ${animeMalId} em TODAS as listas de ${username}`);
-            try {
-                const response = await fetch(`${JIKAN_API_BASE_URL}/users/${username}/animelist`);
-
-                if (response.status === 404 || response.status === 400) {
-                    console.warn(`[checkAnimeOnUserListsJikan] Usuário ${username} não encontrado ou inválido na Jikan (status ${response.status}).`);
-                    if (callback) callback(null);
-                    return;
-                }
-                if (!response.ok) {
-                    const errText = await response.text();
-                    console.error(`[checkAnimeOnUserListsJikan] Erro da API Jikan ao buscar lista de ${username}: ${response.status} - ${errText}`);
-                    if (callback) callback(null);
-                    return;
-                }
-                const data = await response.json();
-                console.log(`[checkAnimeOnUserListsJikan] Lista completa de ${username} recebida:`, data.data?.length, "entradas");
-
-                if (data && data.data) {
-                    const entry = data.data.find(e => e.anime?.mal_id == animeMalId);
-                    if (entry) {
-                        console.log(`[checkAnimeInUserListJikan] Anime ID ${animeMalId} ENCONTRADO na lista de ${username} com status "${entry.status}".`);
-                        if (callback) callback({ isOnList: true, status: entry.status });
-                    } else {
-                        console.log(`[checkAnimeInUserListJikan] Anime ID ${animeMalId} NÃO ENCONTRADO em nenhuma lista de ${username}.`);
-                        if (callback) callback({ isOnList: false });
-                    }
-                } else {
-                    console.warn(`[checkAnimeInUserListJikan] Nenhum dado na lista de ${username}.`);
-                    if (callback) callback({ isOnList: false });
-                }
-            } catch (error) {
-                console.error(`[checkAnimeInUserListJikan] Erro ao verificar lista de animes de ${username}:`, error);
-                if (callback) callback(null);
-            }
-        }
-
-        async function handleCheckMalList(event) {
-            showAlert("Funcionalidade de verificação agora é automática ao indicar.", "info");
-            console.log("handleCheckMalList chamada, mas a verificação agora é automática.");
-        }
+        // checkAnimeOnUserListsJikan REMOVIDA
+        // handleCheckMalList REMOVIDA
 
 
         function handleRemoveIndication(event) {
@@ -1204,7 +1113,7 @@
             animeRevealTitleLink.href = anime.malUrl || '#';
             animeRevealTitleLink.textContent = anime.animeTitle;
             animeRevealIndicator.textContent = anime.indicatorName;
-            animeRevealScore.innerHTML = anime.score ? `<span class="score-badge">${anime.score.toFixed(2)}</span>` : ''; // Mantém na modal
+            animeRevealScore.innerHTML = anime.score ? `<span class="score-badge">${anime.score.toFixed(2)}</span>` : '';
             animeRevealModal.classList.remove('hidden');
         }
 
@@ -1243,8 +1152,7 @@
                 if (clubResultAnimeTitleLink) {
                     clubResultAnimeTitleLink.href = gameState.clubAnimeIndication.malUrl || '#';
                     let titleHTML = gameState.clubAnimeIndication.animeTitle || 'Título não disponível';
-                    // Mantendo o score na UI da tela, mas será removido da exportação PNG
-                    if (gameState.clubAnimeIndication.score) {
+                    if (gameState.clubAnimeIndication.score) { // Score na UI ainda é exibido
                          titleHTML += ` <span class="score-badge">${gameState.clubAnimeIndication.score.toFixed(2)}</span>`;
                     }
                     clubResultAnimeTitleLink.innerHTML = titleHTML;
@@ -1551,25 +1459,9 @@
 
         function handleAddParticipant() {
             const name = participantNameInput.value.trim();
-            let malIdentifier = participantMalUsernameInput.value.trim();
-            let finalMalUsername = null;
+            // malIdentifier e finalMalUsername completamente removidos
 
             if (!name) { showAlert("O nome do participante não pode estar vazio.", "error"); return; }
-
-            if (malIdentifier) {
-                const malListUrlMatch = malIdentifier.match(/myanimelist\.net\/animelist\/([a-zA-Z0-9_-]+)/i);
-                if (malListUrlMatch && malListUrlMatch[1]) {
-                    finalMalUsername = malListUrlMatch[1];
-                    console.log(`Username MAL extraído da URL: ${finalMalUsername}`);
-                } else {
-                    if (/^[a-zA-Z0-9_-]{2,16}$/.test(malIdentifier)) {
-                        finalMalUsername = malIdentifier;
-                    } else if (malIdentifier) {
-                        showAlert("O identificador MAL fornecido não parece ser um username válido nem uma URL de lista MAL. O campo MAL será ignorado.", "warning", 4000);
-                        finalMalUsername = null;
-                    }
-                }
-            }
 
             const maxParticipants = (gameState.gameMode === 'infinito' || gameState.gameMode === 'tradicional') ? initialGenres.length : Infinity;
             if (gameState.participants.length >= maxParticipants && maxParticipants !== Infinity) {
@@ -1580,14 +1472,14 @@
 
             gameState.participants.push({
                 id: generateUUID(), name,
-                malUsername: finalMalUsername,
+                malUsername: null, // Definido como null permanentemente
                 assignedGenre: null, genreDrawNumber: null,
                 currentAssignedGenre: null, genreHistory: [],
                 animeToWatch: null, receivedIndications: [], watchedAnimesHistory: []
             });
             participantNameInput.value = "";
-            participantMalUsernameInput.value = "";
-            showAlert(`${name} adicionado${finalMalUsername ? ` (MAL: ${finalMalUsername})` : ''}!`, "success");
+            // participantMalUsernameInput não existe mais para limpar
+            showAlert(`${name} adicionado!`, "success");
             renderApp();
         };
 
@@ -1637,7 +1529,7 @@
                     const currentParticipantsData = allGamesData.games[currentGameId].participants.map(p => ({
                         id: p.id,
                         name: p.name,
-                        malUsername: p.malUsername || null,
+                        malUsername: null, // Garantir que é null ao resetar
                         assignedGenre: null,
                         genreDrawNumber: null,
                         currentAssignedGenre: null,
@@ -1683,7 +1575,7 @@
                 gameMode: gameMode,
                 createdAt: new Date().toISOString(),
                 userId: generateUUID(),
-                participants: [],
+                participants: [], // malUsername será null por padrão
                 assignedGenreNames: [],
                 clubGenre: null,
                 clubAnimeIndication: null,
@@ -1737,7 +1629,7 @@
                     return {
                         id: p_in.id || generateUUID(),
                         name: p_in.name || "Participante Desconhecido",
-                        malUsername: p_in.malUsername || null,
+                        malUsername: null, // Forçar null ao carregar
                         assignedGenre: p_in.assignedGenre || null,
                         genreDrawNumber: p_in.genreDrawNumber || null,
                         currentAssignedGenre: p_in.currentAssignedGenre || p_in.assignedGenre || null,
@@ -1982,7 +1874,7 @@
                                 type: 'clubAnimeCover',
                                 url: ind.animeImageUrl || PLACEHOLDER_IMG_SEARCH_RESULT,
                                 alt: ind.animeTitle,
-                                data: ind // Mantém o score aqui para uso interno, mas não será renderizado
+                                data: ind
                             });
                         });
                         hasAnyIndications = true;
@@ -2009,7 +1901,7 @@
                                 type: 'animeCover',
                                 url: ind.animeImageUrl || PLACEHOLDER_IMG_SEARCH_RESULT,
                                 alt: ind.animeTitle,
-                                data: { ...ind, receiverName: receiver.name } // Mantém o score aqui
+                                data: { ...ind, receiverName: receiver.name }
                             });
                         });
                     });
@@ -2360,7 +2252,7 @@
                                     return {
                                         id: participantData.id || generateUUID(),
                                         name: participantData.name || "Participante Desconhecido",
-                                        malUsername: participantData.malUsername || null,
+                                        malUsername: null, // MAL Username removido na importação também
                                         assignedGenre: participantData.assignedGenre || null,
                                         genreDrawNumber: participantData.genreDrawNumber || null,
                                         currentAssignedGenre: participantData.currentAssignedGenre || participantData.assignedGenre || null,
@@ -2478,7 +2370,7 @@
         // DOM READY E INICIALIZAÇÃO
         document.addEventListener('DOMContentLoaded', () => {
             participantNameInput = document.getElementById('participantNameInput');
-            participantMalUsernameInput = document.getElementById('participantMalUsernameInput');
+            // participantMalUsernameInput REMOVIDO da atribuição
             addParticipantButton = document.getElementById('addParticipantButton');
             participantsListDiv = document.getElementById('participantsList');
             goToNextPhaseFromRegistrationButton = document.getElementById('goToNextPhaseFromRegistrationButton');
@@ -2587,11 +2479,8 @@
                     if (event.key === 'Enter') { event.preventDefault(); if(addParticipantButton) addParticipantButton.click(); }
                 });
             }
-             if (participantMalUsernameInput) {
-                participantMalUsernameInput.addEventListener('keypress', (event) => {
-                    if (event.key === 'Enter') { event.preventDefault(); if(addParticipantButton) addParticipantButton.click(); }
-                });
-            }
+            // Event listener para participantMalUsernameInput REMOVIDO
+            
             if(newGameNameInput) {
                 newGameNameInput.addEventListener('keypress', (event) => {
                     if (event.key === 'Enter') { event.preventDefault(); if(createNewGameButton) createNewGameButton.click(); }
