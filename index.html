@@ -533,7 +533,7 @@
             if (type === 'success') { customAlertDiv.classList.add('bg-green-500'); iconText = '✅'; }
             else if (type === 'error') { customAlertDiv.classList.add('bg-red-500'); iconText = '❌'; }
             else if (type === 'custom_confirm') { customAlertDiv.classList.add('bg-yellow-600'); iconText = '❓'; alertConfirmButtonsDiv.classList.remove('hidden'); }
-            else { customAlertDiv.classList.add('bg-blue-500'); }
+            else { customAlertDiv.classList.add('bg-blue-500'); } // Default 'info'
             alertIconSpan.textContent = iconText;
             if (type !== 'custom_confirm' && duration !== Infinity) setTimeout(() => customAlertDiv.classList.add('hidden'), duration);
         }
@@ -698,32 +698,38 @@
                 });
 
                 const currentIndicator = gameState.participants.find(p => p.id === gameState.currentIndicatorTabId);
-                if (!currentIndicator) return;
+                if (!currentIndicator) {
+                    console.log("Modo não-clube: currentIndicator não encontrado. Retornando.");
+                    return;
+                }
 
                 const indicatorSection = document.createElement('div');
                 indicatorSection.innerHTML = `<h3 class="text-xl font-semibold text-yellow-400 mb-3 mt-2">Indicações de ${currentIndicator.name}:</h3>`;
+                console.log(`Modo não-clube: Renderizando indicações para ${currentIndicator.name}`);
 
+                let hasReceiversToShow = false;
                 gameState.participants.forEach(receiver => {
                     if (receiver.id === currentIndicator.id) return;
-                    if (!receiver.currentAssignedGenre) return;
+                    if (!receiver.currentAssignedGenre) {
+                         console.log(`Modo não-clube: ${receiver.name} não tem currentAssignedGenre. Pulando.`);
+                         return;
+                    }
+                    hasReceiversToShow = true;
 
                     const existingIndication = receiver.receivedIndications?.find(ind => ind.indicatorId === currentIndicator.id && ind.genreContext === receiver.currentAssignedGenre);
                     const receiverGenreDetails = initialGenres.find(g => g.name === receiver.currentAssignedGenre);
 
-                    const receiverDiv = document.createElement('div');
+                    const receiverDiv = document.createElement('div'); // Div para cada "destinatário"
                     receiverDiv.className = 'mb-4 p-3 bg-slate-700/50 rounded-lg';
                     let receiverInfoHTML = `<p class="mb-2 text-indigo-300">Para: <span class="font-semibold">${receiver.name}</span>`;
                     if (receiverGenreDetails) {
                         receiverInfoHTML += ` - Gênero Atual: <img src="${receiverGenreDetails.imageUrl || PLACEHOLDER_IMG_SEARCH_RESULT}" alt="${receiverGenreDetails.name}" class="inline-block w-5 h-5 object-contain mx-1 rounded-sm"> ${receiverGenreDetails.name}`;
                     }
-                    // MAL username display removido daqui também
                     receiverInfoHTML += `</p>`;
-
-                    receiverDiv.innerHTML = receiverInfoHTML;
-
-
+                    // Conteúdo da indicação (card ou input) vai DENTRO do receiverDiv
+                    let indicationContentHTML = '';
                     if (existingIndication) {
-                        indicatorDiv.innerHTML += `
+                        indicationContentHTML = `
                                 <div class="indication-card">
                                     <img src="${existingIndication.animeImageUrl || PLACEHOLDER_IMG_60x90}" alt="Capa de ${existingIndication.animeTitle}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG_ERROR_60x90}';">
                                     <div class="indication-card-info">
@@ -733,14 +739,23 @@
                                     <button data-indicator-id="${currentIndicator.id}" data-receiver-id="${receiver.id}" class="remove-indication-button text-red-400 hover:text-red-300 ml-auto p-1"><span role="img" aria-label="remover indicação">🗑️</span></button>
                                 </div>`;
                     } else {
-                        indicatorDiv.innerHTML += `
+                        indicationContentHTML = `
                                 <div class="flex flex-col sm:flex-row gap-2 items-center">
                                     <input type="text" data-indicator-id="${currentIndicator.id}" data-receiver-id="${receiver.id}" placeholder="Nome do Anime ou URL MAL" class="indication-input w-full sm:flex-grow p-2 rounded bg-slate-600 border border-slate-500 placeholder-slate-400 text-sm">
                                     <button data-indicator-id="${currentIndicator.id}" data-receiver-id="${receiver.id}" class="indicate-anime-button bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg text-sm w-full sm:w-auto">Indicar</button>
                                 </div>`;
                     }
-                    indicatorSection.appendChild(receiverDiv);
+                    receiverDiv.innerHTML = receiverInfoHTML + indicationContentHTML; // Combina info do receiver + conteúdo da indicação
+                    indicatorSection.appendChild(receiverDiv); // Adiciona o receiverDiv completo à seção do indicador
                 });
+
+                if (!hasReceiversToShow && gameState.participants.length > 1) {
+                     indicatorSection.innerHTML += `<p class="text-slate-400 italic">Nenhum participante elegível para receber indicações de ${currentIndicator.name} no momento (verifique se eles têm gêneros sorteados).</p>`;
+                } else if (gameState.participants.length <=1) {
+                     indicatorSection.innerHTML += `<p class="text-slate-400 italic">São necessários pelo menos 2 participantes para o sistema de indicações.</p>`;
+                }
+
+
                 indicationContentDiv.appendChild(indicatorSection);
 
                 document.querySelectorAll('.indicate-anime-button').forEach(btn => btn.onclick = handleIndicationSubmit);
@@ -1211,20 +1226,21 @@
                                  } else if (p.receivedIndications?.filter(ind => ind.status === 'watched').length === p.receivedIndications?.length && p.receivedIndications?.length > 0){
                                      contentHTML = `<p class="text-green-400 font-semibold">🎉 ${p.name} finalizou todos os ciclos de gênero!</p>`;
                                  }
-                             } else {
+                             } else { // Modo tradicional, sem mais indicações e sem anime para assistir = terminou o gênero
                                  contentHTML = `<p class="text-green-400 font-semibold">🎉 ${p.name} concluiu as indicações para o gênero ${p.currentAssignedGenre}!</p>`;
                              }
-                        } else if (!p.currentAssignedGenre && p.assignedGenre && gameState.gameMode === 'infinito') {
+                        } else if (!p.currentAssignedGenre && p.assignedGenre && gameState.gameMode === 'infinito') { // Terminou o último gênero do ciclo e precisa de um novo
                             allParticipantsFinishedAllCycles = false;
                             contentHTML += `<button data-id="${p.id}" class="draw-new-genre-button bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full mt-2">Sortear Novo Gênero</button>`;
-                        } else if (!p.currentAssignedGenre && !p.assignedGenre) {
+                        } else if (!p.currentAssignedGenre && !p.assignedGenre) { // Nunca teve gênero (não deveria acontecer se passou do sorteio inicial)
                              allParticipantsFinishedAllCycles = false;
                              contentHTML += `<p class="text-slate-400">Aguardando sorteio inicial de gênero.</p>`;
-                        } else {
-                            if(gameState.gameMode === 'tradicional' || (p.genreHistory && p.genreHistory.length >= initialGenres.length)) {
+                        } else { // Nenhum dos casos acima - provavelmente finalizou
+                            if(gameState.gameMode === 'tradicional' || (p.genreHistory && p.genreHistory.length >= initialGenres.length && initialGenres.length > 0)) {
+                                // Se for modo tradicional OU (modo infinito E já passou por todos os gêneros E initialGenres não está vazio)
                                 contentHTML += `<p class="text-green-400 font-semibold">🎉 ${p.name} finalizou sua participação!</p>`;
                             } else {
-                                allParticipantsFinishedAllCycles = false;
+                                allParticipantsFinishedAllCycles = false; // Ainda pode ter mais ciclos no infinito
                                 contentHTML += `<p class="text-slate-400">Aguardando próximo passo.</p>`;
                             }
                         }
@@ -1246,12 +1262,11 @@
                     const everyoneTrulyFinishedOriginalModes = gameState.participants.every(p => {
                         if (gameState.gameMode === 'tradicional') {
                             const pendingForCurrentGenre = p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.assignedGenre).length || 0;
-                            return !p.animeToWatch && pendingForCurrentGenre === 0;
-                        } else {
-                            const lastGenre = p.genreHistory && p.genreHistory.length > 0 ? p.genreHistory[p.genreHistory.length - 1] : null;
-                            let availableNewGenres = initialGenres.filter(g => g.name !== lastGenre);
-                            if (p.genreHistory && p.genreHistory.length >= initialGenres.length) availableNewGenres = [];
-                            return !p.animeToWatch && (p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.currentAssignedGenre).length === 0) && availableNewGenres.length === 0;
+                            return !p.animeToWatch && pendingForCurrentGenre === 0 && p.assignedGenre; // Deve ter tido um gênero sorteado
+                        } else { // infinito
+                            const isFinishedWithCurrentGenreCycle = !p.animeToWatch && (p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.currentAssignedGenre).length === 0);
+                            const hasCompletedAllGenreRotations = p.genreHistory && p.genreHistory.length >= initialGenres.length && initialGenres.length > 0; // Verifica se initialGenres não está vazio
+                             return isFinishedWithCurrentGenreCycle && (!p.currentAssignedGenre || (hasCompletedAllGenreRotations && p.currentAssignedGenre === null)); // currentAssignedGenre será null quando finaliza todos os ciclos
                         }
                     });
                     if(allAnimesWatchedMessage) {
@@ -1279,41 +1294,74 @@
                 if (!participant.watchedAnimesHistory) participant.watchedAnimesHistory = [];
                 participant.watchedAnimesHistory.push({
                     ...participant.animeToWatch,
-                    genreContext: participant.currentAssignedGenre
+                    genreContext: participant.currentAssignedGenre // Salva o contexto do genero que o anime foi assistido
                 });
 
                 const indicationInList = participant.receivedIndications.find(ind =>
                     ind.malId === participant.animeToWatch.malId &&
                     ind.indicatorId === participant.animeToWatch.indicatorId &&
-                    ind.genreContext === participant.currentAssignedGenre
+                    ind.genreContext === participant.currentAssignedGenre // Compara com o genero atual do participante
                 );
                 if (indicationInList) {
                     indicationInList.status = 'watched';
                 }
 
-                participant.animeToWatch = null;
+                participant.animeToWatch = null; // Limpa o anime que estava sendo assistido
                 showAlert("Anime marcado como visto!", "success");
 
                 if(gameState.gameMode === 'infinito') {
-                    drawNewGenreForParticipant(participantId);
-                } else {
+                    const pendingIndicationsForCurrentGenre = participant.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === participant.currentAssignedGenre) || [];
+                    if(pendingIndicationsForCurrentGenre.length === 0) {
+                        console.log(`Modo Infinito: ${participant.name} não tem mais indicações pendentes para ${participant.currentAssignedGenre}. Sorteando novo gênero.`);
+                        drawNewGenreForParticipant(participantId);
+                    } else {
+                        console.log(`Modo Infinito: ${participant.name} ainda tem ${pendingIndicationsForCurrentGenre.length} indicações pendentes para ${participant.currentAssignedGenre}. Renderizando app.`);
+                        renderApp();
+                    }
+                } else { // Modo tradicional
                     renderApp();
                 }
             }
         }
 
         function drawNewGenreForParticipant(participantId) {
+            console.log(`[drawNewGenreForParticipant] Iniciando para ${participantId}`);
             const participant = gameState.participants.find(p => p.id === participantId);
             if (!participant) return;
 
-            const lastGenre = participant.genreHistory && participant.genreHistory.length > 0 ? participant.genreHistory[participant.genreHistory.length - 1] : null;
+            let availableGenresForNewDraw = [];
+            if (initialGenres.length > 0) {
+                const completedGenresInCurrentCycle = new Set(participant.genreHistory || []);
+                
+                if (completedGenresInCurrentCycle.size >= initialGenres.length) { // Completou um ciclo
+                    console.log(`[drawNewGenreForParticipant] ${participant.name} completou um ciclo de ${initialGenres.length} gêneros. Reiniciando ciclo de histórico.`);
+                    participant.genreHistory = []; // Reinicia o histórico para o novo ciclo
+                    completedGenresInCurrentCycle.clear(); // Limpa para permitir todos os gêneros novamente
+                     // O último gênero assistido não deve ser imediatamente repetido, se possível
+                    if (participant.currentAssignedGenre) {
+                        completedGenresInCurrentCycle.add(participant.currentAssignedGenre);
+                    }
+                }
+                
+                availableGenresForNewDraw = initialGenres.filter(g => !completedGenresInCurrentCycle.has(g.name));
 
-            let availableGenresForNewDraw = initialGenres.filter(g => g.name !== lastGenre);
-            if (availableGenresForNewDraw.length === 0 && initialGenres.length > 0) {
-                 availableGenresForNewDraw = initialGenres;
+                if (availableGenresForNewDraw.length === 0 && initialGenres.length > 0) {
+                    // Se, após filtrar, não sobrar nada (ex: só tem 1 gênero e ele foi o último), permite ele mesmo.
+                    // Ou se o ciclo recomeçou e o último assistido era o único que restava.
+                    console.warn(`[drawNewGenreForParticipant] Nenhum gênero novo disponível após filtro, permitindo repetição do último ou reiniciando se necessário.`);
+                     participant.genreHistory = []; // Limpa o histórico para garantir que o sorteio funcione
+                    availableGenresForNewDraw = [...initialGenres];
+                     if (participant.currentAssignedGenre && initialGenres.length > 1) { // Tenta não repetir o último se houver outras opções
+                        const tempFiltered = initialGenres.filter(g => g.name !== participant.currentAssignedGenre);
+                        if (tempFiltered.length > 0) availableGenresForNewDraw = tempFiltered;
+                    }
+                }
             }
+
+
             if (availableGenresForNewDraw.length === 0) {
-                showAlert(`Todos os gêneros já foram sorteados para ${participant.name}! Ele finalizou o bingo!`, "success", 5000);
+                showAlert(`Todos os gêneros já foram sorteados e completados para ${participant.name}! Ele finalizou o bingo infinito!`, "success", 7000);
+                console.log(`[drawNewGenreForParticipant] ${participant.name} FINALIZOU o bingo infinito.`);
                 participant.currentAssignedGenre = null;
                 renderApp();
                 return;
@@ -1322,9 +1370,12 @@
             const chosenNewGenre = availableGenresForNewDraw[Math.floor(Math.random() * availableGenresForNewDraw.length)];
             const newDrawnNumber = chosenNewGenre.numbers[Math.floor(Math.random() * chosenNewGenre.numbers.length)];
 
-            participant.currentAssignedGenre = chosenNewGenre.name;
+            console.log(`[drawNewGenreForParticipant] Novo gênero para ${participant.name}: ${chosenNewGenre.name}`);
+            
             if(!participant.genreHistory) participant.genreHistory = [];
-            participant.genreHistory.push(chosenNewGenre.name);
+            participant.genreHistory.push(chosenNewGenre.name); // Adiciona o NOVO gênero à história
+            participant.currentAssignedGenre = chosenNewGenre.name; // Define o NOVO gênero atual
+
 
             participant.receivedIndications = participant.receivedIndications.filter(ind => ind.status === 'watched');
 
@@ -1332,7 +1383,19 @@
             showGenreRevealModal(participant.name, { ...chosenNewGenre, drawnNumber: newDrawnNumber, imageUrl: chosenNewGenre.imageUrl });
 
             gameState.currentPhase = PHASES.INDICATION;
-            gameState.currentIndicatorTabId = gameState.participants.find(p => p.id !== participantId)?.id || gameState.participants[0]?.id;
+            const otherParticipants = gameState.participants.filter(p => p.id !== participantId);
+            if (otherParticipants.length > 0) {
+                gameState.currentIndicatorTabId = otherParticipants[0].id;
+                console.log(`[drawNewGenreForParticipant] Definindo currentIndicatorTabId para ${otherParticipants[0].name} (${otherParticipants[0].id})`);
+            } else if (gameState.participants.length > 0) {
+                gameState.currentIndicatorTabId = participantId;
+                 console.warn(`[drawNewGenreForParticipant] Apenas 1 participante. currentIndicatorTabId definido para ${participant.name}`);
+            } else {
+                gameState.currentIndicatorTabId = null;
+                 console.warn(`[drawNewGenreForParticipant] Nenhum participante. currentIndicatorTabId definido para null`);
+            }
+
+            console.log(`[drawNewGenreForParticipant] Transicionando para fase de INDICAÇÃO.`);
             renderApp();
         }
 
@@ -1345,9 +1408,9 @@
 
             if (!pendingIndications || pendingIndications.length === 0) {
                 showAlert(`Nenhum anime pendente indicado para ${participant.name} no gênero ${participant.currentAssignedGenre}. Peça indicações!`, "info", 4000);
-                if (gameState.gameMode === 'infinito') {
-                    gameState.currentPhase = PHASES.INDICATION;
-                    gameState.currentIndicatorTabId = gameState.participants.find(p => p.id !== participantId)?.id || gameState.participants[0]?.id;
+                if (gameState.gameMode === 'infinito'){
+                    drawNewGenreForParticipant(participantId);
+                    return;
                 }
                 renderApp();
                 return;
@@ -2001,8 +2064,11 @@
                                     if (exportType === 'history') {
                                         if (gameState.gameMode === 'infinito') {
                                             if (isCurrentAnimeToWatch) {
-                                                statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #3b82f6; vertical-align: middle;">🎲</span>`;
+                                                statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #3b82f6; vertical-align: middle;">🎲</span>`; // Sendo assistido
+                                            } else if (ind.status === 'watched') {
+                                                statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #10b981; vertical-align: middle;">✅</span>`; // Já assistido
                                             }
+                                            // No modo infinito, para histórico, não mostramos ampulheta para pendentes.
                                         } else if (gameState.gameMode === 'tradicional') {
                                             if (isCurrentAnimeToWatch) {
                                                 statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #3b82f6; vertical-align: middle;">🎲</span>`;
@@ -2012,7 +2078,7 @@
                                                 statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #f59e0b; vertical-align: middle;">⏳</span>`;
                                             }
                                         }
-                                    } else if (exportType === 'current') {
+                                    } else if (exportType === 'current') { // Para 'current', só mostramos pendentes (com ampulheta)
                                         if (ind.status === 'pending' && ind.genreContext === participant?.currentAssignedGenre) {
                                              statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #f59e0b; vertical-align: middle;">⏳</span>`;
                                         }
@@ -2212,7 +2278,7 @@
             const reader = new FileReader();
             reader.onload = async (event) => {
                 try {
-                    loadAllGamesData();
+                    loadAllGamesData(); // Carrega o estado atual para mesclar, se necessário
 
                     const importedJson = event.target.result;
                     const importedDataContainer = JSON.parse(importedJson);
@@ -2238,21 +2304,22 @@
                                 continue;
                             }
 
+                            // Sanitização e merge cuidadoso
                             const sanitizedGame = {
-                                ...BASE_GAME_INSTANCE_STATE,
-                                ...JSON.parse(JSON.stringify(gameFromFile)),
-                                id: gameFromFile.id || generateUUID(),
+                                ...BASE_GAME_INSTANCE_STATE, // Começa com a base
+                                ...JSON.parse(JSON.stringify(gameFromFile)), // Sobrescreve com dados do arquivo
+                                id: gameFromFile.id || generateUUID(), // Garante IDs
                                 name: gameFromFile.name || BASE_GAME_INSTANCE_STATE.name,
                                 createdAt: gameFromFile.createdAt || new Date().toISOString(),
                                 userId: gameFromFile.userId || generateUUID(),
                                 gameMode: gameFromFile.gameMode || BASE_GAME_INSTANCE_STATE.gameMode,
                                 currentPhase: Object.values(PHASES).includes(gameFromFile.currentPhase) ? gameFromFile.currentPhase : PHASES.REGISTRATION,
                                 participants: (gameFromFile.participants || []).map(p_in => {
-                                    const participantData = {...p_in};
-                                    return {
+                                    const participantData = {...p_in}; // Clona o participante do arquivo
+                                    return { // Cria um novo objeto participante com defaults e dados do arquivo
                                         id: participantData.id || generateUUID(),
                                         name: participantData.name || "Participante Desconhecido",
-                                        malUsername: null, // MAL Username removido na importação também
+                                        malUsername: null, // MAL Username sempre null
                                         assignedGenre: participantData.assignedGenre || null,
                                         genreDrawNumber: participantData.genreDrawNumber || null,
                                         currentAssignedGenre: participantData.currentAssignedGenre || participantData.assignedGenre || null,
@@ -2274,27 +2341,37 @@
                                 sanitizedGame.currentIndicatorTabId = null;
                             }
 
+
                             if (allGamesData.games[sanitizedGame.id]) {
                                 overwrittenGamesCount++;
                             } else {
                                 importedGamesCount++;
                             }
-                            allGamesData.games[sanitizedGame.id] = sanitizedGame;
+                            allGamesData.games[sanitizedGame.id] = sanitizedGame; // Adiciona/sobrescreve o jogo sanitizado
                         }
                     }
 
-                    allGamesData.activeGameId = null;
-                    gameState = {};
+                    // Decide qual jogo será o ativo após a importação
+                    // Poderia ser o último importado, ou nenhum, ou o 'activeGameId' do arquivo se existir e for válido
+                    if (importedDataContainer.activeGameId && allGamesData.games[importedDataContainer.activeGameId]) {
+                        allGamesData.activeGameId = importedDataContainer.activeGameId;
+                    } else if (Object.keys(allGamesData.games).length > 0) {
+                         // Se não houver um activeGameId válido do arquivo, mas há jogos, não define nenhum como ativo inicialmente
+                         allGamesData.activeGameId = null;
+                    } else {
+                        allGamesData.activeGameId = null;
+                    }
+                    gameState = {}; // Limpa o gameState atual, pois o usuário precisará carregar um jogo da lista
 
-                    saveAllGamesData();
+                    saveAllGamesData(); // Salva todos os dados atualizados
 
                     let successMessage = "Dados importados com sucesso!";
                     if (importedGamesCount > 0) successMessage += ` ${importedGamesCount} novo(s) jogo(s) adicionado(s).`;
                     if (overwrittenGamesCount > 0) successMessage += ` ${overwrittenGamesCount} jogo(s) existente(s) atualizado(s).`;
                     showAlert(successMessage, "success", 6000);
 
-                    importFileInput.value = '';
-                    renderApp();
+                    importFileInput.value = ''; // Limpa o input de arquivo
+                    renderApp(); // Re-renderiza, o que mostrará a tela de gerenciamento se nenhum jogo estiver ativo
 
                 } catch (error) {
                     console.error("Erro ao importar dados:", error);
