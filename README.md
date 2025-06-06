@@ -4,9 +4,6 @@ Bem-vindo ao **Anime Bingo**! Esta é uma aplicação web interativa e divertida
 
 A aplicação é construída com HTML, CSS (TailwindCSS) e JavaScript puro, sem a necessidade de frameworks complexos, e utiliza a API pública do **AniList** para buscar informações detalhadas sobre os animes.
 
-
-*(Sugestão: Substitua a imagem acima por uma captura de tela mais atualizada da sua aplicação)*
-
 ## ✨ Funcionalidades Principais
 
 -   **Gerenciamento de Múltiplos Bingos:** Crie e salve vários jogos de bingo simultaneamente. Perfeito para diferentes grupos de amigos ou eventos.
