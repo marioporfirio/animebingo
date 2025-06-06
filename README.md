@@ -1,74 +1,72 @@
-# 🎉 Bem-vindos ao Anime Bingo! 🎉
+# 🎲 Anime Bingo
 
-Preparem-se para um jeito divertido de indicar anime para seus amigos! Nosso bingo agora tem dois modos emocionantes para escolher:
+Bem-vindo ao **Anime Bingo**! Esta é uma aplicação web interativa e divertida, projetada para ajudar grupos de amigos a sortear e indicar animes para assistir. Chega de indecisão! Com vários modos de jogo, o Anime Bingo garante que todos tenham algo novo e emocionante para descobrir.
+
+A aplicação é construída com HTML, CSS (TailwindCSS) e JavaScript puro, sem a necessidade de frameworks complexos, e utiliza a API pública do **AniList** para buscar informações detalhadas sobre os animes.
+
+
+*(Sugestão: Substitua a imagem acima por uma captura de tela mais atualizada da sua aplicação)*
+
+## ✨ Funcionalidades Principais
+
+-   **Gerenciamento de Múltiplos Bingos:** Crie e salve vários jogos de bingo simultaneamente. Perfeito para diferentes grupos de amigos ou eventos.
+-   **Quatro Modos de Jogo:**
+    1.  **Infinito:** Um modo dinâmico onde, após assistir a um anime sorteado, o participante recebe um novo gênero imediatamente, mantendo o jogo sempre em movimento.
+    2.  **Tradicional:** Cada participante recebe um gênero e deve assistir a um anime indicado para aquele gênero para "marcar" seu ponto.
+    3.  **Clube (Gênero Sorteado):** Um único gênero é sorteado para todo o grupo. Todos os participantes indicam animes desse gênero e um deles é sorteado para o clube assistir.
+    4.  **Clube (Gênero Escolhido):** O grupo escolhe um gênero específico, e o resto segue as regras do modo clube.
+-   **Integração com AniList:**
+    *   Busca de animes com filtros avançados (mostrando apenas animes já finalizados).
+    *   **Verificação de Lista de Usuários:** Ao cadastrar o nome de usuário do AniList de um participante, a aplicação mostra tags visuais nos resultados da busca, informando se aquele anime já está na lista da pessoa (ex: "Completo", "Assistindo", "Planejado").
+    *   **Edição Flexível:** Permite adicionar ou alterar o nome de usuário do AniList de um participante a qualquer momento do jogo.
+-   **Sorteios Interativos:** Modais animados revelam os gêneros e animes sorteados, tornando o processo mais divertido e envolvente.
+-   **Exportação de Resultados:** Gere imagens de alta qualidade para compartilhar facilmente:
+    *   A lista de animes que cada um deve assistir.
+    *   O histórico completo de indicações.
+    *   O resultado final de um bingo no modo clube.
+-   **Backup e Restauração:** Exporte todos os seus dados de bingos para um arquivo JSON e importe-os a qualquer momento. Nunca perca o progresso de um jogo!
+-   **Interface Responsiva:** Funciona bem em desktops, tablets e celulares.
+
+## 🚀 Como Usar
+
+A aplicação foi projetada para ser simples e auto-hospedada.
+
+1.  **Download:** Baixe os três arquivos do repositório:
+    *   `index.html`
+    *   `style.css`
+    *   `script.js`
+2.  **Organização:** Coloque os três arquivos na mesma pasta no seu computador.
+3.  **Execução:** Abra o arquivo `index.html` em qualquer navegador moderno (Chrome, Firefox, Edge, etc.).
+
+A aplicação está pronta para usar!
+
+### Guia Rápido de Jogo
+
+1.  **Gerenciar Bingos:** Na tela inicial, crie um novo bingo, dando um nome e escolhendo um modo de jogo.
+2.  **Cadastro de Participantes:** Adicione os participantes. Você pode opcionalmente incluir o nome de usuário do AniList de cada um para ativar a funcionalidade de verificação de listas.
+3.  **Sorteio de Gêneros:** Avance para a próxima fase. Nos modos "Infinito" e "Tradicional", sorteie um gênero para cada participante. No modo "Clube", sorteie ou escolha um gênero para todo o grupo.
+4.  **Fase de Indicações:** Cada participante indica um anime para os outros (ou para o clube, dependendo do modo de jogo).
+5.  **Sorteio de Animes:** Com as indicações feitas, avance para sortear qual anime cada pessoa (ou o clube) irá assistir.
+6.  **Acompanhamento:** Marque os animes como "vistos" para progredir no jogo. No modo infinito, um novo ciclo se inicia automaticamente!
+
+## 🛠️ Desenvolvido Com
+
+*   **HTML5:** Para a estrutura da página.
+*   **CSS3 & [TailwindCSS](https://tailwindcss.com/):** Para estilização moderna e responsiva.
+*   **JavaScript (ES6+):** Para toda a lógica da aplicação, sem dependências de frameworks.
+*   **[AniList API (GraphQL)](https://anilist.gitbook.io/anilist-apiv2-docs/):** Para buscar informações de animes.
+*   **[html2canvas](https://html2canvas.hertzen.com/):** Para gerar as imagens de exportação.
+
+## 🤝 Como Contribuir
+
+Este é um projeto de código aberto e contribuições são muito bem-vindas! Se você tem uma ideia para uma nova funcionalidade, uma melhoria na interface ou encontrou um bug, sinta-se à vontade para:
+
+1.  **Criar uma Issue:** Descreva sua sugestão ou o problema encontrado.
+2.  **Fazer um Fork do Repositório:** Crie sua própria versão do projeto.
+3.  **Criar uma Branch:** (`git checkout -b feature/minha-nova-feature`)
+4.  **Fazer suas Modificações:** Implemente sua nova funcionalidade ou correção.
+5.  **Enviar um Pull Request:** Abra um PR para que possamos revisar e incorporar suas mudanças.
 
 ---
 
-## 🎮 COMO COMEÇAR?
-
-1.  **Crie um Novo Jogo:** Vá para "**Gerenciar Jogos de Bingo**".
-2.  **Dê um Nome:** Escolha um nome criativo para a sua sala de bingo!
-3.  **Escolha o Modo:**
-    * **Anime Bingo Tradicional:** Um desafio focado, um gênero por pessoa até o fim!
-    * **Anime Bingo Infinito:** A loucura não para! Novos gêneros são sorteados a cada anime assistido.
-4.  **Adicione Participantes:** Cadastre todos os amigos que vão entrar na zoeira.
-
----
-
-## 🎲 MODO: ANIME BINGO TRADICIONAL 🎲
-
-**Objetivo:** Ser o primeiro a assistir todos os animes indicados para o seu gênero sorteado (ou o que a regra da casa definir!).
-
-**Como Funciona:**
-
-1.  **Sorteio de Gênero Inicial:**
-    * Cada participante recebe UM gênero único sorteado aleatoriamente.
-    * Este será o seu tema para toda a partida neste modo.
-    * A legenda no rodapé mostrará qual gênero cada um pegou.
-2.  **Fase de Indicações:**
-    * Todos os participantes indicam animes para CADA UM dos outros participantes, baseando-se no gênero que cada um sorteou.
-    * *Exemplo: Se o João sorteou "Ação/Aventura", todos devem indicar um anime de Ação/Aventura para o João.*
-3.  **Sorteio dos Animes:**
-    * Após todos indicarem, o sistema sorteia UM anime da lista de indicações de cada participante para ele assistir.
-4.  **Fase de Acompanhamento:**
-    * Cada um assiste ao seu anime sorteado.
-    * Ao marcar como "**Visto**", o participante pode sortear o PRÓXIMO anime da lista de indicações que recebeu para o SEU GÊNERO INICIAL.
-    * Isso continua até que todas as indicações para aquele gênero sejam assistidas pelo participante.
-5.  **Fim de Jogo (Sugestão):**
-    * O jogo pode terminar quando um participante assistir todos os animes do seu gênero, ou quando todos os participantes completarem seus respectivos gêneros.
-
----
-
-## ♾️ MODO: ANIME BINGO INFINITO ♾️
-
-**Objetivo:** Uma jornada sem fim (ou até cansar!) por diversos gêneros e animes!
-
-**Como Funciona:**
-
-1.  **Sorteio de Gênero Inicial:**
-    * Similar ao Tradicional, cada um recebe um gênero único inicial.
-    * A legenda no rodapé mostrará o gênero ATIVO de cada um.
-2.  **Fase de Indicações (1ª Rodada):**
-    * Todos indicam animes para os gêneros iniciais de cada um.
-3.  **Sorteio do Anime (1ª Rodada):**
-    * Um anime é sorteado para cada participante, baseado nas indicações para seu gênero atual.
-4.  **Fase de Acompanhamento e Novo Ciclo:**
-    * O participante assiste ao seu anime sorteado.
-    * Ao marcar como "**Visto**":
-        * O anime assistido vai para o histórico (com o gênero em que foi visto).
-        * O sistema IMEDIATAMENTE sorteia um **NOVO GÊNERO** para ESTE participante (diferente do último que ele teve).
-        * O jogo VOLTA PARA A **FASE DE INDICAÇÕES**. Agora, os outros participantes devem indicar animes para o **NOVO GÊNERO** deste participante específico.
-        * Após as novas indicações para o novo gênero serem feitas, o jogo avança para o sorteio de anime (onde o participante que recebeu o novo gênero sorteará um anime da nova lista de indicações).
-        * Este ciclo de "assistir -> novo gênero -> novas indicações -> novo sorteio de anime" se repete para cada participante individualmente.
-5.  **Fim de Jogo:**
-    * Teoricamente, pode ser infinito! Vocês definem quando parar ou se há algum objetivo de "rodadas de gênero" por pessoa.
-
----
-
-## 💡 DICAS IMPORTANTES:
-
-* **Indicações:** Usem o campo para digitar o nome do anime (o sistema busca no MyAnimeList!) ou colem a URL direta do MAL.
-* **Legenda de Gêneros:** No rodapé, cliquem em "Mostrar/Ocultar Legenda de Gêneros" para ver todas as opções com suas imagens. Quando um gênero estiver ativo para alguém, o nome do participante aparecerá sobreposto!
-* **Notas:** As notas dos animes (do MAL) são exibidas para ajudar nas escolhas e dar um toque de "qualidade" ao sorteio!
-
-Divirtam-se com esse novo jeito de indicar e assistir animes! 🦊🎲
+Espero que você e seus amigos se divirtam com o Anime Bingo!
