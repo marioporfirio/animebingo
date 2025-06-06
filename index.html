@@ -38,7 +38,13 @@
         }
         .search-result-item:hover { background-color: #475569; }
         .search-result-item img { width: 50px; height: 75px; object-fit: cover; border-radius: 0.25rem; flex-shrink: 0; }
-        .search-result-info { text-align: left; flex-grow: 1; }
+        .search-result-info {
+            text-align: left;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
         .search-result-actions { display: flex; align-items: center; }
 
         .indication-card {
@@ -56,10 +62,16 @@
         }
         .game-list-item:hover { background-color: #475569; }
         .game-list-item span { flex-grow: 1; }
-        .score-badge { /* Estilo para o app, será mantido para a interface normal */
+        .score-badge {
             background-color: #facc15; color: #1e293b;
             padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-weight: bold; font-size: 0.9em;
             display: inline-block; vertical-align: middle; line-height: 1.3;
+        }
+        .status-tag {
+            font-size: 0.75rem; font-weight: 700; color: white;
+            padding: 0.125rem 0.5rem; border-radius: 9999px;
+            display: inline-block; vertical-align: middle;
+            margin: 2px;
         }
         .genre-legend-item {
             display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
@@ -124,7 +136,7 @@
         <button id="alertCloseButton" class="absolute top-1 right-2 text-2xl font-bold leading-none flex-shrink-0">&times;</button>
         <div id="alertConfirmButtons" class="mt-3 flex justify-end space-x-2 hidden">
              <button id="alertCancelBtn" class="px-3 py-1 bg-slate-600 hover:bg-slate-500 rounded text-sm">Cancelar</button>
-             <button id="alertConfirmBtn" class="px-3 py-1 bg-red-600 hover:bg-red-500 rounded text-sm">Confirmar</button>
+             <button id="alertConfirmBtn" class="px-3 py-1 bg-green-600 hover:bg-green-500 rounded text-sm">Confirmar</button>
         </div>
     </div>
 
@@ -224,9 +236,9 @@
         <div id="actualGameContent" class="hidden">
             <section id="registrationPhaseSection">
                 <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 text-indigo-400 flex items-center"><span role="img" aria-label="ícone de usuários" class="mr-3 text-2xl">👥</span> Cadastro de Participantes</h2>
-                <div class="flex flex-col sm:flex-row gap-4 mb-2">
+                <div class="flex flex-col sm:flex-row gap-4 mb-4">
                     <input type="text" id="participantNameInput" placeholder="Nome do Participante" class="flex-grow p-3 rounded-lg bg-slate-700 border border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder-slate-400"/>
-                    <!-- Input de MAL Username REMOVIDO daqui -->
+                    <input type="text" id="participantAnilistUsernameInput" placeholder="Usuário AniList (Opcional)" class="sm:w-1/3 p-3 rounded-lg bg-slate-700 border border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder-slate-400"/>
                 </div>
                  <div class="flex flex-col sm:flex-row gap-4 mb-6">
                     <button id="addParticipantButton" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-600 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center"><span role="img" aria-label="adicionar" class="mr-2 text-lg">+</span> Adicionar Participante</button>
@@ -341,8 +353,10 @@
     </footer>
 
     <script>
-        // Jikan API (não oficial do MAL)
-        const JIKAN_API_BASE_URL = "https://api.jikan.moe/v4";
+        // AniList API (GraphQL)
+        const ANILIST_API_URL = "https://graphql.anilist.co";
+        // CORS Proxy para html2canvas
+        const CORS_PROXY_URL = "https://api.allorigins.win/raw?url=";
 
 
         let initialGenres = [
@@ -391,7 +405,7 @@
             CLUB_RESULT_DISPLAY: "CLUB_RESULT_DISPLAY"
         };
 
-        const ALL_GAMES_STORAGE_KEY = 'animeBingoAllGamesData_v1';
+        const ALL_GAMES_STORAGE_KEY = 'animeBingoAllGamesData_v1_anilist';
 
         const BASE_GAME_INSTANCE_STATE = {
             id: null,
@@ -414,7 +428,7 @@
         };
         let gameState = {};
 
-        let participantNameInput, participantMalUsernameInput, addParticipantButton, participantsListDiv, goToNextPhaseFromRegistrationButton, maxParticipantsWarning,
+        let participantNameInput, participantAnilistUsernameInput, addParticipantButton, participantsListDiv, goToNextPhaseFromRegistrationButton, maxParticipantsWarning,
             registrationPhaseSection, individualDrawPhaseSection, participantsToDrawListDiv, drawnParticipantsListDiv,
             goToIndicationPhaseButton, indicationPhaseSection, indicationTabsDiv, indicationContentDiv, goToAnimeDrawPhaseButton, exportIndicationsButton,
             animeDrawPhaseSection, participantsToDrawAnimeListDiv, goToWatchLoopButton,
@@ -497,7 +511,7 @@
                 gameState.participants = (gameToLoad.participants || []).map(p => ({
                     id: p.id || generateUUID(),
                     name: p.name || "Participante Desconhecido",
-                    malUsername: null, // MAL Username removido
+                    anilistUsername: p.anilistUsername || null,
                     assignedGenre: p.assignedGenre || null,
                     genreDrawNumber: p.genreDrawNumber || null,
                     currentAssignedGenre: p.currentAssignedGenre || p.assignedGenre || null,
@@ -541,17 +555,36 @@
 
         function ensureImageIsAccessible(src, placeholderOnError) {
             return new Promise((resolve) => {
-                if (!src || src.startsWith('https://placehold.co') || src.startsWith('data:image/png;base64')) {
+                if (!src || src.startsWith('https://placehold.co') || src.startsWith('data:image/png;base64') || src.startsWith(CORS_PROXY_URL)) {
                     resolve(src || placeholderOnError);
                     return;
                 }
+                
+                if (src.includes("raw.githubusercontent.com")) {
+                    const gitHubImg = new Image();
+                    gitHubImg.crossOrigin = "anonymous";
+                    gitHubImg.onload = () => resolve(src);
+                    gitHubImg.onerror = () => resolve(placeholderOnError);
+                    gitHubImg.src = src;
+                    return;
+                }
+                
                 const img = new Image();
                 img.crossOrigin = 'anonymous';
+                
                 img.onload = () => resolve(src);
-                img.onerror = (err) => {
-                    console.warn(`Falha ao carregar/verificar CORS para imagem: ${src}. Usando placeholder: ${placeholderOnError}. Erro:`, err);
-                    resolve(placeholderOnError);
+                img.onerror = () => {
+                    console.warn(`CORS-related error on direct load for ${src}. Retrying via proxy...`);
+                    const proxyImg = new Image();
+                    proxyImg.crossOrigin = 'anonymous';
+                    proxyImg.onload = () => resolve(proxyImg.src);
+                    proxyImg.onerror = (err) => {
+                        console.error(`Failed to load image via proxy as well for ${src}. Using placeholder.`, err);
+                        resolve(placeholderOnError);
+                    };
+                    proxyImg.src = `${CORS_PROXY_URL}${encodeURIComponent(src)}`;
                 };
+
                 img.src = src;
             });
         }
@@ -562,8 +595,8 @@
             gameState.participants.forEach((p, index) => {
                 const div = document.createElement('div');
                 div.className = 'flex items-center justify-between bg-slate-700 p-3 rounded-lg shadow';
-                // const malUsernameDisplay = p.malUsername ? `<span class="text-xs text-slate-400 ml-2">(MAL: ${p.malUsername})</span>` : ''; // REMOVIDO
-                div.innerHTML = `<span class="text-indigo-300">${index + 1}. ${p.name}</span>
+                const anilistUserDisplay = p.anilistUsername ? `<span class="text-xs text-sky-400 ml-2">(@${p.anilistUsername})</span>` : '';
+                div.innerHTML = `<div><span class="text-indigo-300">${index + 1}. ${p.name}</span>${anilistUserDisplay}</div>
                                          <button data-id="${p.id}" class="removeParticipantButton text-red-400 hover:text-red-300"><span role="img" aria-label="remover">🗑️</span></button>`;
                 participantsListDiv.appendChild(div);
             });
@@ -653,7 +686,7 @@
                             <div class="indication-card">
                                 <img src="${existingIndication.animeImageUrl || PLACEHOLDER_IMG_60x90}" alt="Capa de ${existingIndication.animeTitle}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG_ERROR_60x90}';">
                                 <div class="indication-card-info">
-                                    <a href="${existingIndication.malUrl}" target="_blank" class="font-semibold text-green-400 hover:underline">${existingIndication.animeTitle}</a>
+                                    <a href="${existingIndication.animeUrl}" target="_blank" class="font-semibold text-green-400 hover:underline">${existingIndication.animeTitle}</a>
                                     ${existingIndication.score ? `<span class="score-badge">${existingIndication.score.toFixed(2)}</span>` : ''}
                                 </div>
                                 <button data-indicator-id="${indicator.id}" class="remove-club-indication-button text-red-400 hover:text-red-300 ml-auto p-1"><span role="img" aria-label="remover indicação">🗑️</span></button>
@@ -661,7 +694,7 @@
                     } else {
                         indicatorDiv.innerHTML += `
                             <div class="flex flex-col sm:flex-row gap-2 items-center">
-                                <input type="text" data-indicator-id="${indicator.id}" placeholder="Nome do Anime ou URL MAL" class="club-indication-input w-full sm:flex-grow p-2 rounded bg-slate-600 border border-slate-500 placeholder-slate-400 text-sm">
+                                <input type="text" data-indicator-id="${indicator.id}" placeholder="Nome do Anime" class="club-indication-input w-full sm:flex-grow p-2 rounded bg-slate-600 border border-slate-500 placeholder-slate-400 text-sm">
                                 <button data-indicator-id="${indicator.id}" class="indicate-club-anime-button bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg text-sm w-full sm:w-auto">Indicar para o Clube</button>
                             </div>`;
                     }
@@ -705,13 +738,11 @@
 
                 const indicatorSection = document.createElement('div');
                 indicatorSection.innerHTML = `<h3 class="text-xl font-semibold text-yellow-400 mb-3 mt-2">Indicações de ${currentIndicator.name}:</h3>`;
-                console.log(`Modo não-clube: Renderizando indicações para ${currentIndicator.name}`);
 
                 let hasReceiversToShow = false;
                 gameState.participants.forEach(receiver => {
                     if (receiver.id === currentIndicator.id) return;
                     if (!receiver.currentAssignedGenre) {
-                         console.log(`Modo não-clube: ${receiver.name} não tem currentAssignedGenre. Pulando.`);
                          return;
                     }
                     hasReceiversToShow = true;
@@ -719,21 +750,21 @@
                     const existingIndication = receiver.receivedIndications?.find(ind => ind.indicatorId === currentIndicator.id && ind.genreContext === receiver.currentAssignedGenre);
                     const receiverGenreDetails = initialGenres.find(g => g.name === receiver.currentAssignedGenre);
 
-                    const receiverDiv = document.createElement('div'); // Div para cada "destinatário"
+                    const receiverDiv = document.createElement('div');
                     receiverDiv.className = 'mb-4 p-3 bg-slate-700/50 rounded-lg';
                     let receiverInfoHTML = `<p class="mb-2 text-indigo-300">Para: <span class="font-semibold">${receiver.name}</span>`;
                     if (receiverGenreDetails) {
                         receiverInfoHTML += ` - Gênero Atual: <img src="${receiverGenreDetails.imageUrl || PLACEHOLDER_IMG_SEARCH_RESULT}" alt="${receiverGenreDetails.name}" class="inline-block w-5 h-5 object-contain mx-1 rounded-sm"> ${receiverGenreDetails.name}`;
                     }
                     receiverInfoHTML += `</p>`;
-                    // Conteúdo da indicação (card ou input) vai DENTRO do receiverDiv
+
                     let indicationContentHTML = '';
                     if (existingIndication) {
                         indicationContentHTML = `
                                 <div class="indication-card">
                                     <img src="${existingIndication.animeImageUrl || PLACEHOLDER_IMG_60x90}" alt="Capa de ${existingIndication.animeTitle}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG_ERROR_60x90}';">
                                     <div class="indication-card-info">
-                                        <a href="${existingIndication.malUrl}" target="_blank" class="font-semibold text-green-400 hover:underline">${existingIndication.animeTitle}</a>
+                                        <a href="${existingIndication.animeUrl}" target="_blank" class="font-semibold text-green-400 hover:underline">${existingIndication.animeTitle}</a>
                                         ${existingIndication.score ? `<span class="score-badge">${existingIndication.score.toFixed(2)}</span>` : ''}
                                     </div>
                                     <button data-indicator-id="${currentIndicator.id}" data-receiver-id="${receiver.id}" class="remove-indication-button text-red-400 hover:text-red-300 ml-auto p-1"><span role="img" aria-label="remover indicação">🗑️</span></button>
@@ -741,12 +772,12 @@
                     } else {
                         indicationContentHTML = `
                                 <div class="flex flex-col sm:flex-row gap-2 items-center">
-                                    <input type="text" data-indicator-id="${currentIndicator.id}" data-receiver-id="${receiver.id}" placeholder="Nome do Anime ou URL MAL" class="indication-input w-full sm:flex-grow p-2 rounded bg-slate-600 border border-slate-500 placeholder-slate-400 text-sm">
+                                    <input type="text" data-indicator-id="${currentIndicator.id}" data-receiver-id="${receiver.id}" placeholder="Nome do Anime" class="indication-input w-full sm:flex-grow p-2 rounded bg-slate-600 border border-slate-500 placeholder-slate-400 text-sm">
                                     <button data-indicator-id="${currentIndicator.id}" data-receiver-id="${receiver.id}" class="indicate-anime-button bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg text-sm w-full sm:w-auto">Indicar</button>
                                 </div>`;
                     }
-                    receiverDiv.innerHTML = receiverInfoHTML + indicationContentHTML; // Combina info do receiver + conteúdo da indicação
-                    indicatorSection.appendChild(receiverDiv); // Adiciona o receiverDiv completo à seção do indicador
+                    receiverDiv.innerHTML = receiverInfoHTML + indicationContentHTML;
+                    indicatorSection.appendChild(receiverDiv);
                 });
 
                 if (!hasReceiversToShow && gameState.participants.length > 1) {
@@ -807,64 +838,78 @@
             const inputValue = inputElement.value.trim();
 
             if (!inputValue) {
-                showAlert("Por favor, digite o nome do anime ou uma URL do MAL.", "error");
+                showAlert("Por favor, digite o nome do anime.", "error");
                 return;
             }
 
             button.disabled = true;
-            button.textContent = 'Indicando...'; // Mudado de 'Verificando...'
+            button.textContent = 'Buscando...';
 
-            // Não há mais verificação da lista MAL, então prossegue diretamente.
-            await proceedWithIndication(inputValue, indicatorId, receiverId, isClubIndication, button);
+            await searchAnimeByName(inputValue, indicatorId, receiverId, isClubIndication);
+
+            button.disabled = false;
+            button.textContent = isClubIndication ? 'Indicar para o Clube' : 'Indicar';
         }
-
-
-        async function proceedWithIndication(inputValue, indicatorId, receiverId, isClubIndication, buttonElement) {
-            buttonElement.disabled = true;
-            buttonElement.textContent = 'Indicando...';
-
-            const malUrlMatch = inputValue.match(/myanimelist\.net\/anime\/(\d+)/);
-            if (malUrlMatch && malUrlMatch[1]) {
-                const malId = malUrlMatch[1];
-                await fetchAnimeDetailsById(malId, indicatorId, receiverId, inputValue, isClubIndication);
-            } else {
-                await searchAnimeByName(inputValue, indicatorId, receiverId, isClubIndication);
-            }
-            buttonElement.disabled = false;
-            buttonElement.textContent = isClubIndication ? 'Indicar para o Clube' : 'Indicar';
-        }
-
 
         async function handleClubIndicationSubmit(event) {
             await handleIndicationSubmit(event, true);
         }
 
+        function getStatusTagInfo(status) {
+            const statusMap = {
+                COMPLETED: { text: 'Completo', color: 'bg-green-600' },
+                PLANNING: { text: 'Planejado', color: 'bg-sky-600' },
+                CURRENT: { text: 'Assistindo', color: 'bg-blue-600' },
+                PAUSED: { text: 'Pausado', color: 'bg-yellow-500' },
+                DROPPED: { text: 'Dropado', color: 'bg-red-600' },
+                REPEATING: { text: 'Reassistindo', color: 'bg-purple-600' },
+            };
+            return statusMap[status] || { text: status, color: 'bg-gray-500' };
+        }
+
         function renderSearchResults(results) {
             searchResultsListDiv.innerHTML = '';
             if (!results || results.length === 0) {
-                searchResultsListDiv.innerHTML = '<p class="text-slate-400">Nenhum resultado encontrado.</p>';
+                searchResultsListDiv.innerHTML = '<p class="text-slate-400">Nenhum resultado encontrado para animes finalizados.</p>';
                 return;
             }
             results.forEach(anime => {
-                const title = anime.title || anime.titles?.find(t=>t.type === "Default")?.title || "Título Desconhecido";
-                const imageUrl = anime.images?.jpg?.image_url || PLACEHOLDER_IMG_SEARCH_RESULT;
-                const score = anime.score ? `<span class="score-badge">${anime.score.toFixed(2)}</span>` : '<span class="text-xs text-slate-400">N/A</span>';
-                const typeYear = `${anime.type || ''}${anime.year ? ' (' + anime.year + ')' : ''}`;
+                const title = anime.title?.romaji || anime.title?.english || "Título Desconhecido";
+                const imageUrl = anime.coverImage?.medium || PLACEHOLDER_IMG_SEARCH_RESULT;
+                const scoreValue = anime.averageScore ? (anime.averageScore / 10).toFixed(2) : null;
+                const score = scoreValue ? `<span class="score-badge">${scoreValue}</span>` : '<span class="text-xs text-slate-400">N/A</span>';
+                const typeYear = `${anime.format || ''}${anime.startDate?.year ? ' (' + anime.startDate.year + ')' : ''}`;
                 const episodes = anime.episodes ? `${anime.episodes} ep` : 'Ep. N/A';
-                const genres = anime.genres?.slice(0, 2).map(g => g.name).join(', ') || 'Gêneros N/A';
-
+                const genres = anime.genres?.slice(0, 2).join(', ') || 'Gêneros N/A';
+                
+                let tagsHTML = '';
+                if (anime.participantStatuses && anime.participantStatuses.length > 0) {
+                    tagsHTML = anime.participantStatuses.map(ps => {
+                        const { text, color } = getStatusTagInfo(ps.status);
+                        return `<span class="status-tag ${color}">${ps.participantName} (${text})</span>`;
+                    }).join('');
+                } else if (anime.mediaListStatus) { // Fallback for individual mode
+                    const { text, color } = getStatusTagInfo(anime.mediaListStatus);
+                    tagsHTML = `<span class="status-tag ${color}">${text}</span>`;
+                }
+                
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'search-result-item';
                 itemDiv.innerHTML = `
                         <img src="${imageUrl}" alt="Capa de ${title}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG_ERROR_40x60}';">
                         <div class="search-result-info">
-                            <p class="font-semibold text-sky-300">${title}</p>
-                            <p class="text-xs text-slate-300">${typeYear} - ${episodes}</p>
-                            <p class="text-xs text-slate-400">${genres}</p>
+                            <div>
+                                <p class="font-semibold text-sky-300">${title}</p>
+                                <p class="text-xs text-slate-300">${typeYear} - ${episodes}</p>
+                                <p class="text-xs text-slate-400">${genres}</p>
+                            </div>
+                            <div class="mt-2 flex flex-wrap gap-1">
+                                ${tagsHTML}
+                            </div>
                         </div>
                         <div class="search-result-actions flex flex-col items-end gap-1 ml-auto">
                             ${score}
-                            <button data-mal-id="${anime.mal_id}" data-mal-url="${anime.url}" class="select-search-result-button bg-green-600 hover:bg-green-700 text-white text-xs font-semibold py-1 px-2 rounded">Selecionar</button>
+                            <button data-anilist-id="${anime.id}" class="select-search-result-button bg-green-600 hover:bg-green-700 text-white text-xs font-semibold py-1 px-2 rounded">Selecionar</button>
                         </div>
                 `;
                 searchResultsListDiv.appendChild(itemDiv);
@@ -872,109 +917,204 @@
             document.querySelectorAll('.select-search-result-button').forEach(btn => btn.onclick = handleSearchResultSelection);
             searchResultsModal.classList.remove('hidden');
         }
-
-        async function searchAnimeByName(query, indicatorId, receiverId, isClubIndication = false, isPreliminarySearch = false) {
+        
+        async function fetchUserAnimeListStatuses(username) {
+            const query = `
+                query ($userName: String) {
+                  MediaListCollection(userName: $userName, type: ANIME, forceSingleCompletedList: true) {
+                    lists {
+                      entries {
+                        mediaId
+                        status
+                      }
+                    }
+                  }
+                }
+            `;
+            const variables = { userName: username };
+            
             try {
-                const response = await fetch(`${JIKAN_API_BASE_URL}/anime?q=${encodeURIComponent(query)}&limit=10`);
-                if (!response.ok) {
-                    const err = await response.json().catch(() => ({message: response.statusText}));
-                    throw new Error(`Jikan Search API: ${response.status} - ${err.message || 'Erro desconhecido'}`);
+                const response = await fetch(ANILIST_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ query, variables })
+                });
+                const result = await response.json();
+                if (result.errors) {
+                    const userNotFound = result.errors.some(e => e.message.toLowerCase().includes('user not found') || e.status === 404);
+                    if (userNotFound) {
+                        console.warn(`Usuário AniList "${username}" não encontrado. Verificação pulada.`);
+                        return new Map();
+                    }
+                    throw new Error(result.errors.map(e => e.message).join('\n'));
                 }
+                const statusMap = new Map();
+                result.data?.MediaListCollection?.lists?.forEach(list => {
+                    list.entries.forEach(entry => {
+                        statusMap.set(entry.mediaId, entry.status);
+                    });
+                });
+                return statusMap;
+            } catch (error) {
+                console.error("Erro ao buscar a lista do usuário no AniList:", error);
+                showAlert(`Não foi possível buscar a lista de ${username}.`, "warning", 4000);
+                return new Map();
+            }
+        }
+
+
+        async function searchAnimeByName(query, indicatorId, receiverId, isClubIndication = false) {
+             const graphqlQuery = `
+                query ($search: String) {
+                    Page(page: 1, perPage: 50) {
+                        media(search: $search, type: ANIME, sort: SEARCH_MATCH, status: FINISHED) {
+                            id
+                            title { romaji english }
+                            coverImage { medium }
+                            averageScore
+                            format
+                            startDate { year }
+                            episodes
+                            genres
+                            siteUrl
+                        }
+                    }
+                }
+            `;
+            const variables = { search: query };
+
+            try {
+                const response = await fetch(ANILIST_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ query: graphqlQuery, variables })
+                });
+
                 const data = await response.json();
-
-                if (isPreliminarySearch) {
-                    return data.data;
-                }
-
-                if (!data.data || data.data.length === 0) {
-                    showAlert(`Nenhum resultado encontrado para "${query}". Tente uma URL direta do MAL.`, "info");
+                if (data.errors) throw new Error(data.errors.map(e => e.message).join('\n'));
+                
+                let results = data.data?.Page?.media;
+                if (!results || results.length === 0) {
+                    showAlert(`Nenhum resultado encontrado para animes finalizados com o termo "${query}".`, "info");
                     return;
                 }
+
+                if (isClubIndication) {
+                    const usersToCheck = gameState.participants.filter(p => p.anilistUsername);
+                    if (usersToCheck.length > 0) {
+                        const listPromises = usersToCheck.map(user => 
+                            fetchUserAnimeListStatuses(user.anilistUsername)
+                                .then(statusMap => ({ participantName: user.name.split(' ')[0], statusMap }))
+                        );
+                        const allUserLists = await Promise.all(listPromises);
+
+                        const masterStatusMap = new Map();
+                        allUserLists.forEach(userList => {
+                            userList.statusMap.forEach((status, animeId) => {
+                                if (!masterStatusMap.has(animeId)) {
+                                    masterStatusMap.set(animeId, []);
+                                }
+                                masterStatusMap.get(animeId).push({ participantName: userList.participantName, status });
+                            });
+                        });
+
+                        results = results.map(anime => ({
+                            ...anime,
+                            participantStatuses: masterStatusMap.get(anime.id) || []
+                        }));
+                    }
+                } else {
+                    const receiver = gameState.participants.find(p => p.id === receiverId);
+                    if (receiver && receiver.anilistUsername) {
+                        const statusMap = await fetchUserAnimeListStatuses(receiver.anilistUsername);
+                        results = results.map(anime => ({
+                            ...anime,
+                            mediaListStatus: statusMap.get(anime.id) || null
+                        }));
+                    }
+                }
+                
                 currentSearchContext = { indicatorId, receiverId, isClubIndication };
-                renderSearchResults(data.data);
+                renderSearchResults(results);
             } catch (error) {
-                console.error("Erro ao buscar animes por nome na API Jikan:", error);
-                showAlert(`Erro na busca Jikan: ${error.message}.`, "error");
-                if (isPreliminarySearch) return null;
+                console.error("Erro ao buscar na API AniList:", error);
+                showAlert(`Erro na busca AniList: ${error.message}.`, "error");
             }
         }
 
         async function handleSearchResultSelection(event) {
             const button = event.currentTarget;
-            const malId = button.dataset.malId;
-            const malUrl = button.dataset.malUrl;
-            if (currentSearchContext && malId) {
-                await fetchAnimeDetailsById(malId, currentSearchContext.indicatorId, currentSearchContext.receiverId, malUrl, currentSearchContext.isClubIndication);
+            const anilistId = button.dataset.anilistId;
+            if (currentSearchContext && anilistId) {
+                const { indicatorId, receiverId, isClubIndication } = currentSearchContext;
+                await fetchAnimeDetailsById(anilistId, indicatorId, receiverId, isClubIndication);
             }
             searchResultsModal.classList.add('hidden');
             currentSearchContext = null;
         }
 
-        async function fetchAnimeDetailsById(malId, indicatorId, receiverId, originalMalUrl, isClubIndication = false, isForVerificationOnly = false) {
-            try {
-                const response = await fetch(`${JIKAN_API_BASE_URL}/anime/${malId}`);
-                if (!response.ok) {
-                    const err = await response.json().catch(() => ({message: response.statusText}));
-                    throw new Error(`Jikan Detail API: ${response.status} - ${err.message || 'Erro desconhecido'}`);
+        async function fetchAnimeDetailsById(anilistId, indicatorId, receiverId, isClubIndication = false) {
+            const graphqlQuery = `
+                query ($id: Int) {
+                    Media(id: $id, type: ANIME) {
+                        id
+                        title { romaji english }
+                        coverImage { large medium }
+                        averageScore
+                        siteUrl
+                    }
                 }
-                const data = await response.json(); const animeData = data.data;
-                const animeTitle = animeData.title || animeData.titles?.find(t=>t.type === "Default")?.title || 'Título Desconhecido';
-                const animeImageUrl = animeData.images?.jpg?.large_image_url || animeData.images?.jpg?.image_url || PLACEHOLDER_IMG_60x90;
-                const score = animeData.score || null;
+            `;
+            const variables = { id: anilistId };
 
-                if (isForVerificationOnly) {
-                    return { title: animeTitle, mal_id: animeData.mal_id };
-                }
+            try {
+                const response = await fetch(ANILIST_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ query: graphqlQuery, variables })
+                });
+
+                const data = await response.json();
+                if (data.errors) { throw new Error(data.errors.map(e => e.message).join('\n')); }
+
+                const animeData = data.data.Media;
+                const animeTitle = animeData.title.romaji || animeData.title.english || 'Título Desconhecido';
+                const animeImageUrl = animeData.coverImage.large || animeData.coverImage.medium || PLACEHOLDER_IMG_60x90;
+                const score = animeData.averageScore ? (animeData.averageScore / 10) : null;
 
                 const indicator = gameState.participants.find(p => p.id === indicatorId);
+                const indicationObject = {
+                    indicatorId,
+                    indicatorName: indicator.name,
+                    animeId: animeData.id,
+                    animeTitle,
+                    animeImageUrl,
+                    animeUrl: animeData.siteUrl,
+                    score,
+                    apiSource: 'AniList'
+                };
 
                 if (isClubIndication) {
                     if (!gameState.clubIndications) gameState.clubIndications = [];
                     gameState.clubIndications = gameState.clubIndications.filter(ind => ind.indicatorId !== indicatorId);
-                    gameState.clubIndications.push({
-                        indicatorId,
-                        indicatorName: indicator.name,
-                        malId,
-                        animeTitle,
-                        animeImageUrl,
-                        malUrl: originalMalUrl || animeData.url,
-                        score, // Score é salvo nos dados
-                        genreContext: gameState.clubGenre.name
-                    });
-                    showAlert(`"${animeTitle}" indicado por ${indicator.name} para o gênero do clube: ${gameState.clubGenre.name}!`, "success");
+                    gameState.clubIndications.push({ ...indicationObject, genreContext: gameState.clubGenre.name });
+                    showAlert(`"${animeTitle}" indicado por ${indicator.name} para o gênero do clube!`, "success");
                 } else {
                     const receiver = gameState.participants.find(p => p.id === receiverId);
-                    if (!receiver) {
-                        showAlert("Erro: Destinatário da indicação não encontrado.", "error");
-                        return;
-                    }
+                    if (!receiver) { showAlert("Erro: Destinatário da indicação não encontrado.", "error"); return; }
+
                     if (!receiver.receivedIndications) receiver.receivedIndications = [];
                     receiver.receivedIndications = receiver.receivedIndications.filter(ind => !(ind.indicatorId === indicatorId && ind.genreContext === receiver.currentAssignedGenre) );
 
-                    receiver.receivedIndications.push({
-                        indicatorId,
-                        indicatorName: indicator.name,
-                        malId,
-                        animeTitle,
-                        animeImageUrl,
-                        malUrl: originalMalUrl || animeData.url,
-                        score, // Score é salvo nos dados
-                        status: 'pending',
-                        genreContext: receiver.currentAssignedGenre
-                    });
+                    receiver.receivedIndications.push({ ...indicationObject, status: 'pending', genreContext: receiver.currentAssignedGenre });
                     showAlert(`"${animeTitle}" indicado para ${receiver.name} (Gênero: ${receiver.currentAssignedGenre})!`, "success");
                 }
                 renderApp();
             } catch (error) {
-                console.error("Erro ao buscar detalhes do anime por ID na API Jikan:", error);
-                showAlert(`Erro ao buscar detalhes Jikan: ${error.message}.`, "error");
-                 if (isForVerificationOnly) return null;
+                console.error("Erro ao buscar detalhes do anime na API AniList:", error);
+                showAlert(`Erro ao buscar detalhes na AniList: ${error.message}.`, "error");
             }
         }
-
-        // checkAnimeOnUserListsJikan REMOVIDA
-        // handleCheckMalList REMOVIDA
-
 
         function handleRemoveIndication(event) {
             const button = event.currentTarget;
@@ -1028,7 +1168,7 @@
                         <div class="p-4 bg-slate-700/70 rounded-lg shadow-md text-center">
                             <h3 class="text-xl font-semibold text-green-400 mb-2">Anime Sorteado para o Clube:</h3>
                             <img src="${anime.animeImageUrl || PLACEHOLDER_IMG_150x225}" alt="Capa de ${anime.animeTitle}" class="w-32 h-auto mx-auto my-2 rounded-md shadow-lg" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG_ERROR_80x120}';">
-                            <a href="${anime.malUrl}" target="_blank" class="text-2xl font-bold text-yellow-400 hover:underline">${anime.animeTitle}</a> ${scoreHTML}
+                            <a href="${anime.animeUrl}" target="_blank" class="text-2xl font-bold text-yellow-400 hover:underline">${anime.animeTitle}</a> ${scoreHTML}
                             <p class="text-sm text-slate-400 mt-1">Indicado por: ${anime.indicatorName}</p>
                         </div>`;
                 } else {
@@ -1125,7 +1265,7 @@
             animeRevealParticipantName.textContent = `Anime para ${participantName} assistir!`;
             animeRevealCover.src = anime.animeImageUrl || PLACEHOLDER_IMG_150x225;
             animeRevealCover.alt = `Capa de ${anime.animeTitle}`;
-            animeRevealTitleLink.href = anime.malUrl || '#';
+            animeRevealTitleLink.href = anime.animeUrl || '#';
             animeRevealTitleLink.textContent = anime.animeTitle;
             animeRevealIndicator.textContent = anime.indicatorName;
             animeRevealScore.innerHTML = anime.score ? `<span class="score-badge">${anime.score.toFixed(2)}</span>` : '';
@@ -1165,9 +1305,9 @@
                     clubResultAnimeCover.alt = `Capa de ${gameState.clubAnimeIndication.animeTitle || 'Anime não definido'}`;
                 }
                 if (clubResultAnimeTitleLink) {
-                    clubResultAnimeTitleLink.href = gameState.clubAnimeIndication.malUrl || '#';
+                    clubResultAnimeTitleLink.href = gameState.clubAnimeIndication.animeUrl || '#';
                     let titleHTML = gameState.clubAnimeIndication.animeTitle || 'Título não disponível';
-                    if (gameState.clubAnimeIndication.score) { // Score na UI ainda é exibido
+                    if (gameState.clubAnimeIndication.score) {
                          titleHTML += ` <span class="score-badge">${gameState.clubAnimeIndication.score.toFixed(2)}</span>`;
                     }
                     clubResultAnimeTitleLink.innerHTML = titleHTML;
@@ -1203,18 +1343,18 @@
                                     <div class="flex items-center gap-3 mb-3 p-2 bg-slate-600 rounded">
                                         <img src="${p.animeToWatch.animeImageUrl || PLACEHOLDER_IMG_60x90}" alt="${p.animeToWatch.animeTitle}" class="w-[50px] h-[75px] object-cover rounded" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG_ERROR_60x90}';">
                                         <div>
-                                            <a href="${p.animeToWatch.malUrl}" target="_blank" class="font-bold text-green-400 hover:underline">${p.animeToWatch.animeTitle}</a>
+                                            <a href="${p.animeToWatch.animeUrl}" target="_blank" class="font-bold text-green-400 hover:underline">${p.animeToWatch.animeTitle}</a>
                                             ${scoreHTML}
                                             <p class="text-xs text-slate-400">Indicado por: ${p.animeToWatch.indicatorName}</p>
                                         </div>
                                     </div>
                                     <button data-id="${p.id}" class="mark-as-watched-button bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full">Marcar como Visto</button>
                             `;
-                        } else if (p.currentAssignedGenre && pendingIndicationsForCurrentGenre.length > 0) {
+                        } else if (p.currentAssignedGenre && pendingIndicationsForCurrentGenre.length > 0 && gameState.gameMode !== 'infinito') {
                             allParticipantsFinishedAllCycles = false;
                             contentHTML += `<button data-id="${p.id}" class="draw-next-anime-button bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full">Sortear Próximo Anime (Gênero: ${p.currentAssignedGenre})</button>`;
                         } else if (p.currentAssignedGenre && pendingIndicationsForCurrentGenre.length === 0) {
-                            allParticipantsFinishedAllCycles = false;
+                             allParticipantsFinishedAllCycles = false;
                              contentHTML += `<p class="text-yellow-400 mb-2">Aguardando indicações para o gênero: ${p.currentAssignedGenre}.</p>`;
                              contentHTML += `<button data-id="${p.id}" class="go-to-indicate-for-participant-button bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full">Ir para Indicações</button>`;
                              if (gameState.gameMode === 'infinito') {
@@ -1226,21 +1366,20 @@
                                  } else if (p.receivedIndications?.filter(ind => ind.status === 'watched').length === p.receivedIndications?.length && p.receivedIndications?.length > 0){
                                      contentHTML = `<p class="text-green-400 font-semibold">🎉 ${p.name} finalizou todos os ciclos de gênero!</p>`;
                                  }
-                             } else { // Modo tradicional, sem mais indicações e sem anime para assistir = terminou o gênero
+                             } else {
                                  contentHTML = `<p class="text-green-400 font-semibold">🎉 ${p.name} concluiu as indicações para o gênero ${p.currentAssignedGenre}!</p>`;
                              }
-                        } else if (!p.currentAssignedGenre && p.assignedGenre && gameState.gameMode === 'infinito') { // Terminou o último gênero do ciclo e precisa de um novo
+                        } else if (!p.currentAssignedGenre && p.assignedGenre && gameState.gameMode === 'infinito') {
                             allParticipantsFinishedAllCycles = false;
                             contentHTML += `<button data-id="${p.id}" class="draw-new-genre-button bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full mt-2">Sortear Novo Gênero</button>`;
-                        } else if (!p.currentAssignedGenre && !p.assignedGenre) { // Nunca teve gênero (não deveria acontecer se passou do sorteio inicial)
+                        } else if (!p.currentAssignedGenre && !p.assignedGenre) {
                              allParticipantsFinishedAllCycles = false;
                              contentHTML += `<p class="text-slate-400">Aguardando sorteio inicial de gênero.</p>`;
-                        } else { // Nenhum dos casos acima - provavelmente finalizou
+                        } else {
                             if(gameState.gameMode === 'tradicional' || (p.genreHistory && p.genreHistory.length >= initialGenres.length && initialGenres.length > 0)) {
-                                // Se for modo tradicional OU (modo infinito E já passou por todos os gêneros E initialGenres não está vazio)
                                 contentHTML += `<p class="text-green-400 font-semibold">🎉 ${p.name} finalizou sua participação!</p>`;
                             } else {
-                                allParticipantsFinishedAllCycles = false; // Ainda pode ter mais ciclos no infinito
+                                allParticipantsFinishedAllCycles = false;
                                 contentHTML += `<p class="text-slate-400">Aguardando próximo passo.</p>`;
                             }
                         }
@@ -1249,9 +1388,8 @@
                         if (watchedAnimesInHistory.length > 0) {
                             contentHTML += `<h4 class="text-sm font-medium text-slate-400 mt-4 mb-1">Animes já vistos:</h4><ul class="list-disc list-inside text-xs text-slate-500">`;
                             watchedAnimesInHistory.forEach(ind => {
-                                const scoreText = ind.score ? ` (Nota: ${ind.score.toFixed(2)})` : '';
                                 const genreContextText = ind.genreContext ? ` <span class="text-slate-400 italic">(Gênero: ${ind.genreContext})</span>` : '';
-                                contentHTML += `<li><a href="${ind.malUrl}" target="_blank" class="hover:underline">${ind.animeTitle}</a>${scoreText} (por ${ind.indicatorName})${genreContextText}</li>`;
+                                contentHTML += `<li><a href="${ind.animeUrl}" target="_blank" class="hover:underline">${ind.animeTitle}</a> (por ${ind.indicatorName})${genreContextText}</li>`;
                             });
                             contentHTML += `</ul>`;
                         }
@@ -1262,11 +1400,11 @@
                     const everyoneTrulyFinishedOriginalModes = gameState.participants.every(p => {
                         if (gameState.gameMode === 'tradicional') {
                             const pendingForCurrentGenre = p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.assignedGenre).length || 0;
-                            return !p.animeToWatch && pendingForCurrentGenre === 0 && p.assignedGenre; // Deve ter tido um gênero sorteado
-                        } else { // infinito
+                            return !p.animeToWatch && pendingForCurrentGenre === 0 && p.assignedGenre;
+                        } else {
                             const isFinishedWithCurrentGenreCycle = !p.animeToWatch && (p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.currentAssignedGenre).length === 0);
-                            const hasCompletedAllGenreRotations = p.genreHistory && p.genreHistory.length >= initialGenres.length && initialGenres.length > 0; // Verifica se initialGenres não está vazio
-                             return isFinishedWithCurrentGenreCycle && (!p.currentAssignedGenre || (hasCompletedAllGenreRotations && p.currentAssignedGenre === null)); // currentAssignedGenre será null quando finaliza todos os ciclos
+                            const hasCompletedAllGenreRotations = p.genreHistory && p.genreHistory.length >= initialGenres.length && initialGenres.length > 0;
+                             return isFinishedWithCurrentGenreCycle && (!p.currentAssignedGenre || (hasCompletedAllGenreRotations && p.currentAssignedGenre === null));
                         }
                     });
                     if(allAnimesWatchedMessage) {
@@ -1294,31 +1432,25 @@
                 if (!participant.watchedAnimesHistory) participant.watchedAnimesHistory = [];
                 participant.watchedAnimesHistory.push({
                     ...participant.animeToWatch,
-                    genreContext: participant.currentAssignedGenre // Salva o contexto do genero que o anime foi assistido
+                    genreContext: participant.currentAssignedGenre
                 });
 
                 const indicationInList = participant.receivedIndications.find(ind =>
-                    ind.malId === participant.animeToWatch.malId &&
+                    ind.animeId === participant.animeToWatch.animeId &&
                     ind.indicatorId === participant.animeToWatch.indicatorId &&
-                    ind.genreContext === participant.currentAssignedGenre // Compara com o genero atual do participante
+                    ind.genreContext === participant.currentAssignedGenre
                 );
                 if (indicationInList) {
                     indicationInList.status = 'watched';
                 }
 
-                participant.animeToWatch = null; // Limpa o anime que estava sendo assistido
+                participant.animeToWatch = null;
                 showAlert("Anime marcado como visto!", "success");
 
-                if(gameState.gameMode === 'infinito') {
-                    const pendingIndicationsForCurrentGenre = participant.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === participant.currentAssignedGenre) || [];
-                    if(pendingIndicationsForCurrentGenre.length === 0) {
-                        console.log(`Modo Infinito: ${participant.name} não tem mais indicações pendentes para ${participant.currentAssignedGenre}. Sorteando novo gênero.`);
-                        drawNewGenreForParticipant(participantId);
-                    } else {
-                        console.log(`Modo Infinito: ${participant.name} ainda tem ${pendingIndicationsForCurrentGenre.length} indicações pendentes para ${participant.currentAssignedGenre}. Renderizando app.`);
-                        renderApp();
-                    }
-                } else { // Modo tradicional
+                if (gameState.gameMode === 'infinito') {
+                    console.log(`Modo Infinito: ${participant.name} marcou anime como visto. Sorteando novo gênero imediatamente.`);
+                    drawNewGenreForParticipant(participantId);
+                } else {
                     renderApp();
                 }
             }
@@ -1332,26 +1464,23 @@
             let availableGenresForNewDraw = [];
             if (initialGenres.length > 0) {
                 const completedGenresInCurrentCycle = new Set(participant.genreHistory || []);
-                
-                if (completedGenresInCurrentCycle.size >= initialGenres.length) { // Completou um ciclo
+
+                if (completedGenresInCurrentCycle.size >= initialGenres.length) {
                     console.log(`[drawNewGenreForParticipant] ${participant.name} completou um ciclo de ${initialGenres.length} gêneros. Reiniciando ciclo de histórico.`);
-                    participant.genreHistory = []; // Reinicia o histórico para o novo ciclo
-                    completedGenresInCurrentCycle.clear(); // Limpa para permitir todos os gêneros novamente
-                     // O último gênero assistido não deve ser imediatamente repetido, se possível
+                    participant.genreHistory = [];
+                    completedGenresInCurrentCycle.clear();
                     if (participant.currentAssignedGenre) {
                         completedGenresInCurrentCycle.add(participant.currentAssignedGenre);
                     }
                 }
-                
+
                 availableGenresForNewDraw = initialGenres.filter(g => !completedGenresInCurrentCycle.has(g.name));
 
                 if (availableGenresForNewDraw.length === 0 && initialGenres.length > 0) {
-                    // Se, após filtrar, não sobrar nada (ex: só tem 1 gênero e ele foi o último), permite ele mesmo.
-                    // Ou se o ciclo recomeçou e o último assistido era o único que restava.
                     console.warn(`[drawNewGenreForParticipant] Nenhum gênero novo disponível após filtro, permitindo repetição do último ou reiniciando se necessário.`);
-                     participant.genreHistory = []; // Limpa o histórico para garantir que o sorteio funcione
+                     participant.genreHistory = [];
                     availableGenresForNewDraw = [...initialGenres];
-                     if (participant.currentAssignedGenre && initialGenres.length > 1) { // Tenta não repetir o último se houver outras opções
+                     if (participant.currentAssignedGenre && initialGenres.length > 1) {
                         const tempFiltered = initialGenres.filter(g => g.name !== participant.currentAssignedGenre);
                         if (tempFiltered.length > 0) availableGenresForNewDraw = tempFiltered;
                     }
@@ -1371,11 +1500,10 @@
             const newDrawnNumber = chosenNewGenre.numbers[Math.floor(Math.random() * chosenNewGenre.numbers.length)];
 
             console.log(`[drawNewGenreForParticipant] Novo gênero para ${participant.name}: ${chosenNewGenre.name}`);
-            
-            if(!participant.genreHistory) participant.genreHistory = [];
-            participant.genreHistory.push(chosenNewGenre.name); // Adiciona o NOVO gênero à história
-            participant.currentAssignedGenre = chosenNewGenre.name; // Define o NOVO gênero atual
 
+            if(!participant.genreHistory) participant.genreHistory = [];
+            participant.genreHistory.push(chosenNewGenre.name);
+            participant.currentAssignedGenre = chosenNewGenre.name;
 
             participant.receivedIndications = participant.receivedIndications.filter(ind => ind.status === 'watched');
 
@@ -1386,13 +1514,10 @@
             const otherParticipants = gameState.participants.filter(p => p.id !== participantId);
             if (otherParticipants.length > 0) {
                 gameState.currentIndicatorTabId = otherParticipants[0].id;
-                console.log(`[drawNewGenreForParticipant] Definindo currentIndicatorTabId para ${otherParticipants[0].name} (${otherParticipants[0].id})`);
             } else if (gameState.participants.length > 0) {
                 gameState.currentIndicatorTabId = participantId;
-                 console.warn(`[drawNewGenreForParticipant] Apenas 1 participante. currentIndicatorTabId definido para ${participant.name}`);
             } else {
                 gameState.currentIndicatorTabId = null;
-                 console.warn(`[drawNewGenreForParticipant] Nenhum participante. currentIndicatorTabId definido para null`);
             }
 
             console.log(`[drawNewGenreForParticipant] Transicionando para fase de INDICAÇÃO.`);
@@ -1522,7 +1647,7 @@
 
         function handleAddParticipant() {
             const name = participantNameInput.value.trim();
-            // malIdentifier e finalMalUsername completamente removidos
+            const anilistUsername = participantAnilistUsernameInput.value.trim() || null;
 
             if (!name) { showAlert("O nome do participante não pode estar vazio.", "error"); return; }
 
@@ -1535,14 +1660,15 @@
 
             gameState.participants.push({
                 id: generateUUID(), name,
-                malUsername: null, // Definido como null permanentemente
+                anilistUsername: anilistUsername,
                 assignedGenre: null, genreDrawNumber: null,
                 currentAssignedGenre: null, genreHistory: [],
                 animeToWatch: null, receivedIndications: [], watchedAnimesHistory: []
             });
             participantNameInput.value = "";
-            // participantMalUsernameInput não existe mais para limpar
+            participantAnilistUsernameInput.value = "";
             showAlert(`${name} adicionado!`, "success");
+            participantNameInput.focus();
             renderApp();
         };
 
@@ -1592,7 +1718,7 @@
                     const currentParticipantsData = allGamesData.games[currentGameId].participants.map(p => ({
                         id: p.id,
                         name: p.name,
-                        malUsername: null, // Garantir que é null ao resetar
+                        anilistUsername: p.anilistUsername || null,
                         assignedGenre: null,
                         genreDrawNumber: null,
                         currentAssignedGenre: null,
@@ -1638,7 +1764,7 @@
                 gameMode: gameMode,
                 createdAt: new Date().toISOString(),
                 userId: generateUUID(),
-                participants: [], // malUsername será null por padrão
+                participants: [],
                 assignedGenreNames: [],
                 clubGenre: null,
                 clubAnimeIndication: null,
@@ -1692,7 +1818,7 @@
                     return {
                         id: p_in.id || generateUUID(),
                         name: p_in.name || "Participante Desconhecido",
-                        malUsername: null, // Forçar null ao carregar
+                        anilistUsername: p_in.anilistUsername || null,
                         assignedGenre: p_in.assignedGenre || null,
                         genreDrawNumber: p_in.genreDrawNumber || null,
                         currentAssignedGenre: p_in.currentAssignedGenre || p_in.assignedGenre || null,
@@ -1805,18 +1931,18 @@
                 for (const participant of gameState.participants) {
                     if (participant.animeToWatch && participant.animeToWatch.animeTitle) {
                         hasAnimesToWatch = true;
-                        const animeImageUrl = participant.animeToWatch.animeImageUrl || PLACEHOLDER_IMG_60x90;
+                        const anime = participant.animeToWatch;
 
                         imageLoadPromises.push(
-                            ensureImageIsAccessible(animeImageUrl, PLACEHOLDER_IMG_ERROR_80x120)
+                            ensureImageIsAccessible(anime.animeImageUrl || PLACEHOLDER_IMG_60x90, PLACEHOLDER_IMG_ERROR_80x120)
                                 .then(finalUrl => {
                                     const genreDetails = initialGenres.find(g => g.name === participant.currentAssignedGenre);
                                     participantsRenderData.push({
                                         name: participant.name,
                                         genreDisplay: genreDetails ? `<span style="font-family: 'Inter', sans-serif; font-size: 16px; color: #cbd5e1; margin-left: 8px; line-height: 1.4; letter-spacing: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">(Gênero Atual: ${genreDetails.name})</span>` : '',
-                                        animeTitle: participant.animeToWatch.animeTitle,
+                                        animeTitle: anime.animeTitle,
                                         finalAnimeImageUrl: finalUrl,
-                                        indicatorName: participant.animeToWatch.indicatorName
+                                        indicatorName: anime.indicatorName
                                     });
                                 })
                         );
@@ -1889,7 +2015,6 @@
         }
 
         async function exportIndicationsList(exportType) {
-            console.log(`[ExportIndications] Iniciando exportação tipo: ${exportType}`);
             const isClubMode = gameState.gameMode === 'clube_sorteado' || gameState.gameMode === 'clube_escolhido';
             const exportButton = isClubMode ? exportFullIndicationHistoryButton : (exportType === 'current' ? exportIndicationsButton : exportFullIndicationHistoryButton);
 
@@ -1899,7 +2024,6 @@
             const containerId = 'exportAllIndicationsContainer';
             try {
                 await document.fonts.ready;
-                console.log("[ExportIndications] Fontes prontas.");
 
                 let exportContentDiv = document.getElementById(containerId);
                 if (exportContentDiv) exportContentDiv.remove();
@@ -1908,7 +2032,6 @@
                 exportContentDiv.id = containerId;
                 exportContentDiv.className = 'export-base-container';
                 document.body.appendChild(exportContentDiv);
-                console.log("[ExportIndications] Container de exportação criado.");
 
                 let titleText;
                 if (isClubMode) {
@@ -1922,65 +2045,41 @@
                 const imageLoadTracker = [];
 
                 if (isClubMode) {
-                    console.log("[ExportIndications] Modo Clube detectado.");
                     if (gameState.clubGenre && gameState.clubGenre.name) {
-                        imageLoadTracker.push({
-                            type: 'clubGenreIcon',
-                            url: gameState.clubGenre.imageUrl || PLACEHOLDER_IMG_GENRE_ICON,
-                            alt: gameState.clubGenre.name,
-                            data: gameState.clubGenre
-                        });
+                        imageLoadTracker.push({ type: 'clubGenreIcon', url: gameState.clubGenre.imageUrl || PLACEHOLDER_IMG_GENRE_ICON, alt: gameState.clubGenre.name, data: gameState.clubGenre });
                     }
                     if (gameState.clubIndications && gameState.clubIndications.length > 0) {
                         gameState.clubIndications.forEach(ind => {
-                            imageLoadTracker.push({
-                                type: 'clubAnimeCover',
-                                url: ind.animeImageUrl || PLACEHOLDER_IMG_SEARCH_RESULT,
-                                alt: ind.animeTitle,
-                                data: ind
-                            });
+                            imageLoadTracker.push({ type: 'clubAnimeCover', url: ind.animeImageUrl || PLACEHOLDER_IMG_SEARCH_RESULT, alt: ind.animeTitle, data: ind });
                         });
                         hasAnyIndications = true;
                     }
                 } else {
-                    console.log("[ExportIndications] Modo Individual detectado.");
                     gameState.participants.forEach(receiver => {
                         const indicationsToProcess = receiver.receivedIndications || [];
                         indicationsToProcess.forEach(ind => {
-                            if (exportType === 'current' && ind.status !== 'pending') return;
-                            if (exportType === 'current' && ind.genreContext !== receiver.currentAssignedGenre) return;
+                            if (exportType === 'current' && (ind.status !== 'pending' || ind.genreContext !== receiver.currentAssignedGenre)) return;
 
                             hasAnyIndications = true;
                             const genreDetails = initialGenres.find(g => g.name === ind.genreContext);
                             if (genreDetails && !imageLoadTracker.some(item => item.type === 'genreIcon' && item.data.name === genreDetails.name)) {
-                                imageLoadTracker.push({
-                                    type: 'genreIcon',
-                                    url: genreDetails.imageUrl || PLACEHOLDER_IMG_GENRE_ICON,
-                                    alt: genreDetails.name,
-                                    data: genreDetails
-                                });
+                                imageLoadTracker.push({ type: 'genreIcon', url: genreDetails.imageUrl || PLACEHOLDER_IMG_GENRE_ICON, alt: genreDetails.name, data: genreDetails });
                             }
-                            imageLoadTracker.push({
-                                type: 'animeCover',
-                                url: ind.animeImageUrl || PLACEHOLDER_IMG_SEARCH_RESULT,
-                                alt: ind.animeTitle,
-                                data: { ...ind, receiverName: receiver.name }
-                            });
+                            imageLoadTracker.push({ type: 'animeCover', url: ind.animeImageUrl || PLACEHOLDER_IMG_SEARCH_RESULT, alt: ind.animeTitle, data: { ...ind, receiverName: receiver.name } });
                         });
                     });
                 }
 
                 const allImagePromises = imageLoadTracker.map(item =>
                     ensureImageIsAccessible(item.url,
-                        item.type === 'clubGenreIcon' || item.type === 'genreIcon' ? PLACEHOLDER_IMG_ERROR_20x20 : PLACEHOLDER_IMG_ERROR_40x60)
+                        item.type.endsWith('Icon') ? PLACEHOLDER_IMG_ERROR_20x20 : PLACEHOLDER_IMG_ERROR_40x60)
                     .then(finalUrl => ({ ...item, finalUrl }))
                     .catch(err => {
                         console.error(`Erro ao carregar imagem para exportar (${item.alt || 'desconhecido'}):`, err);
-                        return { ...item, finalUrl: (item.type === 'clubGenreIcon' || item.type === 'genreIcon' ? PLACEHOLDER_IMG_ERROR_20x20 : PLACEHOLDER_IMG_ERROR_40x60), errorState: true };
+                        return { ...item, finalUrl: item.type.endsWith('Icon') ? PLACEHOLDER_IMG_ERROR_20x20 : PLACEHOLDER_IMG_ERROR_40x60, errorState: true };
                     })
                 );
                 const resolvedItems = await Promise.all(allImagePromises);
-
 
                 if (isClubMode) {
                     const clubGenreItem = resolvedItems.find(item => item && item.type === 'clubGenreIcon');
@@ -1998,9 +2097,7 @@
                         const indicationsByIndicator = {};
                         resolvedItems.filter(item => item && item.type === 'clubAnimeCover' && item.finalUrl).forEach(item => {
                             const ind = item.data;
-                            if (!indicationsByIndicator[ind.indicatorName]) {
-                                indicationsByIndicator[ind.indicatorName] = [];
-                            }
+                            if (!indicationsByIndicator[ind.indicatorName]) indicationsByIndicator[ind.indicatorName] = [];
                             indicationsByIndicator[ind.indicatorName].push({ ...ind, finalAnimeImageUrl: item.finalUrl });
                         });
 
@@ -2022,9 +2119,7 @@
                     resolvedItems.filter(item => item && item.finalUrl).forEach(item => {
                         if (item.type === 'animeCover') {
                             const indData = item.data;
-                            if (!receiversData[indData.receiverName]) {
-                                receiversData[indData.receiverName] = { name: indData.receiverName, indicationsByGenre: {} };
-                            }
+                            if (!receiversData[indData.receiverName]) receiversData[indData.receiverName] = { name: indData.receiverName, indicationsByGenre: {} };
                             if (!receiversData[indData.receiverName].indicationsByGenre[indData.genreContext]) {
                                 const genreDetailsItem = resolvedItems.find(gi => gi && gi.type === 'genreIcon' && gi.data.name === indData.genreContext);
                                 receiversData[indData.receiverName].indicationsByGenre[indData.genreContext] = {
@@ -2056,32 +2151,14 @@
                                 genreData.indicators[indicatorName].forEach(ind => {
                                     let statusTagHTML = '';
                                     const participant = gameState.participants.find(p => p.name === receiverName);
-                                    const isCurrentAnimeToWatch = participant?.animeToWatch &&
-                                                                  participant.animeToWatch.malId == ind.malId &&
-                                                                  participant.animeToWatch.indicatorId === ind.indicatorId &&
-                                                                  participant.animeToWatch.genreContext === ind.genreContext;
-
+                                    const isCurrentAnimeToWatch = participant?.animeToWatch && participant.animeToWatch.animeId == ind.animeId && participant.animeToWatch.indicatorId === ind.indicatorId && participant.animeToWatch.genreContext === ind.genreContext;
+                                    
                                     if (exportType === 'history') {
-                                        if (gameState.gameMode === 'infinito') {
-                                            if (isCurrentAnimeToWatch) {
-                                                statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #3b82f6; vertical-align: middle;">🎲</span>`; // Sendo assistido
-                                            } else if (ind.status === 'watched') {
-                                                statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #10b981; vertical-align: middle;">✅</span>`; // Já assistido
-                                            }
-                                            // No modo infinito, para histórico, não mostramos ampulheta para pendentes.
-                                        } else if (gameState.gameMode === 'tradicional') {
-                                            if (isCurrentAnimeToWatch) {
-                                                statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #3b82f6; vertical-align: middle;">🎲</span>`;
-                                            } else if (ind.status === 'watched') {
-                                                statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #10b981; vertical-align: middle;">✅</span>`;
-                                            } else if (ind.status === 'pending') {
-                                                statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #f59e0b; vertical-align: middle;">⏳</span>`;
-                                            }
-                                        }
-                                    } else if (exportType === 'current') { // Para 'current', só mostramos pendentes (com ampulheta)
-                                        if (ind.status === 'pending' && ind.genreContext === participant?.currentAssignedGenre) {
-                                             statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #f59e0b; vertical-align: middle;">⏳</span>`;
-                                        }
+                                        if (isCurrentAnimeToWatch) statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #3b82f6; vertical-align: middle;">🎲</span>`;
+                                        else if (ind.status === 'watched') statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #10b981; vertical-align: middle;">✅</span>`;
+                                        else if (ind.status === 'pending' && gameState.gameMode === 'tradicional') statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #f59e0b; vertical-align: middle;">⏳</span>`;
+                                    } else if (exportType === 'current' && ind.status === 'pending' && ind.genreContext === participant?.currentAssignedGenre) {
+                                        statusTagHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 20px; margin-left: 10px; line-height: 1; color: #f59e0b; vertical-align: middle;">⏳</span>`;
                                     }
                                     listContentHTML += `<li style="display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 18px; color: #e2e8f0; line-height: 1.4; font-family: 'Inter', sans-serif;">
                                                             <img src="${ind.finalAnimeImageUrl}" alt="Capa de ${ind.animeTitle}" style="width: 40px; height: 60px; object-fit: cover; border-radius: 2px; flex-shrink: 0;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_40x60}'">
@@ -2096,56 +2173,45 @@
                     }
                 }
 
-
                 if (!hasAnyIndications) {
                     listContentHTML += `<p style="font-family: 'Inter', sans-serif; font-size: 18px; text-align: center; color: #94a3b8; margin-top: 16px;">Nenhuma indicação encontrada para os critérios atuais.</p>`;
                 }
                 exportContentDiv.innerHTML = listContentHTML;
 
                 void exportContentDiv.offsetHeight;
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => setTimeout(resolve, 500));
 
-                try {
-                    const canvas = await html2canvas(exportContentDiv, {
-                        backgroundColor: '#0f172a',
-                        useCORS: true,
-                        scale: 1.5,
-                        logging: true,
-                        windowWidth: exportContentDiv.scrollWidth,
-                        windowHeight: exportContentDiv.scrollHeight
-                    });
-                    const imageURL = canvas.toDataURL('image/png');
+                const canvas = await html2canvas(exportContentDiv, {
+                    backgroundColor: '#0f172a',
+                    useCORS: true,
+                    scale: 1.5,
+                    logging: true,
+                    windowWidth: exportContentDiv.scrollWidth,
+                    windowHeight: exportContentDiv.scrollHeight
+                });
+                const imageURL = canvas.toDataURL('image/png');
 
-                    if (!imageURL || imageURL === "data:,") {
-                        console.error("[ExportIndications] Canvas gerado está em branco ou inválido.");
-                        showAlert("Erro: A imagem gerada para exportação está em branco. Verifique o console.", "error");
-                        throw new Error("Canvas em branco");
-                    }
-
-                    const link = document.createElement('a');
-                    link.href = imageURL;
-                    const filenamePrefix = isClubMode ? 'indicacoes_clube' : (exportType === 'current' ? 'indicacoes_atuais' : 'historico_indicacoes');
-                    link.download = `${filenamePrefix}_${(gameState.name || 'bingo').replace(/\s+/g, '_')}.png`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    showAlert("Lista de indicações exportada como imagem!", "success");
-                } catch (canvasError) {
-                    console.error("[ExportIndications] Erro DURANTE html2canvas ou download:", canvasError);
-                    showAlert("Erro ao gerar a imagem de indicações. Verifique o console para detalhes.", "error");
+                if (!imageURL || imageURL === "data:,") {
+                    throw new Error("Canvas em branco");
                 }
 
-
+                const link = document.createElement('a');
+                link.href = imageURL;
+                const filenamePrefix = isClubMode ? 'indicacoes_clube' : (exportType === 'current' ? 'indicacoes_atuais' : 'historico_indicacoes');
+                link.download = `${filenamePrefix}_${(gameState.name || 'bingo').replace(/\s+/g, '_')}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showAlert("Lista de indicações exportada como imagem!", "success");
             } catch (error) {
-                console.error(`Erro GERAL ao exportar imagem de indicações (${exportType}):`, error);
-                showAlert("Erro GERAL ao exportar imagem de indicações. Verifique o console.", "error");
+                console.error(`Erro ao exportar imagem de indicações:`, error);
+                showAlert("Erro ao gerar a imagem de indicações. Verifique o console.", "error");
             } finally {
                 if (document.getElementById(containerId)) {
                     document.body.removeChild(document.getElementById(containerId));
                 }
                 if (exportButton) exportButton.disabled = false;
                 customAlertDiv.classList.add('hidden');
-                console.log("[ExportIndications] Exportação finalizada.");
             }
         }
 
@@ -2214,8 +2280,6 @@
                 });
                 const imageURL = canvas.toDataURL('image/png');
                 if (!imageURL || imageURL === "data:,") {
-                    console.error("[ExportClubResult] Canvas gerado está em branco ou inválido.");
-                    showAlert("Erro: A imagem gerada para exportação está em branco. Verifique o console.", "error");
                     throw new Error("Canvas em branco");
                 }
                 const link = document.createElement('a');
@@ -2278,7 +2342,7 @@
             const reader = new FileReader();
             reader.onload = async (event) => {
                 try {
-                    loadAllGamesData(); // Carrega o estado atual para mesclar, se necessário
+                    loadAllGamesData();
 
                     const importedJson = event.target.result;
                     const importedDataContainer = JSON.parse(importedJson);
@@ -2303,23 +2367,22 @@
                                 console.warn(`Jogo com ID ${gameId} no arquivo importado tem formato inválido. Jogo ignorado.`);
                                 continue;
                             }
-
-                            // Sanitização e merge cuidadoso
+                            
                             const sanitizedGame = {
-                                ...BASE_GAME_INSTANCE_STATE, // Começa com a base
-                                ...JSON.parse(JSON.stringify(gameFromFile)), // Sobrescreve com dados do arquivo
-                                id: gameFromFile.id || generateUUID(), // Garante IDs
+                                ...BASE_GAME_INSTANCE_STATE,
+                                ...JSON.parse(JSON.stringify(gameFromFile)),
+                                id: gameFromFile.id || generateUUID(),
                                 name: gameFromFile.name || BASE_GAME_INSTANCE_STATE.name,
                                 createdAt: gameFromFile.createdAt || new Date().toISOString(),
                                 userId: gameFromFile.userId || generateUUID(),
                                 gameMode: gameFromFile.gameMode || BASE_GAME_INSTANCE_STATE.gameMode,
                                 currentPhase: Object.values(PHASES).includes(gameFromFile.currentPhase) ? gameFromFile.currentPhase : PHASES.REGISTRATION,
                                 participants: (gameFromFile.participants || []).map(p_in => {
-                                    const participantData = {...p_in}; // Clona o participante do arquivo
-                                    return { // Cria um novo objeto participante com defaults e dados do arquivo
+                                    const participantData = {...p_in};
+                                    return {
                                         id: participantData.id || generateUUID(),
                                         name: participantData.name || "Participante Desconhecido",
-                                        malUsername: null, // MAL Username sempre null
+                                        anilistUsername: participantData.anilistUsername || null,
                                         assignedGenre: participantData.assignedGenre || null,
                                         genreDrawNumber: participantData.genreDrawNumber || null,
                                         currentAssignedGenre: participantData.currentAssignedGenre || participantData.assignedGenre || null,
@@ -2347,31 +2410,28 @@
                             } else {
                                 importedGamesCount++;
                             }
-                            allGamesData.games[sanitizedGame.id] = sanitizedGame; // Adiciona/sobrescreve o jogo sanitizado
+                            allGamesData.games[sanitizedGame.id] = sanitizedGame;
                         }
                     }
 
-                    // Decide qual jogo será o ativo após a importação
-                    // Poderia ser o último importado, ou nenhum, ou o 'activeGameId' do arquivo se existir e for válido
                     if (importedDataContainer.activeGameId && allGamesData.games[importedDataContainer.activeGameId]) {
                         allGamesData.activeGameId = importedDataContainer.activeGameId;
                     } else if (Object.keys(allGamesData.games).length > 0) {
-                         // Se não houver um activeGameId válido do arquivo, mas há jogos, não define nenhum como ativo inicialmente
                          allGamesData.activeGameId = null;
                     } else {
                         allGamesData.activeGameId = null;
                     }
-                    gameState = {}; // Limpa o gameState atual, pois o usuário precisará carregar um jogo da lista
+                    gameState = {};
 
-                    saveAllGamesData(); // Salva todos os dados atualizados
+                    saveAllGamesData();
 
                     let successMessage = "Dados importados com sucesso!";
                     if (importedGamesCount > 0) successMessage += ` ${importedGamesCount} novo(s) jogo(s) adicionado(s).`;
                     if (overwrittenGamesCount > 0) successMessage += ` ${overwrittenGamesCount} jogo(s) existente(s) atualizado(s).`;
                     showAlert(successMessage, "success", 6000);
 
-                    importFileInput.value = ''; // Limpa o input de arquivo
-                    renderApp(); // Re-renderiza, o que mostrará a tela de gerenciamento se nenhum jogo estiver ativo
+                    importFileInput.value = '';
+                    renderApp();
 
                 } catch (error) {
                     console.error("Erro ao importar dados:", error);
@@ -2447,7 +2507,7 @@
         // DOM READY E INICIALIZAÇÃO
         document.addEventListener('DOMContentLoaded', () => {
             participantNameInput = document.getElementById('participantNameInput');
-            // participantMalUsernameInput REMOVIDO da atribuição
+            participantAnilistUsernameInput = document.getElementById('participantAnilistUsernameInput');
             addParticipantButton = document.getElementById('addParticipantButton');
             participantsListDiv = document.getElementById('participantsList');
             goToNextPhaseFromRegistrationButton = document.getElementById('goToNextPhaseFromRegistrationButton');
@@ -2553,11 +2613,22 @@
 
             if (participantNameInput) {
                 participantNameInput.addEventListener('keypress', (event) => {
-                    if (event.key === 'Enter') { event.preventDefault(); if(addParticipantButton) addParticipantButton.click(); }
+                    if (event.key === 'Enter') { 
+                        event.preventDefault();
+                        participantAnilistUsernameInput.focus();
+                    }
                 });
             }
-            // Event listener para participantMalUsernameInput REMOVIDO
-            
+
+            if (participantAnilistUsernameInput) {
+                participantAnilistUsernameInput.addEventListener('keypress', (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        if(addParticipantButton) addParticipantButton.click();
+                    }
+                });
+            }
+
             if(newGameNameInput) {
                 newGameNameInput.addEventListener('keypress', (event) => {
                     if (event.key === 'Enter') { event.preventDefault(); if(createNewGameButton) createNewGameButton.click(); }
