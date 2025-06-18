@@ -992,10 +992,16 @@ let initialGenres = [
                     } else {
                         const anilistUserDisplay = p.anilistUsername ? `<span class="text-xs text-sky-400 ml-2">(@${p.anilistUsername})</span>` : '';
                         headerHTML = `
-                            <h3 class="text-xl font-semibold text-indigo-300 mb-2 flex items-center">
-                                ${p.name} ${anilistUserDisplay}
-                                <button data-id="${p.id}" class="edit-anilist-user-button text-slate-400 hover:text-white ml-2 text-xs p-1">✏️</button>
-                            </h3>`;
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-xl font-semibold text-indigo-300 flex items-center">
+                                    ${p.name} ${anilistUserDisplay}
+                                    <button data-id="${p.id}" class="edit-anilist-user-button text-slate-400 hover:text-white ml-2 text-xs p-1" title="Editar usuário AniList">✏️</button>
+                                </h3>
+                                <button data-id="${p.id}" class="remove-participant-watch-loop-button text-red-500 hover:text-red-400 p-1 text-lg" title="Remover ${p.name}">
+                                    <span role="img" aria-label="remover">🗑️</span>
+                                </button>
+                            </div>
+                        `;
                     }
                     
                     let contentHTML = headerHTML;
@@ -1127,6 +1133,7 @@ let initialGenres = [
                 renderApp();
             };
         });
+        document.querySelectorAll('.remove-participant-watch-loop-button').forEach(btn => btn.onclick = e => handleRemoveParticipant(e.currentTarget.dataset.id));
     }
 
     function handleMarkAsWatched(participantId) {
@@ -1375,21 +1382,43 @@ let initialGenres = [
         renderApp();
     };
 
-    function handleRemoveParticipant(participantId) {
-        const pName = gameState.participants.find(p=>p.id === participantId)?.name;
-        gameState.participants = gameState.participants.filter(p => p.id !== participantId);
-        gameState.participants.forEach(p => {
-            p.receivedIndications = p.receivedIndications.filter(ind => ind.indicatorId !== participantId);
-        });
-        if (gameState.clubIndications) {
-            gameState.clubIndications = gameState.clubIndications.filter(ind => ind.indicatorId !== participantId);
+    async function handleRemoveParticipant(participantId) {
+        const participant = gameState.participants.find(p => p.id === participantId);
+        if (!participant) return;
+    
+        const confirmed = await showConfirmAlert(
+            `<p class="font-semibold mb-2">Confirmar Remoção</p><p>Tem certeza que deseja remover <strong>${participant.name}</strong> do bingo? Todas as suas indicações (dadas e recebidas) serão perdidas. Esta ação não pode ser desfeita.</p>`
+        );
+    
+        if (confirmed) {
+            // Remove from participants list
+            gameState.participants = gameState.participants.filter(p => p.id !== participantId);
+            
+            // Clean up indications given by the removed participant from other players' lists
+            gameState.participants.forEach(p => {
+                if(p.receivedIndications) {
+                    p.receivedIndications = p.receivedIndications.filter(ind => ind.indicatorId !== participantId);
+                }
+            });
+    
+            // Clean up club indications
+            if (gameState.clubIndications) {
+                gameState.clubIndications = gameState.clubIndications.filter(ind => ind.indicatorId !== participantId);
+            }
+    
+            // Reset indication tab if the removed participant was the active one
+            if (gameState.currentIndicatorTabId === participantId) {
+                gameState.currentIndicatorTabId = gameState.participants[0]?.id || null;
+            }
+    
+            // Clean up the list of initially assigned unique genres
+            if(gameState.assignedGenreNames) {
+                gameState.assignedGenreNames = gameState.assignedGenreNames.filter(ag => ag.participantId !== participantId);
+            }
+            
+            showAlert(`${participant.name} removido.`, "success");
+            renderApp();
         }
-
-        if (gameState.currentIndicatorTabId === participantId) {
-            gameState.currentIndicatorTabId = gameState.participants[0]?.id || null;
-        }
-        gameState.assignedGenreNames = gameState.assignedGenreNames.filter(ag => ag.participantId !== participantId);
-        showAlert(`${pName} removido.`, "success"); renderApp();
     }
 
     function handleIndividualGenreDraw(participantId) {
