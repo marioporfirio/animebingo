@@ -247,11 +247,12 @@ let initialGenres = [
         });
         document.querySelectorAll('.removeParticipantButton').forEach(btn => btn.onclick = e => handleRemoveParticipant(e.currentTarget.dataset.id));
 
-        const maxParticipants = (gameState.gameMode === 'infinito' || gameState.gameMode === 'tradicional') ? initialGenres.length : Infinity;
+        const isIndividualModeWithLimit = ['infinito', 'tradicional', 'soberano'].includes(gameState.gameMode);
+        const maxParticipants = isIndividualModeWithLimit ? initialGenres.length : Infinity;
+        
         addParticipantButton.disabled = gameState.participants.length >= maxParticipants && maxParticipants !== Infinity;
-        maxParticipantsWarning.classList.toggle('hidden', gameState.participants.length < maxParticipants || maxParticipants === Infinity);
+        maxParticipantsWarning.classList.toggle('hidden', !addParticipantButton.disabled);
         if(maxParticipants !== Infinity) maxParticipantsWarning.innerHTML = `<span role="img" aria-label="informação" class="inline mr-2">ℹ️</span> Máximo de ${maxParticipants} participantes para este modo.`;
-        else maxParticipantsWarning.classList.add('hidden');
 
         goToNextPhaseFromRegistrationButton.classList.toggle('hidden', gameState.participants.length === 0);
     }
@@ -362,7 +363,7 @@ let initialGenres = [
             const allClubIndicationsDone = gameState.participants.length > 0 && gameState.participants.every(p => gameState.clubIndications.some(ind => ind.indicatorId === p.id));
             goToAnimeDrawPhaseButton.classList.toggle('hidden', !allClubIndicationsDone);
 
-        } else { // Modos Infinito/Tradicional
+        } else { // Modos Infinito/Tradicional/Soberano
             if (!gameState.currentIndicatorTabId && gameState.participants.length > 0) {
                 gameState.currentIndicatorTabId = gameState.participants[0].id;
             }
@@ -792,7 +793,18 @@ let initialGenres = [
 
     function renderAnimeDrawPhase() {
         const isClubMode = gameState.gameMode === 'clube_sorteado' || gameState.gameMode === 'clube_escolhido';
-        animeDrawPhaseTitle.textContent = isClubMode ? "📺 Sorteio de Anime do Clube" : "📺 Sorteio de Anime para Assistir";
+        const isSovereignMode = gameState.gameMode === 'soberano';
+
+        let titleIcon = "📺";
+        let titleText = "Sorteio de Anime";
+        if (isSovereignMode) {
+            titleIcon = "👑";
+            titleText = "Escolha de Anime";
+        } else if (isClubMode) {
+            titleIcon = "🎯";
+            titleText = "Sorteio de Anime do Clube";
+        }
+        animeDrawPhaseTitle.innerHTML = `<span role="img" aria-label="ícone da fase" class="mr-3 text-2xl">${titleIcon}</span> ${titleText}`;
 
         clubGenreForAnimeDrawDisplay.classList.toggle('hidden', !isClubMode || !gameState.clubGenre);
         if (isClubMode && gameState.clubGenre) {
@@ -822,18 +834,42 @@ let initialGenres = [
             const allClubIndicationsMade = gameState.participants.length > 0 && gameState.participants.every(p => gameState.clubIndications.some(ind => ind.indicatorId === p.id));
             drawClubAnimeButton.disabled = !(gameState.clubIndications && gameState.clubIndications.length > 0 && allClubIndicationsMade);
             goToWatchLoopButton.classList.toggle('hidden', !gameState.clubAnimeIndication);
-        } else {
-            let participantsYetToDrawAnime = 0;
+        } else { // Modos Infinito, Tradicional, Soberano
+            let participantsYetToAction = 0;
             gameState.participants.forEach(p => {
                 if (!p.animeToWatch && p.currentAssignedGenre) {
-                    const indicationsForCurrentGenre = p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.currentAssignedGenre).length || 0;
-                    if (indicationsForCurrentGenre > 0) {
-                        participantsYetToDrawAnime++;
+                    const pendingIndications = p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.currentAssignedGenre) || [];
+                    if (pendingIndications.length > 0) {
+                        participantsYetToAction++;
                         const div = document.createElement('div');
-                        div.className = 'flex items-center justify-between bg-slate-700 p-3 rounded-lg shadow';
-                        div.innerHTML = `<span class="text-indigo-300">${p.name} (Gênero: ${p.currentAssignedGenre})</span>
-                                             <button data-id="${p.id}" class="draw-anime-button bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">Sortear Anime para ${p.name.split(' ')[0]}</button>`;
+                        div.className = 'bg-slate-700 p-3 rounded-lg shadow';
+                        
+                        if (isSovereignMode) {
+                            div.innerHTML = `<h4 class="text-lg font-semibold text-indigo-300 mb-2">${p.name}, escolha seu anime para o gênero "${p.currentAssignedGenre}":</h4>`;
+                            const indicationsList = document.createElement('div');
+                            indicationsList.className = "space-y-2 mt-2";
+                            pendingIndications.forEach(ind => {
+                                const indicationCard = document.createElement('div');
+                                indicationCard.className = "flex items-center gap-3 p-2 bg-slate-600 rounded-md";
+                                indicationCard.innerHTML = `
+                                    <img src="${ind.animeImageUrl || PLACEHOLDER_IMG_60x90}" alt="${ind.animeTitle}" class="w-[40px] h-[60px] object-cover rounded flex-shrink-0" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG_ERROR_40x60}';">
+                                    <div class="flex-grow">
+                                        <p class="font-semibold text-green-400">${ind.animeTitle}</p>
+                                        <p class="text-xs text-slate-400">Indicado por: ${ind.indicatorName}</p>
+                                    </div>
+                                    <button data-viewer-id="${p.id}" data-anime-id="${ind.animeId}" data-indicator-id="${ind.indicatorId}" class="choose-anime-button bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">Escolher</button>
+                                `;
+                                indicationsList.appendChild(indicationCard);
+                            });
+                            div.appendChild(indicationsList);
+                        } else { // Modo Infinito/Tradicional
+                            div.innerHTML = `<div class="flex items-center justify-between">
+                                <span class="text-indigo-300">${p.name} (Gênero: ${p.currentAssignedGenre})</span>
+                                <button data-id="${p.id}" class="draw-anime-button bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">Sortear para ${p.name.split(' ')[0]}</button>
+                            </div>`;
+                        }
                         participantsToDrawAnimeListDiv.appendChild(div);
+
                     } else if (p.currentAssignedGenre) {
                          const pEl = document.createElement('p');
                          pEl.className = 'text-slate-400 p-3 bg-slate-700 rounded-lg shadow';
@@ -843,26 +879,47 @@ let initialGenres = [
                 } else if (p.animeToWatch) {
                     const pEl = document.createElement('p');
                     pEl.className = 'text-slate-400 p-3 bg-slate-700 rounded-lg shadow';
-                    pEl.innerHTML = `${p.name} - Anime já sorteado: ${p.animeToWatch.animeTitle}.`;
+                    pEl.innerHTML = `${p.name} - Anime já ${isSovereignMode ? 'escolhido' : 'sorteado'}: ${p.animeToWatch.animeTitle}.`;
                     participantsToDrawAnimeListDiv.appendChild(pEl);
                 }
             });
 
-            const allParticipantsHaveAnimeOrNoGenreOrNoIndications = gameState.participants.every(p =>
-                p.animeToWatch ||
-                !p.currentAssignedGenre ||
-                (p.currentAssignedGenre && (p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.currentAssignedGenre).length === 0))
-            );
-
-            if (participantsYetToDrawAnime === 0 && gameState.participants.length > 0 && allParticipantsHaveAnimeOrNoGenreOrNoIndications) {
-                participantsToDrawAnimeListDiv.innerHTML = '<p class="text-green-400 text-center p-3">Todos os animes possíveis foram sorteados ou aguardam indicações!</p>';
+            if (participantsYetToAction === 0 && gameState.participants.length > 0) {
+                 participantsToDrawAnimeListDiv.innerHTML = `<p class="text-green-400 text-center p-3">Todos os animes possíveis foram ${isSovereignMode ? 'escolhidos' : 'sorteados'} ou aguardam indicações!</p>`;
             } else if (gameState.participants.length === 0) {
                 participantsToDrawAnimeListDiv.innerHTML = '<p class="text-slate-400 text-center p-3">Nenhum participante.</p>';
             }
+
             document.querySelectorAll('.draw-anime-button').forEach(btn => btn.onclick = e => handleDrawAnimeForParticipant(e.currentTarget.dataset.id));
-            goToWatchLoopButton.classList.toggle('hidden', participantsYetToDrawAnime > 0 || gameState.participants.length === 0);
+            document.querySelectorAll('.choose-anime-button').forEach(btn => btn.onclick = e => handleChooseAnimeForParticipant(e));
+            goToWatchLoopButton.classList.toggle('hidden', participantsYetToAction > 0 || gameState.participants.length === 0);
         }
     }
+
+    function handleChooseAnimeForParticipant(event) {
+        const button = event.currentTarget;
+        const viewerId = button.dataset.viewerId;
+        const animeId = parseInt(button.dataset.animeId, 10);
+        const indicatorId = button.dataset.indicatorId;
+
+        const viewer = gameState.participants.find(p => p.id === viewerId);
+        if (!viewer) return;
+
+        const chosenIndication = viewer.receivedIndications.find(ind => 
+            ind.animeId === animeId && 
+            ind.indicatorId === indicatorId &&
+            ind.genreContext === viewer.currentAssignedGenre
+        );
+
+        if (chosenIndication) {
+            viewer.animeToWatch = { ...chosenIndication, statusInternal: 'watching' };
+            showAlert(`${viewer.name} escolheu assistir "${chosenIndication.animeTitle}"!`, "success");
+            renderApp();
+        } else {
+            showAlert("Ocorreu um erro ao selecionar o anime.", "error");
+        }
+    }
+
 
     function handleDrawAnimeForParticipant(viewerId) {
         const viewer = gameState.participants.find(p => p.id === viewerId);
@@ -1009,7 +1066,7 @@ let initialGenres = [
 
                     if (genreDetails) {
                         contentHTML += `<p class="text-sm text-slate-400 mb-2">Gênero Atual: <img src="${genreDetails.imageUrl || PLACEHOLDER_IMG_SEARCH_RESULT}" alt="${genreDetails.name}" class="inline-block w-5 h-5 object-contain mx-1 rounded-sm"> ${genreDetails.name}</p>`;
-                    } else if (p.assignedGenre && !p.currentAssignedGenre && (p.genreHistory?.length || 0) >= initialGenres.length && gameState.gameMode === 'infinito') {
+                    } else if (p.assignedGenre && !p.currentAssignedGenre && (p.genreHistory?.length || 0) >= initialGenres.length && (gameState.gameMode === 'infinito' || gameState.gameMode === 'soberano')) {
                          contentHTML += `<p class="text-green-400 font-semibold">🎉 ${p.name} finalizou todos os ciclos de gênero!</p>`;
                     } else if (!p.currentAssignedGenre && p.assignedGenre && gameState.gameMode === 'tradicional'){
                         const initialGenreDetails = initialGenres.find(g => g.name === p.assignedGenre);
@@ -1033,14 +1090,14 @@ let initialGenres = [
                                 </div>
                                 <button data-id="${p.id}" class="mark-as-watched-button bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full">Marcar como Visto</button>
                         `;
-                    } else if (p.currentAssignedGenre && pendingIndicationsForCurrentGenre.length > 0 && gameState.gameMode !== 'infinito') {
+                    } else if (p.currentAssignedGenre && pendingIndicationsForCurrentGenre.length > 0 && gameState.gameMode !== 'infinito' && gameState.gameMode !== 'soberano') {
                         allParticipantsFinishedAllCycles = false;
                         contentHTML += `<button data-id="${p.id}" class="draw-next-anime-button bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full">Sortear Próximo Anime (Gênero: ${p.currentAssignedGenre})</button>`;
                     } else if (p.currentAssignedGenre && pendingIndicationsForCurrentGenre.length === 0) {
                          allParticipantsFinishedAllCycles = false;
                          contentHTML += `<p class="text-yellow-400 mb-2">Aguardando indicações para o gênero: ${p.currentAssignedGenre}.</p>`;
                          contentHTML += `<button data-id="${p.id}" class="go-to-indicate-for-participant-button bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full">Ir para Indicações</button>`;
-                         if (gameState.gameMode === 'infinito') {
+                         if (gameState.gameMode === 'infinito' || gameState.gameMode === 'soberano') {
                              const lastGenre = p.genreHistory && p.genreHistory.length > 0 ? p.genreHistory[p.genreHistory.length - 1] : null;
                              let availableNewGenres = initialGenres.filter(g => g.name !== lastGenre);
                              if (p.genreHistory && p.genreHistory.length >= initialGenres.length) availableNewGenres = [];
@@ -1052,7 +1109,7 @@ let initialGenres = [
                          } else {
                              contentHTML = headerHTML + `<p class="text-green-400 font-semibold">🎉 ${p.name} concluiu as indicações para o gênero ${p.currentAssignedGenre}!</p>`;
                          }
-                    } else if (!p.currentAssignedGenre && p.assignedGenre && gameState.gameMode === 'infinito') {
+                    } else if (!p.currentAssignedGenre && p.assignedGenre && (gameState.gameMode === 'infinito' || gameState.gameMode === 'soberano')) {
                         allParticipantsFinishedAllCycles = false;
                         contentHTML += `<button data-id="${p.id}" class="draw-new-genre-button bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg text-sm w-full mt-2">Sortear Novo Gênero</button>`;
                     } else if (!p.currentAssignedGenre && !p.assignedGenre) {
@@ -1092,7 +1149,7 @@ let initialGenres = [
                     if (gameState.gameMode === 'tradicional') {
                         const pendingForCurrentGenre = p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.assignedGenre).length || 0;
                         return !p.animeToWatch && pendingForCurrentGenre === 0 && p.assignedGenre;
-                    } else {
+                    } else { // Infinito e Soberano
                         const isFinishedWithCurrentGenreCycle = !p.animeToWatch && (p.receivedIndications?.filter(ind => ind.status === 'pending' && ind.genreContext === p.currentAssignedGenre).length === 0);
                         const hasCompletedAllGenreRotations = p.genreHistory && p.genreHistory.length >= initialGenres.length && initialGenres.length > 0;
                          return isFinishedWithCurrentGenreCycle && (!p.currentAssignedGenre || (hasCompletedAllGenreRotations && p.currentAssignedGenre === null));
@@ -1157,8 +1214,7 @@ let initialGenres = [
             participant.animeToWatch = null;
             showAlert("Anime marcado como visto!", "success");
 
-            if (gameState.gameMode === 'infinito') {
-                console.log(`Modo Infinito: ${participant.name} marcou anime como visto. Sorteando novo gênero imediatamente.`);
+            if (gameState.gameMode === 'infinito' || gameState.gameMode === 'soberano') {
                 drawNewGenreForParticipant(participantId);
             } else {
                 renderApp();
@@ -1199,8 +1255,7 @@ let initialGenres = [
 
 
         if (availableGenresForNewDraw.length === 0) {
-            showAlert(`Todos os gêneros já foram sorteados e completados para ${participant.name}! Ele finalizou o bingo infinito!`, "success", 7000);
-            console.log(`[drawNewGenreForParticipant] ${participant.name} FINALIZOU o bingo infinito.`);
+            showAlert(`Todos os gêneros já foram sorteados e completados para ${participant.name}! Ele finalizou o bingo!`, "success", 7000);
             participant.currentAssignedGenre = null;
             renderApp();
             return;
@@ -1208,8 +1263,6 @@ let initialGenres = [
 
         const chosenNewGenre = availableGenresForNewDraw[Math.floor(Math.random() * availableGenresForNewDraw.length)];
         const newDrawnNumber = chosenNewGenre.numbers[Math.floor(Math.random() * chosenNewGenre.numbers.length)];
-
-        console.log(`[drawNewGenreForParticipant] Novo gênero para ${participant.name}: ${chosenNewGenre.name}`);
 
         if(!participant.genreHistory) participant.genreHistory = [];
         participant.genreHistory.push(chosenNewGenre.name);
@@ -1229,8 +1282,6 @@ let initialGenres = [
         } else {
             gameState.currentIndicatorTabId = null;
         }
-
-        console.log(`[drawNewGenreForParticipant] Transicionando para fase de INDICAÇÃO.`);
         renderApp();
     }
 
@@ -1243,7 +1294,7 @@ let initialGenres = [
 
         if (!pendingIndications || pendingIndications.length === 0) {
             showAlert(`Nenhum anime pendente indicado para ${participant.name} no gênero ${participant.currentAssignedGenre}. Peça indicações!`, "info", 4000);
-            if (gameState.gameMode === 'infinito'){
+            if (gameState.gameMode === 'infinito' || gameState.gameMode === 'soberano'){
                 drawNewGenreForParticipant(participantId);
                 return;
             }
@@ -1261,12 +1312,14 @@ let initialGenres = [
     function renderGenreGridFooter() {
         if (!genreGridFooterDiv) { return; }
         genreGridFooterDiv.innerHTML = '';
+        const isIndividualMode = ['infinito', 'tradicional', 'soberano'].includes(gameState.gameMode);
+
         initialGenres.forEach(genre => {
             const div = document.createElement('div');
             div.className = 'genre-legend-item bg-slate-700 rounded-lg shadow text-center';
 
             let overlayHTMLContent = '';
-            if (gameState.gameMode === 'infinito' || gameState.gameMode === 'tradicional') {
+            if (isIndividualMode) {
                 const participantsWithThisGenre = gameState.participants?.filter(p => p.currentAssignedGenre === genre.name) || [];
                 if (participantsWithThisGenre.length > 0) {
                     div.classList.add('assigned');
@@ -1286,6 +1339,7 @@ let initialGenres = [
                 div.onclick = () => handleChooseClubGenre(genre.name, genre.imageUrl, genre.numbers ? genre.numbers[0] : undefined);
             } else {
                 div.onclick = null;
+                div.style.cursor = 'default';
             }
 
             div.innerHTML = `
@@ -1311,6 +1365,7 @@ let initialGenres = [
 
         let modeDisplayName = "Desconhecido";
         if (gameState.gameMode === 'infinito') modeDisplayName = "Infinito";
+        else if (gameState.gameMode === 'soberano') modeDisplayName = "Soberano";
         else if (gameState.gameMode === 'tradicional') modeDisplayName = "Tradicional";
         else if (gameState.gameMode === 'clube_sorteado') modeDisplayName = "Clube (Gênero Sorteado)";
         else if (gameState.gameMode === 'clube_escolhido') modeDisplayName = "Clube (Gênero Escolhido)";
@@ -1322,10 +1377,10 @@ let initialGenres = [
         if (gameState.currentPhase === PHASES.REGISTRATION) {
             registrationPhaseSection.classList.remove('hidden');
             renderParticipantsList();
-        } else if (gameState.currentPhase === PHASES.INDIVIDUAL_DRAW_SELECTION && (gameState.gameMode === 'infinito' || gameState.gameMode === 'tradicional')) {
+        } else if (gameState.currentPhase === PHASES.INDIVIDUAL_DRAW_SELECTION && ['infinito', 'tradicional', 'soberano'].includes(gameState.gameMode)) {
             individualDrawPhaseSection.classList.remove('hidden');
             renderIndividualDrawSelection();
-        } else if (gameState.currentPhase === PHASES.CLUB_GENRE_SETUP && (gameState.gameMode === 'clube_sorteado' || gameState.gameMode === 'clube_escolhido')) {
+        } else if (gameState.currentPhase === PHASES.CLUB_GENRE_SETUP && ['clube_sorteado', 'clube_escolhido'].includes(gameState.gameMode)) {
             clubGenreSetupPhaseSection.classList.remove('hidden');
             renderClubGenreSetupPhase();
         } else if (gameState.currentPhase === PHASES.INDICATION) {
@@ -1361,8 +1416,9 @@ let initialGenres = [
 
         if (!name) { showAlert("O nome do participante não pode estar vazio.", "error"); return; }
 
-        const maxParticipants = (gameState.gameMode === 'infinito' || gameState.gameMode === 'tradicional') ? initialGenres.length : Infinity;
-        if (gameState.participants.length >= maxParticipants && maxParticipants !== Infinity) {
+        const isIndividualModeWithLimit = ['infinito', 'tradicional', 'soberano'].includes(gameState.gameMode);
+        const maxParticipants = isIndividualModeWithLimit ? initialGenres.length : Infinity;
+        if (gameState.participants.length >= maxParticipants) {
             showAlert(`Máximo de ${maxParticipants} participantes para este modo.`, "error"); return;
         }
 
@@ -1391,27 +1447,22 @@ let initialGenres = [
         );
     
         if (confirmed) {
-            // Remove from participants list
             gameState.participants = gameState.participants.filter(p => p.id !== participantId);
             
-            // Clean up indications given by the removed participant from other players' lists
             gameState.participants.forEach(p => {
                 if(p.receivedIndications) {
                     p.receivedIndications = p.receivedIndications.filter(ind => ind.indicatorId !== participantId);
                 }
             });
     
-            // Clean up club indications
             if (gameState.clubIndications) {
                 gameState.clubIndications = gameState.clubIndications.filter(ind => ind.indicatorId !== participantId);
             }
     
-            // Reset indication tab if the removed participant was the active one
             if (gameState.currentIndicatorTabId === participantId) {
                 gameState.currentIndicatorTabId = gameState.participants[0]?.id || null;
             }
     
-            // Clean up the list of initially assigned unique genres
             if(gameState.assignedGenreNames) {
                 gameState.assignedGenreNames = gameState.assignedGenreNames.filter(ag => ag.participantId !== participantId);
             }
@@ -1508,6 +1559,7 @@ let initialGenres = [
         newGameNameInput.value = '';
         let modeDisplayName = "Desconhecido";
         if (gameMode === 'infinito') modeDisplayName = "Infinito";
+        else if (gameMode === 'soberano') modeDisplayName = "Soberano";
         else if (gameMode === 'tradicional') modeDisplayName = "Tradicional";
         else if (gameMode === 'clube_sorteado') modeDisplayName = "Clube (Gênero Sorteado)";
         else if (gameMode === 'clube_escolhido') modeDisplayName = "Clube (Gênero Escolhido)";
@@ -1622,6 +1674,7 @@ let initialGenres = [
                 const game = allGamesData.games[id];
                 let modeDisplayName = "Desconhecido";
                 if (game.gameMode === 'infinito') modeDisplayName = "Infinito";
+                else if (game.gameMode === 'soberano') modeDisplayName = "Soberano";
                 else if (game.gameMode === 'tradicional') modeDisplayName = "Tradicional";
                 else if (game.gameMode === 'clube_sorteado') modeDisplayName = "Clube (Gênero Sorteado)";
                 else if (game.gameMode === 'clube_escolhido') modeDisplayName = "Clube (Gênero Escolhido)";
@@ -2383,9 +2436,9 @@ let initialGenres = [
         if (addParticipantButton) addParticipantButton.onclick = handleAddParticipant;
 
         if(goToNextPhaseFromRegistrationButton) goToNextPhaseFromRegistrationButton.onclick = () => {
-            if (gameState.gameMode === 'infinito' || gameState.gameMode === 'tradicional') {
+            if (['infinito', 'tradicional', 'soberano'].includes(gameState.gameMode)) {
                 gameState.currentPhase = PHASES.INDIVIDUAL_DRAW_SELECTION;
-            } else if (gameState.gameMode === 'clube_sorteado' || gameState.gameMode === 'clube_escolhido') {
+            } else if (['clube_sorteado', 'clube_escolhido'].includes(gameState.gameMode)) {
                 gameState.currentPhase = PHASES.CLUB_GENRE_SETUP;
             }
             renderApp();
@@ -2399,7 +2452,7 @@ let initialGenres = [
             renderApp();
         };
         if(goToAnimeDrawPhaseButton) goToAnimeDrawPhaseButton.onclick = () => {
-            if (gameState.gameMode === 'clube_sorteado' || gameState.gameMode === 'clube_escolhido') {
+            if (['clube_sorteado', 'clube_escolhido'].includes(gameState.gameMode)) {
                 gameState.currentPhase = PHASES.CLUB_ANIME_DRAW;
             } else {
                 gameState.currentPhase = PHASES.ANIME_DRAW_SELECTION;
@@ -2407,7 +2460,7 @@ let initialGenres = [
             renderApp();
         };
         if(goToWatchLoopButton) goToWatchLoopButton.onclick = () => {
-            if (gameState.gameMode === 'clube_sorteado' || gameState.gameMode === 'clube_escolhido') {
+            if (['clube_sorteado', 'clube_escolhido'].includes(gameState.gameMode)) {
                 gameState.currentPhase = PHASES.CLUB_RESULT_DISPLAY;
             } else {
                 gameState.currentPhase = PHASES.WATCH_LOOP;
