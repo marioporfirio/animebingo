@@ -95,7 +95,9 @@ let initialGenres = [
         animeDrawPhaseTitle, clubGenreForAnimeDrawDisplay, clubGenreForAnimeDrawIcon, clubGenreForAnimeDrawName, drawClubAnimeButton,
         watchLoopPhaseTitle, clubResultGenre, clubResultGenreIcon, clubResultGenreName,
         clubResultAnime, clubResultAnimeCover, clubResultAnimeTitleLink, clubResultAnimeIndicator,
-        clubResultParticipants, clubResultParticipantsList, exportClubResultButton;
+        clubResultParticipants, clubResultParticipantsList, exportClubResultButton,
+        
+        conversionModal, conversionModalTitle, conversionOptions, closeConversionModalButton;
 
 
     let currentAlertResolve = null;
@@ -1670,30 +1672,141 @@ let initialGenres = [
         if (gameIds.length === 0) {
             savedGamesListDiv.innerHTML = '<p class="text-slate-400">Nenhum bingo salvo ainda.</p>';
         } else {
-            gameIds.forEach(id => {
+            // Ordenar por data de criação, do mais novo para o mais antigo
+            const sortedGameIds = gameIds.sort((a, b) => {
+                const dateA = new Date(allGamesData.games[a].createdAt || 0);
+                const dateB = new Date(allGamesData.games[b].createdAt || 0);
+                return dateB - dateA;
+            });
+            
+            sortedGameIds.forEach(id => {
                 const game = allGamesData.games[id];
                 let modeDisplayName = "Desconhecido";
-                if (game.gameMode === 'infinito') modeDisplayName = "Infinito";
-                else if (game.gameMode === 'soberano') modeDisplayName = "Soberano";
-                else if (game.gameMode === 'tradicional') modeDisplayName = "Tradicional";
-                else if (game.gameMode === 'clube_sorteado') modeDisplayName = "Clube (Gênero Sorteado)";
-                else if (game.gameMode === 'clube_escolhido') modeDisplayName = "Clube (Gênero Escolhido)";
+                const modeDetails = {
+                    infinito: "Infinito",
+                    soberano: "Soberano",
+                    tradicional: "Tradicional",
+                    clube_sorteado: "Clube (Sorteado)",
+                    clube_escolhido: "Clube (Escolhido)"
+                };
+                modeDisplayName = modeDetails[game.gameMode] || "Desconhecido";
 
                 const gameItem = document.createElement('div');
                 gameItem.className = 'game-list-item';
                 gameItem.innerHTML = `
-                        <span>${game.name || 'Bingo Sem Nome'} <em class="text-xs text-slate-400 ml-2">(Modo: ${modeDisplayName})</em></span>
-                        <div>
-                            <button data-game-id="${id}" class="load-game-button bg-green-600 hover:bg-green-700 text-white text-xs font-semibold py-1 px-2 rounded mr-2">Carregar</button>
-                            <button data-game-id="${id}" class="delete-game-button text-red-400 hover:text-red-300 p-1"><span role="img" aria-label="excluir bingo">🗑️</span></button>
+                        <div class="flex-grow">
+                            <span class="font-semibold">${game.name || 'Bingo Sem Nome'}</span>
+                            <em class="block text-xs text-slate-400 mt-1">(Modo: ${modeDisplayName})</em>
+                        </div>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <button data-game-id="${id}" class="convert-game-button bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-1 px-2 rounded" title="Converter Modo do Bingo">Converter</button>
+                            <button data-game-id="${id}" class="load-game-button bg-green-600 hover:bg-green-700 text-white text-xs font-semibold py-1 px-2 rounded" title="Carregar Bingo">Carregar</button>
+                            <button data-game-id="${id}" class="delete-game-button text-red-400 hover:text-red-300 p-1" title="Excluir Bingo"><span role="img" aria-label="excluir bingo">🗑️</span></button>
                         </div>
                 `;
                 savedGamesListDiv.appendChild(gameItem);
             });
             document.querySelectorAll('.load-game-button').forEach(btn => btn.onclick = (e) => loadSelectedGame(e.currentTarget.dataset.gameId));
             document.querySelectorAll('.delete-game-button').forEach(btn => btn.onclick = (e) => deleteGame(e.currentTarget.dataset.gameId));
+            document.querySelectorAll('.convert-game-button').forEach(btn => btn.onclick = (e) => openConversionModal(e.currentTarget.dataset.gameId));
         }
     }
+
+    // ===== FUNÇÕES DE CONVERSÃO =====
+    
+    function getModeDisplayName(modeKey) {
+        const names = {
+            infinito: "Infinito",
+            soberano: "Soberano",
+            tradicional: "Tradicional",
+            clube_sorteado: "Clube (Gênero Sorteado)",
+            clube_escolhido: "Clube (Gênero Escolhido)"
+        };
+        return names[modeKey] || "Desconhecido";
+    }
+
+    function openConversionModal(gameId) {
+        const sourceGame = allGamesData.games[gameId];
+        if (!sourceGame) return;
+
+        conversionModalTitle.textContent = `Converter "${sourceGame.name}"`;
+        conversionOptions.innerHTML = '';
+        
+        const newNameInput = document.getElementById('conversionNewNameInput');
+        newNameInput.value = `${sourceGame.name} (Cópia)`;
+
+        const individualModes = ['infinito', 'soberano', 'tradicional'];
+        const clubModes = ['clube_sorteado', 'clube_escolhido'];
+        
+        const possibleConversions = [];
+
+        if (individualModes.includes(sourceGame.gameMode)) {
+            individualModes.forEach(mode => {
+                if (mode !== sourceGame.gameMode) {
+                    possibleConversions.push(mode);
+                }
+            });
+        } else if (clubModes.includes(sourceGame.gameMode)) {
+             clubModes.forEach(mode => {
+                if (mode !== sourceGame.gameMode) {
+                    possibleConversions.push(mode);
+                }
+            });
+        }
+
+        possibleConversions.forEach(newMode => {
+            const button = document.createElement('button');
+            button.className = 'w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg';
+            button.textContent = `Converter para ${getModeDisplayName(newMode)}`;
+            button.onclick = () => handleConvertGame(gameId, newMode);
+            conversionOptions.appendChild(button);
+        });
+
+        conversionModal.classList.remove('hidden');
+        newNameInput.focus();
+        newNameInput.select();
+    }
+
+    function handleConvertGame(sourceGameId, newMode) {
+        const sourceGame = allGamesData.games[sourceGameId];
+        if (!sourceGame) {
+            showAlert("Erro: Bingo de origem não encontrado.", "error");
+            return;
+        }
+
+        const newNameInput = document.getElementById('conversionNewNameInput');
+        const newName = newNameInput.value.trim();
+        if (!newName) {
+            showAlert("Por favor, insira um nome para o bingo convertido.", "error");
+            newNameInput.focus();
+            return;
+        }
+        if (Object.values(allGamesData.games).some(g => g.name === newName)) {
+            showAlert("Já existe um bingo com este nome. Por favor, escolha outro.", "error");
+            newNameInput.focus();
+            return;
+        }
+
+        // 1. Criar uma cópia profunda para manter o estado
+        const newGame = JSON.parse(JSON.stringify(sourceGame));
+
+        // 2. Definir novas propriedades
+        newGame.id = generateUUID();
+        newGame.gameMode = newMode;
+        newGame.name = newName;
+        newGame.createdAt = new Date().toISOString();
+
+        // O estado (currentPhase, participants, etc.) é preservado da cópia.
+
+        // 3. Adicionar o novo jogo convertido ao nosso armazenamento
+        allGamesData.games[newGame.id] = newGame;
+        saveAllGamesData();
+        
+        conversionModal.classList.add('hidden');
+        showAlert(`Bingo convertido com sucesso para "${newGame.name}"!`, "success");
+        renderGameManagementScreen();
+    }
+
 
     async function exportAnimeWatchList() {
          if(exportWatchListButton) exportWatchListButton.disabled = true;
@@ -2352,11 +2465,9 @@ let initialGenres = [
         exportIndicationsButton = document.getElementById('exportIndicationsButton');
         exportFullIndicationHistoryButton = document.getElementById('exportFullIndicationHistoryButton');
         exportWatchListButton = document.getElementById('exportWatchListButton');
-
         importFileInput = document.getElementById('importFileInput');
         importGamesButton = document.getElementById('importGamesButton');
         exportAllGamesButton = document.getElementById('exportAllGamesButton');
-
         clubGenreSetupPhaseSection = document.getElementById('clubGenreSetupPhaseSection');
         clubGenreDrawModeContent = document.getElementById('clubGenreDrawModeContent');
         drawClubGenreButton = document.getElementById('drawClubGenreButton');
@@ -2387,8 +2498,13 @@ let initialGenres = [
         clubResultParticipants = document.getElementById('clubResultParticipants');
         clubResultParticipantsList = document.getElementById('clubResultParticipantsList');
         exportClubResultButton = document.getElementById('exportClubResultButton');
+        conversionModal = document.getElementById('conversionModal');
+        conversionModalTitle = document.getElementById('conversionModalTitle');
+        conversionOptions = document.getElementById('conversionOptions');
+        closeConversionModalButton = document.getElementById('closeConversionModalButton');
 
 
+        if (closeConversionModalButton) closeConversionModalButton.onclick = () => conversionModal.classList.add('hidden');
         if (alertCloseButton) alertCloseButton.onclick = () => { customAlertDiv.classList.add('hidden'); if (currentAlertResolve) { currentAlertResolve(false); currentAlertResolve = null; } };
         if (alertCancelBtn) alertCancelBtn.onclick = () => { customAlertDiv.classList.add('hidden'); if (currentAlertResolve) { currentAlertResolve(false); currentAlertResolve = null; } };
         if (alertConfirmBtn) alertConfirmBtn.onclick = () => { customAlertDiv.classList.add('hidden'); if (currentAlertResolve) { currentAlertResolve(true); currentAlertResolve = null; } };
