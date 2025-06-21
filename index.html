@@ -69,9 +69,42 @@
     <div id="searchResultsModal" class="modal-overlay hidden">
         <div class="search-results-modal-content">
             <h3 class="text-xl font-semibold text-sky-400 mb-4">Resultados da Busca - Selecione um Anime</h3>
-            <div id="searchResultsList" class="space-y-2 mb-4">
+            
+            <!-- START: Novos Filtros de Busca -->
+            <div id="searchFilters" class="mb-4 p-3 bg-slate-700/50 rounded-lg flex flex-col sm:flex-row gap-4 items-center">
+                <div class="flex-grow w-full sm:w-auto">
+                    <label for="filterType" class="text-xs font-medium text-slate-300">Formato:</label>
+                    <select id="filterType" class="w-full p-2 mt-1 rounded-lg bg-slate-600 border border-slate-500 focus:ring-2 focus:ring-sky-500 outline-none text-sm">
+                        <option value="">Qualquer</option>
+                        <option value="TV">TV</option>
+                        <option value="OVA">OVA</option>
+                        <option value="MOVIE">Filme</option>
+                        <option value="SPECIAL">Especial</option>
+                        <option value="ONA">ONA</option>
+                        <option value="MUSIC">Música</option>
+                    </select>
                 </div>
-            <button id="closeSearchResultsModalButton" class="bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded-lg">Cancelar</button>
+                <div class="flex-grow w-full sm:w-auto">
+                     <label class="text-xs font-medium text-slate-300">Episódios:</label>
+                    <div class="flex items-center gap-2 mt-1">
+                        <input type="number" id="filterEpisodesMin" min="1" placeholder="Min" class="w-full p-2 rounded-lg bg-slate-600 border border-slate-500 focus:ring-2 focus:ring-sky-500 outline-none text-sm placeholder-slate-400">
+                        <span class="text-slate-400">-</span>
+                        <input type="number" id="filterEpisodesMax" min="1" placeholder="Max" class="w-full p-2 rounded-lg bg-slate-600 border border-slate-500 focus:ring-2 focus:ring-sky-500 outline-none text-sm placeholder-slate-400">
+                    </div>
+                </div>
+                <button id="applySearchFiltersButton" class="w-full sm:w-auto mt-4 sm:mt-0 self-end bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">Filtrar</button>
+            </div>
+            <!-- END: Novos Filtros de Busca -->
+
+            <div id="searchResultsList" class="space-y-2 mb-4">
+                <!-- Resultados da busca aparecem aqui -->
+            </div>
+            <div id="searchLoadingIndicator" class="loading-indicator hidden">
+                <div class="spinner"></div>
+                <span>Carregando mais animes...</span>
+            </div>
+
+            <button id="closeSearchResultsModalButton" class="bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded-lg mt-4">Cancelar</button>
         </div>
     </div>
 

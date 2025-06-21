@@ -1,8 +1,5 @@
-// AniList API (GraphQL)
-const ANILIST_API_URL = "https://graphql.anilist.co";
 // CORS Proxy para html2canvas
 const CORS_PROXY_URL = "https://api.allorigins.win/raw?url=";
-
 
 let initialGenres = [
 { name: "Ação/Aventura", imageUrl: "https://raw.githubusercontent.com/marioporfirio/animebingo/c6d5c9f27e507f6ed6800bc7812f37e6a8be9188/images/acaoaventura.png" },
@@ -74,6 +71,7 @@ let initialGenres = [
     let gameState = {};
     let editingAnilistForParticipantId = null;
 
+    // Elementos do DOM
     let participantNameInput, participantAnilistUsernameInput, addParticipantButton, participantsListDiv, goToNextPhaseFromRegistrationButton, maxParticipantsWarning,
         registrationPhaseSection, individualDrawPhaseSection, participantsToDrawListDiv, drawnParticipantsListDiv,
         goToIndicationPhaseButton, indicationPhaseSection, indicationTabsDiv, indicationContentDiv, goToAnimeDrawPhaseButton, exportIndicationsButton,
@@ -97,11 +95,26 @@ let initialGenres = [
         clubResultAnime, clubResultAnimeCover, clubResultAnimeTitleLink, clubResultAnimeIndicator,
         clubResultParticipants, clubResultParticipantsList, exportClubResultButton,
         
-        conversionModal, conversionModalTitle, conversionOptions, closeConversionModalButton;
+        conversionModal, conversionModalTitle, conversionOptions, closeConversionModalButton,
+        
+        // Novos elementos para filtros e scroll infinito
+        filterTypeSelect, filterEpisodesMinInput, filterEpisodesMaxInput, applySearchFiltersButton,
+        searchLoadingIndicator;
 
 
     let currentAlertResolve = null;
-    let currentSearchContext = null;
+
+    // Estado da busca com scroll infinito
+    let currentSearchContext = {
+        indicatorId: null,
+        receiverId: null,
+        isClubIndication: false,
+        searchTerm: '',
+        filters: {},
+        page: 1,
+        hasNextPage: true,
+        isFetching: false
+    };
 
     const PLACEHOLDER_IMG_60x90 = 'https://placehold.co/60x90/1e293b/4f46e5?text=Capa';
     const PLACEHOLDER_IMG_150x225 = 'https://placehold.co/150x225/1e293b/4f46e5?text=Anime';
@@ -244,7 +257,7 @@ let initialGenres = [
             div.className = 'flex items-center justify-between bg-slate-700 p-3 rounded-lg shadow';
             const anilistUserDisplay = p.anilistUsername ? `<span class="text-xs text-sky-400 ml-2">(@${p.anilistUsername})</span>` : '';
             div.innerHTML = `<div><span class="text-indigo-300">${index + 1}. ${p.name}</span>${anilistUserDisplay}</div>
-                                     <button data-id="${p.id}" class="removeParticipantButton text-red-400 hover:text-red-300"><span role="img" aria-label="remover">🗑️</span></button>`;
+                                         <button data-id="${p.id}" class="removeParticipantButton text-red-400 hover:text-red-300"><span role="img" aria-label="remover">🗑️</span></button>`;
             participantsListDiv.appendChild(div);
         });
         document.querySelectorAll('.removeParticipantButton').forEach(btn => btn.onclick = e => handleRemoveParticipant(e.currentTarget.dataset.id));
@@ -269,7 +282,7 @@ let initialGenres = [
                 const div = document.createElement('div');
                 div.className = 'flex items-center justify-between bg-slate-700 p-3 rounded-lg shadow';
                 div.innerHTML = `<span class="text-indigo-300">${p.name}</span>
-                                     <button data-id="${p.id}" class="draw-genre-for-participant-button bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">Sortear para ${p.name.split(' ')[0]}</button>`;
+                                         <button data-id="${p.id}" class="draw-genre-for-participant-button bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">Sortear para ${p.name.split(' ')[0]}</button>`;
                 participantsToDrawListDiv.appendChild(div);
             } else {
                 const li = document.createElement('li');
@@ -483,9 +496,9 @@ let initialGenres = [
         const inputElement = isClubIndication ?
             document.querySelector(`input.club-indication-input[data-indicator-id="${indicatorId}"]`) :
             document.querySelector(`input.indication-input[data-indicator-id="${indicatorId}"][data-receiver-id="${receiverId}"]`);
-        const inputValue = inputElement.value.trim();
+        const searchTerm = inputElement.value.trim();
 
-        if (!inputValue) {
+        if (!searchTerm) {
             showAlert("Por favor, digite o nome do anime.", "error");
             return;
         }
@@ -493,7 +506,25 @@ let initialGenres = [
         button.disabled = true;
         button.textContent = 'Buscando...';
 
-        await searchAnimeByName(inputValue, indicatorId, receiverId, isClubIndication);
+        // Resetar busca para nova pesquisa
+        searchResultsListDiv.innerHTML = ''; // Limpar resultados antigos
+        currentSearchContext = {
+            indicatorId,
+            receiverId,
+            isClubIndication,
+            searchTerm,
+            filters: {}, // Resetar filtros ao buscar por um novo nome
+            page: 1,
+            hasNextPage: true,
+            isFetching: false
+        };
+
+        // Limpar e definir filtros da UI
+        filterTypeSelect.value = "";
+        filterEpisodesMinInput.value = "";
+        filterEpisodesMaxInput.value = "";
+        
+        await searchAnime(true); // true indica que é uma nova busca
 
         button.disabled = false;
         button.textContent = isClubIndication ? 'Indicar para o Clube' : 'Indicar';
@@ -501,6 +532,14 @@ let initialGenres = [
 
     async function handleClubIndicationSubmit(event) {
         await handleIndicationSubmit(event, true);
+    }
+    
+    function handleApplySearchFilters() {
+        // Redefinir a paginação e limpar os resultados para uma nova busca com filtros
+        searchResultsListDiv.innerHTML = '';
+        currentSearchContext.page = 1;
+        currentSearchContext.hasNextPage = true;
+        searchAnime(true); // true indica que é uma nova busca/filtro
     }
 
     function getStatusTagInfo(status) {
@@ -515,21 +554,39 @@ let initialGenres = [
         return statusMap[status] || { text: status, color: 'bg-gray-500' };
     }
 
-    function renderSearchResults(results) {
-        searchResultsListDiv.innerHTML = '';
+    function renderSearchResults(results, isNewSearch = false) {
+        if (isNewSearch) {
+            searchResultsListDiv.innerHTML = '';
+        }
+
         if (!results || results.length === 0) {
-            searchResultsListDiv.innerHTML = '<p class="text-slate-400">Nenhum resultado encontrado para animes finalizados.</p>';
+            if(isNewSearch) {
+                searchResultsListDiv.innerHTML = '<p class="text-slate-400 text-center p-4">Nenhum resultado encontrado com os filtros aplicados.</p>';
+            }
             return;
         }
+
         results.forEach(anime => {
             const title = anime.title?.romaji || anime.title?.english || "Título Desconhecido";
             const imageUrl = anime.coverImage?.medium || PLACEHOLDER_IMG_SEARCH_RESULT;
             const scoreValue = anime.averageScore ? (anime.averageScore / 10).toFixed(2) : null;
             const score = scoreValue ? `<span class="score-badge">${scoreValue}</span>` : '<span class="text-xs text-slate-400">N/A</span>';
-            const typeYear = `${anime.format || ''}${anime.startDate?.year ? ' (' + anime.startDate.year + ')' : ''}`;
+            const typeYear = `${anime.format?.replace('_', ' ') || ''}${anime.startDate?.year ? ' (' + anime.startDate.year + ')' : ''}`;
             const episodes = anime.episodes ? `${anime.episodes} ep` : 'Ep. N/A';
-            const genres = anime.genres?.slice(0, 2).join(', ') || 'Gêneros N/A';
             
+            let studioDisplay = 'N/A';
+            if (anime.studios?.edges?.length > 0) {
+                const mainStudioNode = anime.studios.edges.find(edge => edge.isMain);
+                if (mainStudioNode) {
+                    studioDisplay = mainStudioNode.node.name;
+                } else {
+                    const producerNode = anime.studios.edges[0];
+                    if (producerNode) {
+                        studioDisplay = `${producerNode.node.name} (Prod.)`;
+                    }
+                }
+            }
+
             let tagsHTML = '';
             if (anime.participantStatuses && anime.participantStatuses.length > 0) {
                 tagsHTML = anime.participantStatuses.map(ps => {
@@ -547,9 +604,9 @@ let initialGenres = [
                     <img src="${imageUrl}" alt="Capa de ${title}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG_ERROR_40x60}';">
                     <div class="search-result-info">
                         <div>
-                            <p class="font-semibold text-sky-300">${title}</p>
+                            <a href="${anime.siteUrl || '#'}" target="_blank" class="font-semibold text-sky-300 hover:underline">${title}</a>
                             <p class="text-xs text-slate-300">${typeYear} - ${episodes}</p>
-                            <p class="text-xs text-slate-400">${genres}</p>
+                            <p class="text-xs text-slate-400" title="Estúdio/Produtor">${studioDisplay}</p>
                         </div>
                         <div class="mt-2 flex flex-wrap gap-1">
                             ${tagsHTML}
@@ -562,8 +619,12 @@ let initialGenres = [
             `;
             searchResultsListDiv.appendChild(itemDiv);
         });
+
         document.querySelectorAll('.select-search-result-button').forEach(btn => btn.onclick = handleSearchResultSelection);
-        searchResultsModal.classList.remove('hidden');
+        
+        if (isNewSearch && results.length > 0) {
+            searchResultsModal.classList.remove('hidden');
+        }
     }
     
     async function fetchUserAnimeListStatuses(username) {
@@ -582,22 +643,9 @@ let initialGenres = [
         const variables = { userName: username };
         
         try {
-            const response = await fetch(ANILIST_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify({ query, variables })
-            });
-            const result = await response.json();
-            if (result.errors) {
-                const userNotFound = result.errors.some(e => e.message.toLowerCase().includes('user not found') || e.status === 404);
-                if (userNotFound) {
-                    console.warn(`Usuário AniList "${username}" não encontrado. Verificação pulada.`);
-                    return new Map();
-                }
-                throw new Error(result.errors.map(e => e.message).join('\n'));
-            }
+            const data = await fetchAniList(query, variables);
             const statusMap = new Map();
-            result.data?.MediaListCollection?.lists?.forEach(list => {
+            data.data?.MediaListCollection?.lists?.forEach(list => {
                 list.entries.forEach(entry => {
                     statusMap.set(entry.mediaId, entry.status);
                 });
@@ -611,11 +659,36 @@ let initialGenres = [
     }
 
 
-    async function searchAnimeByName(query, indicatorId, receiverId, isClubIndication = false) {
-         const graphqlQuery = `
-            query ($search: String) {
-                Page(page: 1, perPage: 50) {
-                    media(search: $search, type: ANIME, sort: SEARCH_MATCH, status: FINISHED) {
+    async function searchAnime(isNewSearch = false) {
+        if (currentSearchContext.isFetching) return;
+        
+        if (isNewSearch) {
+             currentSearchContext.filters = {
+                format: filterTypeSelect.value || null,
+                episodes_greater: filterEpisodesMinInput.value ? parseInt(filterEpisodesMinInput.value, 10) : null,
+                episodes_lesser: filterEpisodesMaxInput.value ? parseInt(filterEpisodesMaxInput.value, 10) : null,
+            };
+        }
+        
+        currentSearchContext.isFetching = true;
+        searchLoadingIndicator.classList.remove('hidden');
+
+        const graphqlQuery = `
+            query ($page: Int, $perPage: Int, $search: String, $format: MediaFormat, $episodes_greater: Int, $episodes_lesser: Int) {
+                Page(page: $page, perPage: $perPage) {
+                    pageInfo {
+                        hasNextPage
+                    }
+                    media(
+                        search: $search, 
+                        type: ANIME, 
+                        sort: SEARCH_MATCH, 
+                        status_in: [FINISHED, RELEASING],
+                        status_not: NOT_YET_RELEASED,
+                        format: $format,
+                        episodes_greater: $episodes_greater,
+                        episodes_lesser: $episodes_lesser
+                    ) {
                         id
                         title { romaji english }
                         coverImage { medium }
@@ -625,68 +698,100 @@ let initialGenres = [
                         episodes
                         genres
                         siteUrl
+                        studios {
+                            edges {
+                                isMain
+                                node {
+                                    name
+                                }
+                            }
+                        }
                     }
                 }
             }
         `;
-        const variables = { search: query };
+        
+        const variables = {
+            search: currentSearchContext.searchTerm,
+            page: currentSearchContext.page,
+            perPage: 20,
+        };
+
+        if (currentSearchContext.filters.format) {
+            variables.format = currentSearchContext.filters.format;
+        }
+        if (currentSearchContext.filters.episodes_greater) {
+            variables.episodes_greater = currentSearchContext.filters.episodes_greater;
+        }
+        if (currentSearchContext.filters.episodes_lesser) {
+            variables.episodes_lesser = currentSearchContext.filters.episodes_lesser;
+        }
 
         try {
-            const response = await fetch(ANILIST_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify({ query: graphqlQuery, variables })
-            });
-
-            const data = await response.json();
+            const data = await fetchAniList(graphqlQuery, variables);
             if (data.errors) throw new Error(data.errors.map(e => e.message).join('\n'));
             
-            let results = data.data?.Page?.media;
-            if (!results || results.length === 0) {
-                showAlert(`Nenhum resultado encontrado para animes finalizados com o termo "${query}".`, "info");
-                return;
+            let results = data.data?.Page?.media || [];
+            currentSearchContext.hasNextPage = data.data?.Page?.pageInfo?.hasNextPage || false;
+
+            if (['infinito', 'tradicional', 'soberano'].includes(gameState.gameMode)) {
+                 const statusFinishedQuery = `
+                    query ($ids: [Int]) {
+                        Page(page: 1, perPage: 50) {
+                            media(id_in: $ids, status: FINISHED) {
+                                id
+                            }
+                        }
+                    }
+                `;
+                const mediaIds = results.map(r => r.id);
+                if(mediaIds.length > 0) {
+                    const statusData = await fetchAniList(statusFinishedQuery, { ids: mediaIds });
+                    if(statusData.data) {
+                        const finishedIds = new Set(statusData.data.Page.media.map(m => m.id));
+                        results = results.filter(r => finishedIds.has(r.id));
+                    }
+                }
             }
 
-            if (isClubIndication) {
-                const usersToCheck = gameState.participants.filter(p => p.anilistUsername);
-                if (usersToCheck.length > 0) {
-                    const listPromises = usersToCheck.map(user => 
-                        fetchUserAnimeListStatuses(user.anilistUsername)
-                            .then(statusMap => ({ participantName: user.name.split(' ')[0], statusMap }))
-                    );
-                    const allUserLists = await Promise.all(listPromises);
+            if (results.length > 0) {
+                 if (currentSearchContext.isClubIndication) {
+                    const usersToCheck = gameState.participants.filter(p => p.anilistUsername);
+                    if (usersToCheck.length > 0) {
+                        const listPromises = usersToCheck.map(user => 
+                            fetchUserAnimeListStatuses(user.anilistUsername)
+                                .then(statusMap => ({ participantName: user.name.split(' ')[0], statusMap }))
+                        );
+                        const allUserLists = await Promise.all(listPromises);
 
-                    const masterStatusMap = new Map();
-                    allUserLists.forEach(userList => {
-                        userList.statusMap.forEach((status, animeId) => {
-                            if (!masterStatusMap.has(animeId)) {
-                                masterStatusMap.set(animeId, []);
-                            }
-                            masterStatusMap.get(animeId).push({ participantName: userList.participantName, status });
+                        const masterStatusMap = new Map();
+                        allUserLists.forEach(userList => {
+                            userList.statusMap.forEach((status, animeId) => {
+                                if (!masterStatusMap.has(animeId)) masterStatusMap.set(animeId, []);
+                                masterStatusMap.get(animeId).push({ participantName: userList.participantName, status });
+                            });
                         });
-                    });
-
-                    results = results.map(anime => ({
-                        ...anime,
-                        participantStatuses: masterStatusMap.get(anime.id) || []
-                    }));
-                }
-            } else {
-                const receiver = gameState.participants.find(p => p.id === receiverId);
-                if (receiver && receiver.anilistUsername) {
-                    const statusMap = await fetchUserAnimeListStatuses(receiver.anilistUsername);
-                    results = results.map(anime => ({
-                        ...anime,
-                        mediaListStatus: statusMap.get(anime.id) || null
-                    }));
+                        results = results.map(anime => ({...anime, participantStatuses: masterStatusMap.get(anime.id) || [] }));
+                    }
+                } else {
+                    const receiver = gameState.participants.find(p => p.id === currentSearchContext.receiverId);
+                    if (receiver && receiver.anilistUsername) {
+                        const statusMap = await fetchUserAnimeListStatuses(receiver.anilistUsername);
+                        results = results.map(anime => ({...anime, mediaListStatus: statusMap.get(anime.id) || null }));
+                    }
                 }
             }
             
-            currentSearchContext = { indicatorId, receiverId, isClubIndication };
-            renderSearchResults(results);
+            renderSearchResults(results, isNewSearch);
         } catch (error) {
             console.error("Erro ao buscar na API AniList:", error);
             showAlert(`Erro na busca AniList: ${error.message}.`, "error");
+            searchResultsListDiv.innerHTML = `<p class="text-red-400 text-center p-4">Ocorreu um erro na busca.</p>`;
+        } finally {
+            currentSearchContext.isFetching = false;
+            if (!currentSearchContext.hasNextPage) {
+                searchLoadingIndicator.classList.add('hidden');
+            }
         }
     }
 
@@ -698,7 +803,7 @@ let initialGenres = [
             await fetchAnimeDetailsById(anilistId, indicatorId, receiverId, isClubIndication);
         }
         searchResultsModal.classList.add('hidden');
-        currentSearchContext = null;
+        currentSearchContext = { ...currentSearchContext, searchTerm: '', page: 1, hasNextPage: true }; // Reset context
     }
 
     async function fetchAnimeDetailsById(anilistId, indicatorId, receiverId, isClubIndication = false) {
@@ -716,13 +821,7 @@ let initialGenres = [
         const variables = { id: anilistId };
 
         try {
-            const response = await fetch(ANILIST_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify({ query: graphqlQuery, variables })
-            });
-
-            const data = await response.json();
+            const data = await fetchAniList(graphqlQuery, variables);
             if (data.errors) { throw new Error(data.errors.map(e => e.message).join('\n')); }
 
             const animeData = data.data.Media;
@@ -763,6 +862,31 @@ let initialGenres = [
             showAlert(`Erro ao buscar detalhes na AniList: ${error.message}.`, "error");
         }
     }
+
+    // Função auxiliar para requisições à API AniList
+    async function fetchAniList(query, variables) {
+        const url = 'https://graphql.anilist.co';
+        
+        const options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query,
+                variables: variables
+            })
+        };
+    
+        const response = await fetch(url, options);
+        
+        if (!response.ok) {
+            throw new Error(`Erro de rede ou servidor: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+    }
+
 
     function handleRemoveIndication(event) {
         const button = event.currentTarget;
@@ -961,11 +1085,11 @@ let initialGenres = [
         const chosenClubAnime = gameState.clubIndications[randomIndex];
         gameState.clubAnimeIndication = { ...chosenClubAnime };
 
-        showAnimeRevealModal("o Clube", gameState.clubAnimeIndication);
+        showAnimeRevealModal("o Clube", gameState.clubAnimeIndication, true);
         renderApp();
     }
 
-    function showAnimeRevealModal(participantName, anime) {
+    function showAnimeRevealModal(participantName, anime, isClub = false) {
         animeRevealParticipantName.textContent = `Anime para ${participantName} assistir!`;
         animeRevealCover.src = anime.animeImageUrl || PLACEHOLDER_IMG_150x225;
         animeRevealCover.alt = `Capa de ${anime.animeTitle}`;
@@ -1247,7 +1371,7 @@ let initialGenres = [
             if (availableGenresForNewDraw.length === 0 && initialGenres.length > 0) {
                 console.warn(`[drawNewGenreForParticipant] Nenhum gênero novo disponível após filtro, permitindo repetição do último ou reiniciando se necessário.`);
                  participant.genreHistory = [];
-                availableGenresForNewDraw = [...initialGenres];
+                 availableGenresForNewDraw = [...initialGenres];
                  if (participant.currentAssignedGenre && initialGenres.length > 1) {
                     const tempFiltered = initialGenres.filter(g => g.name !== participant.currentAssignedGenre);
                     if (tempFiltered.length > 0) availableGenresForNewDraw = tempFiltered;
@@ -1983,10 +2107,10 @@ let initialGenres = [
                 const clubGenreItem = resolvedItems.find(item => item && item.type === 'clubGenreIcon');
                 if (clubGenreItem && clubGenreItem.finalUrl) {
                     listContentHTML += `<div style="text-align: center; margin-bottom: 20px; padding-bottom:15px; border-bottom: 1px solid #475569;">
-                                        <p style="font-family: 'Inter', sans-serif; font-size: 22px; font-weight: 600; color: #a5b4fc; margin-bottom: 8px;">Gênero do Clube:</p>
-                                        <img src="${clubGenreItem.finalUrl}" alt="${clubGenreItem.alt}" style="width: 40px; height: 40px; object-fit: contain; margin-right: 8px; display: inline-block; vertical-align: middle; border-radius: 4px;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_20x20}'">
-                                        <span style="font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 500; color: #e2e8f0; vertical-align: middle;">${clubGenreItem.data.name}</span>
-                                   </div>`;
+                                            <p style="font-family: 'Inter', sans-serif; font-size: 22px; font-weight: 600; color: #a5b4fc; margin-bottom: 8px;">Gênero do Clube:</p>
+                                            <img src="${clubGenreItem.finalUrl}" alt="${clubGenreItem.alt}" style="width: 40px; height: 40px; object-fit: contain; margin-right: 8px; display: inline-block; vertical-align: middle; border-radius: 4px;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_20x20}'">
+                                            <span style="font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 500; color: #e2e8f0; vertical-align: middle;">${clubGenreItem.data.name}</span>
+                                       </div>`;
                 }
 
                 if (!hasAnyIndications) {
@@ -2147,21 +2271,21 @@ let initialGenres = [
 
             if (genreImage && genreImage.url) {
                 contentHTML += `<div style="margin-bottom: 20px; text-align: center;">
-                                    <p style="font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 600; color: #a5b4fc; margin-bottom: 8px;">Gênero do Clube:</p>
-                                    <img src="${genreImage.url}" alt="${genreImage.data.name}" style="width: 80px; height: 80px; object-fit: contain; border-radius: 8px; margin: 0 auto 8px auto; display: block;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_60x90}'">
-                                    <p style="font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 500; color: #e2e8f0;">${genreImage.data.name}</p>
-                               </div>`;
+                                        <p style="font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 600; color: #a5b4fc; margin-bottom: 8px;">Gênero do Clube:</p>
+                                        <img src="${genreImage.url}" alt="${genreImage.data.name}" style="width: 80px; height: 80px; object-fit: contain; border-radius: 8px; margin: 0 auto 8px auto; display: block;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_60x90}'">
+                                        <p style="font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 500; color: #e2e8f0;">${genreImage.data.name}</p>
+                                   </div>`;
             }
 
             if (animeImage && animeImage.url) {
                 contentHTML += `<div style="margin-top: 20px; padding-top:20px; border-top: 1px dashed #475569; text-align: center;">
-                                    <p style="font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 600; color: #67e8f9; margin-bottom: 10px;">Anime Sorteado para o Clube:</p>
-                                    <img src="${animeImage.url}" alt="Capa de ${animeImage.data.animeTitle}" style="width: 150px; height: 225px; object-fit: cover; border-radius: 8px; margin: 0 auto 10px auto; display: block; border: 1px solid #475569;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_80x120}'">
-                                    <p style="font-family: 'Inter', sans-serif; font-size: 26px; font-weight: 700; color: #5eead4; margin-bottom: 5px; line-height: 1.3; text-align: center;">
-                                        ${animeImage.data.animeTitle}
-                                    </p>
-                                    <p style="font-family: 'Inter', sans-serif; font-size: 16px; color: #cbd5e1;">Indicado por: ${animeImage.data.indicatorName}</p>
-                               </div>`;
+                                        <p style="font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 600; color: #67e8f9; margin-bottom: 10px;">Anime Sorteado para o Clube:</p>
+                                        <img src="${animeImage.url}" alt="Capa de ${animeImage.data.animeTitle}" style="width: 150px; height: 225px; object-fit: cover; border-radius: 8px; margin: 0 auto 10px auto; display: block; border: 1px solid #475569;" onerror="this.src='${PLACEHOLDER_IMG_ERROR_80x120}'">
+                                        <p style="font-family: 'Inter', sans-serif; font-size: 26px; font-weight: 700; color: #5eead4; margin-bottom: 5px; line-height: 1.3; text-align: center;">
+                                            ${animeImage.data.animeTitle}
+                                        </p>
+                                        <p style="font-family: 'Inter', sans-serif; font-size: 16px; color: #cbd5e1;">Indicado por: ${animeImage.data.indicatorName}</p>
+                                   </div>`;
             }
 
             exportContentDiv.innerHTML = contentHTML;
@@ -2502,6 +2626,11 @@ let initialGenres = [
         conversionModalTitle = document.getElementById('conversionModalTitle');
         conversionOptions = document.getElementById('conversionOptions');
         closeConversionModalButton = document.getElementById('closeConversionModalButton');
+        filterTypeSelect = document.getElementById('filterType');
+        filterEpisodesMinInput = document.getElementById('filterEpisodesMin');
+        filterEpisodesMaxInput = document.getElementById('filterEpisodesMax');
+        applySearchFiltersButton = document.getElementById('applySearchFiltersButton');
+        searchLoadingIndicator = document.getElementById('searchLoadingIndicator');
 
 
         if (closeConversionModalButton) closeConversionModalButton.onclick = () => conversionModal.classList.add('hidden');
@@ -2510,7 +2639,29 @@ let initialGenres = [
         if (alertConfirmBtn) alertConfirmBtn.onclick = () => { customAlertDiv.classList.add('hidden'); if (currentAlertResolve) { currentAlertResolve(true); currentAlertResolve = null; } };
         if (closeGenreRevealModalButton) closeGenreRevealModalButton.onclick = () => genreRevealModal.classList.add('hidden');
         if (closeAnimeRevealModalButton) closeAnimeRevealModalButton.onclick = () => animeRevealModal.classList.add('hidden');
-        if (closeSearchResultsModalButton) closeSearchResultsModalButton.onclick = () => {searchResultsModal.classList.add('hidden'); currentSearchContext = null;};
+        if (closeSearchResultsModalButton) {
+            closeSearchResultsModalButton.onclick = () => {
+                searchResultsModal.classList.add('hidden'); 
+                currentSearchContext = { searchTerm: '', page: 1, hasNextPage: true, isFetching: false, filters: {} }; // Resetar completamente
+            };
+        }
+
+        // Lógica de scroll infinito
+        if (searchResultsListDiv) {
+            searchResultsListDiv.addEventListener('scroll', () => {
+                if (currentSearchContext.isFetching || !currentSearchContext.hasNextPage) return;
+                
+                const { scrollTop, scrollHeight, clientHeight } = searchResultsListDiv;
+                if (scrollHeight - scrollTop - clientHeight < 200) { // Buffer de 200px
+                    console.log("Chegou ao final, buscando mais...");
+                    currentSearchContext.page++;
+                    searchAnime(); // Chama a busca para a próxima página
+                }
+            });
+        }
+        
+        if(applySearchFiltersButton) applySearchFiltersButton.onclick = handleApplySearchFilters;
+
 
         if (participantNameInput) {
             participantNameInput.addEventListener('keypress', (event) => {
