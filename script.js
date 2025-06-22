@@ -865,7 +865,8 @@ let initialGenres = [
 
     // Função auxiliar para requisições à API AniList
     async function fetchAniList(query, variables) {
-        const url = 'https://graphql.anilist.co';
+        const anilistUrl = 'https://graphql.anilist.co';
+        const proxiedUrl = `${CORS_PROXY_URL}${encodeURIComponent(anilistUrl)}`;
         
         const options = {
             method: 'POST',
@@ -879,7 +880,7 @@ let initialGenres = [
             })
         };
     
-        const response = await fetch(url, options);
+        const response = await fetch(proxiedUrl, options);
         
         if (!response.ok) {
             throw new Error(`Erro de rede ou servidor: ${response.status} ${response.statusText}`);
